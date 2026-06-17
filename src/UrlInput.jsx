@@ -20,7 +20,7 @@ function UrlInput() {
     setError(null)
     setResult(null)
     try {
-      const response = await fetch('http://127.0.0.1:8001/analyze', {
+      const response = await fetch('https://ai-ad-backend-zhpj.onrender.com/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
