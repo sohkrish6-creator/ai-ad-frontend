@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import Dashboard from './Dashboard'
 import UrlInput from './UrlInput'
 import Leads from './Leads'
@@ -17,6 +17,7 @@ function Layout() {
         minHeight: '100vh',
       }}>
         <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/analyze" element={<UrlInput />} />
           <Route path="/leads" element={<Leads />} />
