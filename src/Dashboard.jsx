@@ -1,4 +1,6 @@
 function Dashboard() {
+  const isMobile = window.innerWidth < 768
+
   const stats = [
     { label: 'Total Spend', value: '₹48,250', change: '+12%', color: '#6366F1' },
     { label: 'Total Clicks', value: '3,420', change: '+8%', color: '#06B6D4' },
@@ -30,7 +32,7 @@ function Dashboard() {
       <div style={{
         background: '#0D1117',
         borderBottom: '1px solid #1E2A3E',
-        padding: '0 24px',
+        padding: '0 16px',
         height: '56px',
         display: 'flex',
         alignItems: 'center',
@@ -50,7 +52,7 @@ function Dashboard() {
         </span>
       </div>
 
-      <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
+      <div style={{ padding: '20px 16px', maxWidth: '1100px', margin: '0 auto' }}>
 
         {/* Page Title */}
         <div style={{ marginBottom: '24px' }}>
@@ -65,8 +67,8 @@ function Dashboard() {
         {/* KPI Cards */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '16px',
+          gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)',
+          gap: '12px',
           marginBottom: '24px',
         }}>
           {stats.map((stat) => (
@@ -74,16 +76,16 @@ function Dashboard() {
               background: '#0D1117',
               border: '1px solid #1E2A3E',
               borderRadius: '12px',
-              padding: '20px',
+              padding: '16px',
             }}>
-              <p style={{ color: '#64748B', fontSize: '12px', margin: '0 0 8px 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <p style={{ color: '#64748B', fontSize: '11px', margin: '0 0 8px 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 {stat.label}
               </p>
-              <p style={{ fontSize: '24px', fontWeight: '700', margin: '0 0 6px 0', fontFamily: 'monospace' }}>
+              <p style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 6px 0', fontFamily: 'monospace' }}>
                 {stat.value}
               </p>
               <span style={{
-                fontSize: '12px',
+                fontSize: '11px',
                 color: stat.change.startsWith('+') ? '#10B981' : '#F43F5E',
                 fontWeight: '600',
               }}>
@@ -96,7 +98,7 @@ function Dashboard() {
         {/* Bottom Grid */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
+          gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
           gap: '16px',
         }}>
 
@@ -120,8 +122,9 @@ function Dashboard() {
                 borderRadius: '8px',
                 marginBottom: '8px',
                 border: '1px solid #1E2A3E',
+                gap: '10px',
               }}>
-                <div>
+                <div style={{ minWidth: 0 }}>
                   <p style={{ margin: '0 0 2px 0', fontSize: '13px', fontWeight: '500' }}>
                     {c.name}
                   </p>
@@ -137,6 +140,7 @@ function Dashboard() {
                   background: c.status === 'Active' ? '#10B98120' : '#F59E0B20',
                   color: c.status === 'Active' ? '#10B981' : '#F59E0B',
                   border: `1px solid ${c.status === 'Active' ? '#10B98140' : '#F59E0B40'}`,
+                  whiteSpace: 'nowrap',
                 }}>
                   {c.status}
                 </span>

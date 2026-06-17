@@ -7,13 +7,14 @@ import Nav from './Nav'
 function Layout() {
   const location = useLocation()
   const showNav = location.pathname !== '/'
+  const isMobile = window.innerWidth < 768
 
   return (
-    <div style={{ display: 'flex' }}>
+    <div>
       {showNav && <Nav />}
       <div style={{
-        marginLeft: showNav ? '200px' : '0',
-        flex: 1,
+        marginLeft: showNav && !isMobile ? '200px' : '0',
+        paddingBottom: showNav && isMobile ? '64px' : '0',
         minHeight: '100vh',
       }}>
         <Routes>
