@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-route
 import Dashboard from './Dashboard'
 import UrlInput from './UrlInput'
 import Leads from './Leads'
+import Competitor from './Competitor'
 import Nav from './Nav'
 
 function Layout() {
@@ -21,6 +22,7 @@ function Layout() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/analyze" element={<UrlInput />} />
+          <Route path="/competitor" element={<Competitor />} />
           <Route path="/leads" element={<Leads />} />
         </Routes>
       </div>
