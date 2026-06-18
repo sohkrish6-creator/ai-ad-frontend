@@ -3,6 +3,7 @@ import { useState } from 'react'
 function AdIntel() {
   const [businessName, setBusinessName] = useState('')
   const [businessType, setBusinessType] = useState('')
+  const [website, setWebsite] = useState('')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
@@ -24,6 +25,7 @@ function AdIntel() {
         body: JSON.stringify({
           business_name: businessName,
           business_type: businessType,
+          website: website,
           country: 'IN'
         })
       })
@@ -130,7 +132,10 @@ function AdIntel() {
             <label style={{ display: 'block', color: '#94A3B8', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Competitor ka Naam</label>
             <input type="text" value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder="e.g. Dot and Key" style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #1E2A3E', background: '#131820', color: '#fff', fontSize: '14px', boxSizing: 'border-box', outline: 'none' }} />
           </div>
-
+<div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', color: '#94A3B8', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Competitor ki Website (Google ads ke liye)</label>
+            <input type="text" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="e.g. mamaearth.in" style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #1E2A3E', background: '#131820', color: '#fff', fontSize: '14px', boxSizing: 'border-box', outline: 'none' }} />
+          </div>
           <div style={{ marginBottom: '28px' }}>
             <label style={{ display: 'block', color: '#94A3B8', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Business Type</label>
             <select value={businessType} onChange={(e) => setBusinessType(e.target.value)} style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #1E2A3E', background: '#131820', color: businessType ? '#fff' : '#64748B', fontSize: '14px', boxSizing: 'border-box', outline: 'none' }}>
