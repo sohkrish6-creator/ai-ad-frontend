@@ -6,6 +6,7 @@ function Nav() {
 
   const links = [
     { path: '/dashboard', label: 'Dashboard', icon: '📊' },
+    { path: '/brain', label: 'Marketing Brain', icon: '🧠' },
     { path: '/analyze', label: 'AI Analyzer', icon: '🌐' },
     { path: '/competitor', label: 'Competitor', icon: '🔍' },
     { path: '/ad-intel', label: 'Ad Intel', icon: '📡' },

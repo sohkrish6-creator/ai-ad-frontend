@@ -4,6 +4,7 @@ import UrlInput from './UrlInput'
 import Leads from './Leads'
 import Competitor from './Competitor'
 import AdIntel from './AdIntel'
+import MarketingBrain from './MarketingBrain'
 import Nav from './Nav'
 
 function Layout() {
@@ -22,6 +23,7 @@ function Layout() {
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/brain" element={<MarketingBrain />} />
           <Route path="/analyze" element={<UrlInput />} />
           <Route path="/competitor" element={<Competitor />} />
           <Route path="/ad-intel" element={<AdIntel />} />
