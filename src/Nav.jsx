@@ -10,6 +10,7 @@ function Nav() {
     { path: '/analyze', label: 'AI Analyzer', icon: '🌐' },
     { path: '/competitor', label: 'Competitor', icon: '🔍' },
     { path: '/ad-intel', label: 'Ad Intel', icon: '📡' },
+    { path: '/ad-creative', label: 'Ad Creative', icon: '🎨' },
     { path: '/leads', label: 'Leads', icon: '👥' },
   ]
 
