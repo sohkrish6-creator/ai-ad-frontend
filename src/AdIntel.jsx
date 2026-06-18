@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 function AdIntel() {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
   const [businessName, setBusinessName] = useState('')
   const [businessType, setBusinessType] = useState('')
   const [website, setWebsite] = useState('')

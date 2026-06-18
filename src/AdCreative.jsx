@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 function AdCreative() {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
   const [url, setUrl] = useState('')
   const [businessType, setBusinessType] = useState('')
   const [offer, setOffer] = useState('')
@@ -155,7 +156,7 @@ function AdCreative() {
             <input type="text" value={offer} onChange={(e) => setOffer(e.target.value)} placeholder="e.g. Diwali Sale 50% off, New Vitamin C Serum" style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #1E2A3E', background: '#131820', color: '#fff', fontSize: '14px', boxSizing: 'border-box', outline: 'none' }} />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
             <div>
               <label style={{ display: 'block', color: '#94A3B8', fontSize: '12px', fontWeight: '600', marginBottom: '7px' }}>Platform</label>
               <select value={platform} onChange={(e) => setPlatform(e.target.value)} style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #1E2A3E', background: '#131820', color: '#fff', fontSize: '14px', boxSizing: 'border-box', outline: 'none' }}>

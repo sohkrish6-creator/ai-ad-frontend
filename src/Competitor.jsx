@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 function Competitor() {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
   const [myUrl, setMyUrl] = useState('')
   const [comp1, setComp1] = useState('')
   const [comp2, setComp2] = useState('')

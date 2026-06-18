@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 function MarketingBrain() {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
   const [url, setUrl] = useState('')
   const [businessType, setBusinessType] = useState('')
   const [budget, setBudget] = useState('')
@@ -172,7 +173,7 @@ function MarketingBrain() {
             </select>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
             <div>
               <label style={{ display: 'block', color: '#94A3B8', fontSize: '12px', fontWeight: '600', marginBottom: '7px' }}>Budget (₹/month)</label>
               <input type="number" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="50000" style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #1E2A3E', background: '#131820', color: '#fff', fontSize: '14px', boxSizing: 'border-box', outline: 'none' }} />
