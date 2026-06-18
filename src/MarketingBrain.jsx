@@ -5,6 +5,7 @@ function MarketingBrain() {
   const [businessType, setBusinessType] = useState('')
   const [budget, setBudget] = useState('')
   const [goal, setGoal] = useState('')
+  const [language, setLanguage] = useState('Hinglish')
   const [compName, setCompName] = useState('')
   const [compWebsite, setCompWebsite] = useState('')
   const [loading, setLoading] = useState(false)
@@ -27,7 +28,7 @@ function MarketingBrain() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           url, business_type: businessType, budget: parseInt(budget), goal,
-          competitor_name: compName, competitor_website: compWebsite
+          competitor_name: compName, competitor_website: compWebsite, language
         })
       })
       const data = await response.json()
@@ -187,6 +188,15 @@ function MarketingBrain() {
                 <option value="WhatsApp Inquiries">WhatsApp Inquiries</option>
               </select>
             </div>
+          </div>
+
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', color: '#94A3B8', fontSize: '12px', fontWeight: '600', marginBottom: '7px' }}>Language</label>
+            <select value={language} onChange={(e) => setLanguage(e.target.value)} style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #1E2A3E', background: '#131820', color: '#fff', fontSize: '14px', boxSizing: 'border-box', outline: 'none' }}>
+              <option value="Hinglish">Hinglish</option>
+              <option value="English">English</option>
+              <option value="Hindi">Hindi</option>
+            </select>
           </div>
 
           <p style={{ fontSize: '11px', color: '#6366F1', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '24px 0 14px 0' }}>Competitor (Optional)</p>
