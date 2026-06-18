@@ -10,6 +10,9 @@ function UrlInput() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
+  const [mismatch, setMismatch] = useState(null)
+
+  const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 
   const loadJsPDF = () => {
     return new Promise((resolve) => {
@@ -33,7 +36,6 @@ function UrlInput() {
     const addPage = () => { doc.addPage(); y = 20 }
     const checkY = (needed = 10) => { if (y + needed > pageHeight - 20) addPage() }
 
-    // Cover Page
     doc.setFillColor(8, 11, 18)
     doc.rect(0, 0, pageWidth, pageHeight, 'F')
     doc.setFillColor(99, 102, 241)
@@ -58,14 +60,12 @@ function UrlInput() {
     doc.text('Prepared by Sohscape | sohscape.com', pageWidth / 2, pageHeight - 25, { align: 'center' })
     doc.text('Confidential - For Client Use Only', pageWidth / 2, pageHeight - 15, { align: 'center' })
 
-    // Content Pages
     doc.addPage()
     y = 20
 
     const lines = result.analysis.split('\n')
     lines.forEach((line) => {
       if (!line.trim()) { y += 4; return }
-
       if (line.match(/^[A-Z\s()\/]+:$/)) {
         checkY(16)
         if (y > 25) { y += 6 }
@@ -109,27 +109,31 @@ function UrlInput() {
     doc.save(`AI-Report-${result.url.replace(/https?:\/\//, '').replace(/\//g, '')}.pdf`)
   }
 
-  async function handleAnalyze() {
-    if (!url || !businessType || !budget || !goal) {
-      alert('Sabhi fields bharo pehle!')
-      return
-    }
+  async function runAnalyze(forceCategory) {
     setLoading(true)
     setError(null)
     setResult(null)
+    setMismatch(null)
     try {
-      const response = await fetch('https://ai-ad-backend-zhpj.onrender.com/analyze', {
+      const response = await fetch(`${BACKEND}/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           url: url,
-          business_type: businessType,
+          business_type: forceCategory || businessType,
           budget: parseInt(budget),
-          goal: goal
+          goal: goal,
+          force: !!forceCategory
         })
       })
       const data = await response.json()
-      setResult(data)
+      if (data.needs_confirmation) {
+        setMismatch(data.classification)
+      } else if (data.scan_failed) {
+        setError(data.message)
+      } else {
+        setResult(data)
+      }
     } catch (err) {
       setError('Backend se connect nahi ho paya.')
     } finally {
@@ -137,25 +141,19 @@ function UrlInput() {
     }
   }
 
+  function handleAnalyze() {
+    if (!url || !businessType || !budget || !goal) {
+      alert('Sabhi fields bharo pehle!')
+      return
+    }
+    runAnalyze(null)
+  }
+
   // Password Screen
   if (!unlocked) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: '#080B12',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'system-ui, sans-serif',
-      }}>
-        <div style={{
-          background: '#0D1117',
-          border: '1px solid #1E2A3E',
-          borderRadius: '16px',
-          padding: '40px',
-          width: '340px',
-          textAlign: 'center',
-        }}>
+      <div style={{ minHeight: '100vh', background: '#080B12', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ background: '#0D1117', border: '1px solid #1E2A3E', borderRadius: '16px', padding: '40px', width: '340px', textAlign: 'center' }}>
           <p style={{ fontSize: '40px', margin: '0 0 16px 0' }}>🔐</p>
           <h2 style={{ color: '#fff', fontSize: '18px', margin: '0 0 8px 0' }}>AI Ad Manager</h2>
           <p style={{ color: '#64748B', fontSize: '14px', margin: '0 0 24px 0' }}>Access code daalo</p>
@@ -170,21 +168,14 @@ function UrlInput() {
               }
             }}
             placeholder="••••••••"
-            style={{
-              width: '100%', padding: '11px 14px', borderRadius: '8px',
-              border: '1px solid #1E2A3E', background: '#131820', color: '#fff',
-              fontSize: '14px', boxSizing: 'border-box', outline: 'none', marginBottom: '12px',
-            }}
+            style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #1E2A3E', background: '#131820', color: '#fff', fontSize: '14px', boxSizing: 'border-box', outline: 'none', marginBottom: '12px' }}
           />
           <button
             onClick={() => {
               if (accessCode === 'sohscape2024') setUnlocked(true)
               else alert('Wrong access code!')
             }}
-            style={{
-              width: '100%', padding: '11px', borderRadius: '8px', border: 'none',
-              background: '#6366F1', color: '#fff', fontSize: '14px', fontWeight: '600', cursor: 'pointer',
-            }}
+            style={{ width: '100%', padding: '11px', borderRadius: '8px', border: 'none', background: '#6366F1', color: '#fff', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}
           >
             🔓 Unlock
           </button>
@@ -196,10 +187,7 @@ function UrlInput() {
   // Loading Screen
   if (loading) {
     return (
-      <div style={{
-        minHeight: '100vh', background: '#080B12', fontFamily: 'system-ui, sans-serif',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
+      <div style={{ minHeight: '100vh', background: '#080B12', fontFamily: 'system-ui, sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: '48px', marginBottom: '16px' }}>🤖</div>
           <h2 style={{ color: '#fff', fontSize: '18px', marginBottom: '8px' }}>AI Analysis Ho Rahi Hai...</h2>
@@ -210,78 +198,118 @@ function UrlInput() {
     )
   }
 
+  // Mismatch Warning Screen
+  if (mismatch) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#080B12', fontFamily: 'system-ui, sans-serif', color: '#fff' }}>
+        <div style={{ background: '#0D1117', borderBottom: '1px solid #1E2A3E', padding: '0 24px', height: '56px', display: 'flex', alignItems: 'center' }}>
+          <span style={{ fontWeight: '700', fontSize: '15px' }}>✦ AI Ad Manager</span>
+        </div>
+
+        <div style={{ maxWidth: '620px', margin: '40px auto', padding: '0 24px' }}>
+          <div style={{
+            background: '#F59E0B15', border: '1px solid #F59E0B40',
+            borderRadius: '12px', padding: '20px', marginBottom: '24px',
+            display: 'flex', gap: '14px', alignItems: 'flex-start',
+          }}>
+            <span style={{ fontSize: '28px' }}>⚠️</span>
+            <div>
+              <p style={{ margin: '0 0 6px 0', fontWeight: '700', fontSize: '16px', color: '#F59E0B' }}>
+                Category Mismatch Detected
+              </p>
+              <p style={{ margin: 0, fontSize: '14px', color: '#94A3B8', lineHeight: '1.6' }}>
+                Aapne <b style={{ color: '#fff' }}>{mismatch.selected_category}</b> chuna,
+                par website dekh ke yeh <b style={{ color: '#fff' }}>{mismatch.recommended_category}</b> lag raha hai.
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+            <div style={{ background: '#0D1117', border: '1px solid #6366F1', borderRadius: '12px', padding: '16px' }}>
+              <p style={{ margin: '0 0 6px 0', fontSize: '11px', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AI Detected</p>
+              <p style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#818CF8' }}>{mismatch.recommended_category}</p>
+            </div>
+            <div style={{ background: '#0D1117', border: '1px solid #1E2A3E', borderRadius: '12px', padding: '16px' }}>
+              <p style={{ margin: '0 0 6px 0', fontSize: '11px', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Confidence</p>
+              <p style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#10B981' }}>{mismatch.confidence_score}%</p>
+            </div>
+          </div>
+
+          {mismatch.evidence && mismatch.evidence.length > 0 && (
+            <div style={{ background: '#0D1117', border: '1px solid #1E2A3E', borderRadius: '12px', padding: '16px', marginBottom: '24px' }}>
+              <p style={{ margin: '0 0 10px 0', fontSize: '11px', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Website Evidence</p>
+              {mismatch.evidence.map((e, i) => (
+                <p key={i} style={{ margin: '0 0 6px 0', fontSize: '13px', color: '#94A3B8', lineHeight: '1.5' }}>• {e}</p>
+              ))}
+            </div>
+          )}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <button
+              onClick={() => runAnalyze(mismatch.recommended_category)}
+              style={{ width: '100%', padding: '13px', borderRadius: '10px', border: 'none', background: '#6366F1', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}
+            >
+              ✅ AI Detected Category Use Karo ({mismatch.recommended_category})
+            </button>
+            <button
+              onClick={() => runAnalyze(mismatch.selected_category)}
+              style={{ width: '100%', padding: '13px', borderRadius: '10px', border: '1px solid #1E2A3E', background: 'transparent', color: '#94A3B8', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}
+            >
+              Meri Selected Category Rakho ({mismatch.selected_category})
+            </button>
+            <button
+              onClick={() => setMismatch(null)}
+              style={{ width: '100%', padding: '11px', borderRadius: '10px', border: 'none', background: 'transparent', color: '#64748B', fontSize: '13px', cursor: 'pointer' }}
+            >
+              ← Wapas Edit Karo
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   // Result Screen
   if (result) {
     const lines = result.analysis.split('\n')
     return (
       <div style={{ minHeight: '100vh', background: '#080B12', fontFamily: 'system-ui, sans-serif', color: '#fff' }}>
-        <div style={{
-          background: '#0D1117', borderBottom: '1px solid #1E2A3E',
-          padding: '0 24px', height: '56px', display: 'flex',
-          alignItems: 'center', justifyContent: 'space-between',
-        }}>
+        <div style={{ background: '#0D1117', borderBottom: '1px solid #1E2A3E', padding: '0 24px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontWeight: '700', fontSize: '15px' }}>✦ AI Ad Manager</span>
           <div style={{ display: 'flex', gap: '10px' }}>
-            <button
-              onClick={downloadPDF}
-              style={{
-                background: '#10B981', border: 'none', color: '#fff',
-                padding: '6px 16px', borderRadius: '8px', fontSize: '13px',
-                cursor: 'pointer', fontWeight: '600',
-              }}
-            >
+            <button onClick={downloadPDF} style={{ background: '#10B981', border: 'none', color: '#fff', padding: '6px 16px', borderRadius: '8px', fontSize: '13px', cursor: 'pointer', fontWeight: '600' }}>
               ⬇️ PDF Download
             </button>
-            <button
-              onClick={() => setResult(null)}
-              style={{
-                background: 'transparent', border: '1px solid #1E2A3E',
-                color: '#64748B', padding: '6px 16px', borderRadius: '8px',
-                fontSize: '13px', cursor: 'pointer',
-              }}
-            >
+            <button onClick={() => setResult(null)} style={{ background: 'transparent', border: '1px solid #1E2A3E', color: '#64748B', padding: '6px 16px', borderRadius: '8px', fontSize: '13px', cursor: 'pointer' }}>
               ← Naya Analysis
             </button>
           </div>
         </div>
 
         <div style={{ maxWidth: '800px', margin: '32px auto', padding: '0 24px' }}>
-          <div style={{
-            background: '#10B98115', border: '1px solid #10B98140',
-            borderRadius: '12px', padding: '16px 20px', marginBottom: '24px',
-            display: 'flex', alignItems: 'center', gap: '12px',
-          }}>
+          <div style={{ background: '#10B98115', border: '1px solid #10B98140', borderRadius: '12px', padding: '16px 20px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
             <span style={{ fontSize: '24px' }}>✅</span>
             <div>
               <p style={{ margin: '0 0 2px 0', fontWeight: '600', color: '#10B981' }}>AI Analysis Complete!</p>
-              <p style={{ margin: 0, fontSize: '13px', color: '#64748B' }}>{result.url} ka analysis taiyaar hai</p>
+              <p style={{ margin: 0, fontSize: '13px', color: '#64748B' }}>
+                {result.url} {result.detected_category ? `· ${result.detected_category}` : ''} ka analysis taiyaar hai
+              </p>
             </div>
           </div>
 
           <div style={{ background: '#0D1117', border: '1px solid #1E2A3E', borderRadius: '16px', padding: '28px' }}>
-            <h2 style={{ fontSize: '15px', fontWeight: '600', marginBottom: '20px', color: '#818CF8' }}>
-              🤖 AI Generated Report
-            </h2>
+            <h2 style={{ fontSize: '15px', fontWeight: '600', marginBottom: '20px', color: '#818CF8' }}>🤖 AI Generated Report</h2>
             {lines.map((line, index) => {
               if (line.match(/^[A-Z\s]+:$/) || line.match(/^[A-Z\s()]+:$/)) {
                 return (
-                  <h3 key={index} style={{
-                    color: '#6366F1', fontSize: '13px', fontWeight: '700',
-                    textTransform: 'uppercase', letterSpacing: '0.08em',
-                    marginTop: '24px', marginBottom: '10px',
-                    paddingBottom: '6px', borderBottom: '1px solid #1E2A3E',
-                  }}>
+                  <h3 key={index} style={{ color: '#6366F1', fontSize: '13px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: '24px', marginBottom: '10px', paddingBottom: '6px', borderBottom: '1px solid #1E2A3E' }}>
                     {line}
                   </h3>
                 )
               }
               if (line.match(/^\d+\./)) {
                 return (
-                  <div key={index} style={{
-                    background: '#131820', border: '1px solid #1E2A3E',
-                    borderRadius: '8px', padding: '10px 14px', marginBottom: '8px',
-                    fontSize: '14px', color: '#E2E8F0', lineHeight: '1.5',
-                  }}>
+                  <div key={index} style={{ background: '#131820', border: '1px solid #1E2A3E', borderRadius: '8px', padding: '10px 14px', marginBottom: '8px', fontSize: '14px', color: '#E2E8F0', lineHeight: '1.5' }}>
                     {line}
                   </div>
                 )
@@ -304,15 +332,9 @@ function UrlInput() {
   // Main Form
   return (
     <div style={{ minHeight: '100vh', background: '#080B12', fontFamily: 'system-ui, sans-serif', color: '#fff' }}>
-      <div style={{
-        background: '#0D1117', borderBottom: '1px solid #1E2A3E',
-        padding: '0 24px', height: '56px', display: 'flex',
-        alignItems: 'center', justifyContent: 'space-between',
-      }}>
+      <div style={{ background: '#0D1117', borderBottom: '1px solid #1E2A3E', padding: '0 24px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontWeight: '700', fontSize: '15px' }}>✦ AI Ad Manager</span>
-        <span style={{ background: '#6366F1', borderRadius: '20px', padding: '4px 14px', fontSize: '12px', fontWeight: '600' }}>
-          Krish — Pro Plan
-        </span>
+        <span style={{ background: '#6366F1', borderRadius: '20px', padding: '4px 14px', fontSize: '12px', fontWeight: '600' }}>Krish — Pro Plan</span>
       </div>
 
       <div style={{ maxWidth: '560px', margin: '48px auto', padding: '0 24px' }}>
@@ -323,34 +345,19 @@ function UrlInput() {
 
         <div style={{ background: '#0D1117', border: '1px solid #1E2A3E', borderRadius: '16px', padding: '28px' }}>
           {error && (
-            <div style={{
-              background: '#F43F5E15', border: '1px solid #F43F5E40',
-              borderRadius: '8px', padding: '12px 16px', marginBottom: '20px',
-              color: '#F43F5E', fontSize: '13px',
-            }}>
+            <div style={{ background: '#F43F5E15', border: '1px solid #F43F5E40', borderRadius: '8px', padding: '12px 16px', marginBottom: '20px', color: '#F43F5E', fontSize: '13px' }}>
               ⚠️ {error}
             </div>
           )}
 
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', color: '#94A3B8', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
-              Website URL
-            </label>
-            <input
-              type="url" value={url} onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://aapkibusiness.com"
-              style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #1E2A3E', background: '#131820', color: '#fff', fontSize: '14px', boxSizing: 'border-box', outline: 'none' }}
-            />
+            <label style={{ display: 'block', color: '#94A3B8', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Website URL</label>
+            <input type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://aapkibusiness.com" style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #1E2A3E', background: '#131820', color: '#fff', fontSize: '14px', boxSizing: 'border-box', outline: 'none' }} />
           </div>
 
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', color: '#94A3B8', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
-              Business Type
-            </label>
-            <select
-              value={businessType} onChange={(e) => setBusinessType(e.target.value)}
-              style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #1E2A3E', background: '#131820', color: businessType ? '#fff' : '#64748B', fontSize: '14px', boxSizing: 'border-box', outline: 'none' }}
-            >
+            <label style={{ display: 'block', color: '#94A3B8', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Business Type</label>
+            <select value={businessType} onChange={(e) => setBusinessType(e.target.value)} style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #1E2A3E', background: '#131820', color: businessType ? '#fff' : '#64748B', fontSize: '14px', boxSizing: 'border-box', outline: 'none' }}>
               <option value="">Select karo...</option>
               <option value="Wedding & Events">Wedding & Events</option>
               <option value="Restaurant / Cafe">Restaurant / Cafe</option>
@@ -367,51 +374,25 @@ function UrlInput() {
           </div>
 
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', color: '#94A3B8', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
-              Monthly Ad Budget (₹)
-            </label>
-            <input
-              type="number" value={budget} onChange={(e) => setBudget(e.target.value)}
-              placeholder="10000"
-              style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #1E2A3E', background: '#131820', color: '#fff', fontSize: '14px', boxSizing: 'border-box', outline: 'none', fontFamily: 'monospace' }}
-            />
+            <label style={{ display: 'block', color: '#94A3B8', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Monthly Ad Budget (₹)</label>
+            <input type="number" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="10000" style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #1E2A3E', background: '#131820', color: '#fff', fontSize: '14px', boxSizing: 'border-box', outline: 'none', fontFamily: 'monospace' }} />
             {budget && (
-              <p style={{ color: '#64748B', fontSize: '12px', margin: '6px 0 0 0' }}>
-                Daily budget: ₹{Math.round(parseInt(budget) / 30).toLocaleString()}
-              </p>
+              <p style={{ color: '#64748B', fontSize: '12px', margin: '6px 0 0 0' }}>Daily budget: ₹{Math.round(parseInt(budget) / 30).toLocaleString()}</p>
             )}
           </div>
 
           <div style={{ marginBottom: '28px' }}>
-            <label style={{ display: 'block', color: '#94A3B8', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
-              Marketing Goal
-            </label>
+            <label style={{ display: 'block', color: '#94A3B8', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Marketing Goal</label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               {['Lead Generation', 'Website Traffic', 'Brand Awareness', 'WhatsApp Inquiries', 'Sales / Revenue', 'App Downloads'].map((g) => (
-                <div
-                  key={g} onClick={() => setGoal(g)}
-                  style={{
-                    padding: '10px 14px', borderRadius: '8px',
-                    border: `1px solid ${goal === g ? '#6366F1' : '#1E2A3E'}`,
-                    background: goal === g ? '#6366F115' : '#131820',
-                    color: goal === g ? '#818CF8' : '#64748B',
-                    fontSize: '13px', cursor: 'pointer',
-                    fontWeight: goal === g ? '600' : '400',
-                  }}
-                >
+                <div key={g} onClick={() => setGoal(g)} style={{ padding: '10px 14px', borderRadius: '8px', border: `1px solid ${goal === g ? '#6366F1' : '#1E2A3E'}`, background: goal === g ? '#6366F115' : '#131820', color: goal === g ? '#818CF8' : '#64748B', fontSize: '13px', cursor: 'pointer', fontWeight: goal === g ? '600' : '400' }}>
                   {g}
                 </div>
               ))}
             </div>
           </div>
 
-          <button
-            onClick={handleAnalyze}
-            style={{
-              width: '100%', padding: '13px', borderRadius: '10px', border: 'none',
-              background: '#6366F1', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer',
-            }}
-          >
+          <button onClick={handleAnalyze} style={{ width: '100%', padding: '13px', borderRadius: '10px', border: 'none', background: '#6366F1', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}>
             🤖 AI Analysis Shuru Karo
           </button>
         </div>
