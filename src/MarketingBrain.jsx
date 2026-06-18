@@ -114,6 +114,15 @@ function MarketingBrain() {
 
             {renderBlock(result.ad_guide)}
           </div>
+
+          {/* SECTION 4 — Smart Creative */}
+          {result.smart_creative && (
+            <div style={{ background: 'linear-gradient(135deg, #1a1030 0%, #0D1117 100%)', border: '1px solid #6366F1', borderRadius: '16px', padding: '26px', marginTop: '20px' }}>
+              <h2 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '4px', color: '#A78BFA' }}>✨ 4. Smart Ad Creative</h2>
+              <p style={{ fontSize: '12px', color: '#64748B', marginTop: 0, marginBottom: '16px' }}>Competitor se ALAG — market gap pe based, ready-to-use ad</p>
+              {renderBlock(result.smart_creative)}
+            </div>
+          )}
         </div>
       </div>
     )
