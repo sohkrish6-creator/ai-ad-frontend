@@ -6,6 +6,7 @@ import Competitor from './Competitor'
 import AdIntel from './AdIntel'
 import MarketingBrain from './MarketingBrain'
 import AdCreative from './AdCreative'
+import AudienceFinder from './AudienceFinder'
 import Nav from './Nav'
 
 function Layout() {
@@ -26,6 +27,7 @@ function Layout() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/brain" element={<MarketingBrain />} />
           <Route path="/ad-creative" element={<AdCreative />} />
+          <Route path="/audience" element={<AudienceFinder />} />
           <Route path="/analyze" element={<UrlInput />} />
           <Route path="/competitor" element={<Competitor />} />
           <Route path="/ad-intel" element={<AdIntel />} />

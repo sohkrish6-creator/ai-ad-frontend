@@ -11,6 +11,7 @@ function Nav() {
     { path: '/competitor', label: 'Competitor', icon: '🔍' },
     { path: '/ad-intel', label: 'Ad Intel', icon: '📡' },
     { path: '/ad-creative', label: 'Ad Creative', icon: '🎨' },
+    { path: '/audience', label: 'Audience Finder', icon: '🎯' },
     { path: '/leads', label: 'Leads', icon: '👥' },
   ]
 
