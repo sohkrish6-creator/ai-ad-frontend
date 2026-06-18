@@ -10,6 +10,7 @@ function UrlInput() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
+  const [mismatch, setMismatch] = useState(null)
   const [copiedIndex, setCopiedIndex] = useState(null)
 
   const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
