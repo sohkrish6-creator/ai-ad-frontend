@@ -10,7 +10,7 @@ function UrlInput() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
-  const [mismatch, setMismatch] = useState(null)
+  const [copiedIndex, setCopiedIndex] = useState(null)
 
   const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 
@@ -309,8 +309,18 @@ function UrlInput() {
               }
               if (line.match(/^\d+\./)) {
                 return (
-                  <div key={index} style={{ background: '#131820', border: '1px solid #1E2A3E', borderRadius: '8px', padding: '10px 14px', marginBottom: '8px', fontSize: '14px', color: '#E2E8F0', lineHeight: '1.5' }}>
-                    {line}
+                  <div key={index} style={{ background: '#131820', border: '1px solid #1E2A3E', borderRadius: '8px', padding: '10px 14px', marginBottom: '8px', fontSize: '14px', color: '#E2E8F0', lineHeight: '1.5', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+                    <span>{line}</span>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(line.replace(/^\d+\.\s*/, ''))
+                        setCopiedIndex(index)
+                        setTimeout(() => setCopiedIndex(null), 1500)
+                      }}
+                      style={{ background: copiedIndex === index ? '#10B981' : '#1E2A3E', border: 'none', color: '#fff', padding: '5px 10px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', flexShrink: 0, fontWeight: '600' }}
+                    >
+                      {copiedIndex === index ? '✓ Copied' : '📋 Copy'}
+                    </button>
                   </div>
                 )
               }
