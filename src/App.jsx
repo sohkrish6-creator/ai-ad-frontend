@@ -3,6 +3,7 @@ import Dashboard from './Dashboard'
 import UrlInput from './UrlInput'
 import Leads from './Leads'
 import Competitor from './Competitor'
+import AdIntel from './AdIntel'
 import Nav from './Nav'
 
 function Layout() {
@@ -23,6 +24,7 @@ function Layout() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/analyze" element={<UrlInput />} />
           <Route path="/competitor" element={<Competitor />} />
+          <Route path="/ad-intel" element={<AdIntel />} />
           <Route path="/leads" element={<Leads />} />
         </Routes>
       </div>

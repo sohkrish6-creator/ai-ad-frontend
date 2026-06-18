@@ -8,6 +8,7 @@ function Nav() {
     { path: '/dashboard', label: 'Dashboard', icon: '📊' },
     { path: '/analyze', label: 'AI Analyzer', icon: '🌐' },
     { path: '/competitor', label: 'Competitor', icon: '🔍' },
+    { path: '/ad-intel', label: 'Ad Intel', icon: '📡' },
     { path: '/leads', label: 'Leads', icon: '👥' },
   ]
 
