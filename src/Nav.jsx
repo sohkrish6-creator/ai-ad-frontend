@@ -69,8 +69,9 @@ function Nav() {
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap');
-        .nav-link { transition: background 0.1s, color 0.1s; }
+        .nav-link { transition: background 0.15s ease, color 0.15s ease; }
         .nav-link:not(.active):hover { background: #F5F5F5 !important; color: #333 !important; }
+        .nav-link:not(.active):hover svg { color: #888 !important; }
       `}</style>
       <div style={{
         position: 'fixed', left: 0, top: 0,
