@@ -4,19 +4,20 @@ const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 
 function ScoreRing({ score, label, inverse = false }) {
   const s = score || 0
-  const pct = inverse ? 100 - s : s
-  const color = pct >= 75 ? '#10B981' : pct >= 50 ? '#F59E0B' : '#F43F5E'
-  const r = 28
+  const color = inverse
+    ? (s <= 40 ? '#10B981' : s <= 70 ? '#F59E0B' : '#EF4444')
+    : (s >= 80 ? '#10B981' : s >= 60 ? '#F59E0B' : '#EF4444')
+  const r = 34
   const circ = 2 * Math.PI * r
   const dash = (s / 100) * circ
   return (
-    <div style={{ textAlign: 'center', flex: 1, minWidth: '72px' }}>
-      <svg width="76" height="76" viewBox="0 0 76 76" style={{ display: 'block', margin: '0 auto 8px' }}>
-        <circle cx="38" cy="38" r={r} fill="none" stroke="#1E2A3E" strokeWidth="6" />
-        <circle cx="38" cy="38" r={r} fill="none" stroke={color} strokeWidth="6"
+    <div style={{ textAlign: 'center', flex: 1, minWidth: '84px' }}>
+      <svg width="88" height="88" viewBox="0 0 88 88" style={{ display: 'block', margin: '0 auto 8px', filter: `drop-shadow(0 0 8px ${color}55)` }}>
+        <circle cx="44" cy="44" r={r} fill="none" stroke="#1E2A3E" strokeWidth="7" />
+        <circle cx="44" cy="44" r={r} fill="none" stroke={color} strokeWidth="7"
           strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"
-          transform="rotate(-90 38 38)" />
-        <text x="38" y="43" textAnchor="middle" fill={color} fontSize="15" fontWeight="800" fontFamily="system-ui, sans-serif">{s}</text>
+          transform="rotate(-90 44 44)" />
+        <text x="44" y="50" textAnchor="middle" fill={color} fontSize="17" fontWeight="800" fontFamily="system-ui, sans-serif">{s}</text>
       </svg>
       <p style={{ color: '#94A3B8', fontSize: '11px', margin: 0, lineHeight: '1.4' }}>{label}</p>
     </div>
@@ -205,6 +206,306 @@ function Intelligence() {
       return 'yellow'
     }
 
+    const downloadPDF = async () => {
+      try {
+        const { jsPDF } = await import('jspdf')
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+        const W = 210, PH = 297, M = 18
+        let y = M, pg = 1
+
+        const C = {
+          bg:[8,11,18], card:[13,17,23], border:[30,42,62],
+          gold:[212,175,55], white:[240,242,246], muted:[100,116,139],
+          dim:[71,85,105], green:[16,185,129], amber:[245,158,11],
+          red:[239,68,68], indigo:[129,140,248], cyan:[56,189,248],
+        }
+
+        const scoreCol = (s, inv) => inv
+          ? (s <= 40 ? C.green : s <= 70 ? C.amber : C.red)
+          : (s >= 80 ? C.green : s >= 60 ? C.amber : C.red)
+
+        const initPage = () => {
+          doc.setFillColor(...C.bg); doc.rect(0, 0, W, PH, 'F')
+          doc.setFillColor(...C.gold)
+          doc.rect(0, 0, W, 1.5, 'F')
+          doc.rect(0, PH - 1.5, W, 1.5, 'F')
+        }
+
+        const addPage = () => { doc.addPage(); pg++; initPage(); y = M + 4 }
+
+        const checkY = (need) => { if (y + need > PH - 18) addPage() }
+
+        const tt = (str, x, yy, { sz=9, col=C.white, bold=false, align='left', maxW }={}) => {
+          if (str == null || str === '') return
+          doc.setFontSize(sz); doc.setTextColor(...col)
+          doc.setFont('helvetica', bold ? 'bold' : 'normal')
+          doc.text(String(str), x, yy, { align, ...(maxW ? { maxWidth: maxW } : {}) })
+        }
+
+        const wrapText = (str, x, { sz=8.5, col=C.white, maxW=W-M*2, lh=4.8 }={}) => {
+          if (!str) return
+          doc.setFontSize(sz); doc.setTextColor(...col); doc.setFont('helvetica','normal')
+          doc.splitTextToSize(String(str), maxW).forEach(line => { checkY(lh+1); doc.text(line, x, y); y += lh })
+        }
+
+        const secHeader = (title, accent=C.gold) => {
+          checkY(16)
+          doc.setFillColor(...accent); doc.rect(M, y, 3, 9, 'F')
+          tt(title.toUpperCase(), M+7, y+6.5, { sz:11, col:C.white, bold:true })
+          y += 15
+        }
+
+        const infoRow = (label, value) => {
+          if (!value) return
+          checkY(8)
+          tt(label, M, y, { sz:7.5, col:C.muted })
+          tt(String(value), M+52, y, { sz:8, col:C.white, maxW:W-M-56 })
+          y += 6.5
+        }
+
+        const scoreBar = (label, score, inv=false) => {
+          const s = score || 0, c = scoreCol(s, inv)
+          checkY(14)
+          tt(label, M, y+3.5, { sz:8, col:C.muted })
+          tt(`${s}`, W-M, y+3.5, { sz:8, col:c, bold:true, align:'right' })
+          y += 6
+          doc.setFillColor(...C.border); doc.rect(M, y, W-M*2, 2.5, 'F')
+          doc.setFillColor(...c); doc.rect(M, y, (W-M*2)*(s/100), 2.5, 'F')
+          y += 7
+        }
+
+        // ── COVER ─────────────────────────────────────────────────────────────
+        initPage()
+        doc.setFillColor(...C.gold)
+        doc.rect(M, 36, W-M*2, 0.5, 'F')
+        doc.rect(M, PH-44, W-M*2, 0.5, 'F')
+        tt('SOHSCAPE', W/2, 54, { sz:30, col:C.gold, bold:true, align:'center' })
+        tt('Business Intelligence Report', W/2, 66, { sz:13.5, col:C.white, align:'center' })
+        tt(result.url, W/2, 80, { sz:9.5, col:C.muted, align:'center' })
+        tt(new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}), W/2, 88, { sz:8.5, col:C.dim, align:'center' })
+
+        const sItems = [
+          { l:'DNA Score',   v:scores?.dna_score||0 },
+          { l:'Opportunity', v:scores?.opportunity_score||0 },
+          { l:'Threat',      v:scores?.threat_score||0, inv:true },
+          { l:'Positioning', v:scores?.positioning_score||0 },
+          { l:'Audience',    v:scores?.audience_quality_score||0 },
+          { l:'Readiness',   v:scores?.readiness_score||0 },
+        ]
+        const tW = (W-M*2)/3
+        sItems.forEach(({l,v,inv},i) => {
+          const c = scoreCol(v, inv)
+          const tx = M+(i%3)*tW, ty = 102+Math.floor(i/3)*36
+          doc.setFillColor(...C.card); doc.rect(tx+1, ty, tW-4, 32, 'F')
+          doc.setDrawColor(...c); doc.setLineWidth(0.4); doc.rect(tx+1, ty, tW-4, 32, 'S')
+          tt(String(v), tx+tW/2-1.5, ty+19, { sz:19, col:c, bold:true, align:'center' })
+          tt(l, tx+tW/2-1.5, ty+27, { sz:7.5, col:C.muted, align:'center' })
+        })
+
+        if (exec.readiness_verdict) tt(exec.readiness_verdict, W/2, 188, { sz:13, col:C.gold, bold:true, align:'center' })
+        if (dna.detected_industry) tt(`${dna.detected_industry}${dna.detected_sub_industry?' · '+dna.detected_sub_industry:''}`, W/2, 197, { sz:8.5, col:C.muted, align:'center' })
+        const evStats = `${ev.pages_fetched||0} pages crawled · ${ev.evidence_points||0} evidence points · ${Math.round((ev.avg_confidence||0)*100)}% confidence`
+        tt(evStats, W/2, PH-28, { sz:8, col:C.dim, align:'center' })
+        tt('Powered by Sohscape AI  ·  Confidential', W/2, PH-20, { sz:8, col:C.dim, align:'center' })
+
+        // ── PAGE 2: DNA + OPPORTUNITY ──────────────────────────────────────────
+        addPage()
+        secHeader('Business DNA', C.indigo)
+        infoRow('Detected Industry', dna.detected_industry)
+        infoRow('Sub-Industry', dna.detected_sub_industry)
+        infoRow('Business Model', dna.business_model)
+        infoRow('Revenue Model', dna.revenue_model)
+        infoRow('Price Range', dna.price_range)
+        infoRow('Target Geography', dna.target_geography)
+        infoRow('DNA Score', dna.dna_score!=null ? `${dna.dna_score}/100 — ${dna.dna_score_reason||''}` : null)
+        y += 2
+        if (dna.unique_value_prop) {
+          checkY(22)
+          doc.setFillColor(15,18,28); doc.rect(M, y, W-M*2, 16, 'F')
+          doc.setFillColor(...C.indigo); doc.rect(M, y, 3, 16, 'F')
+          tt('UNIQUE VALUE PROPOSITION', M+6, y+5.5, { sz:6.5, col:C.indigo, bold:true })
+          tt(dna.unique_value_prop, M+6, y+12, { sz:8.5, col:C.white, maxW:W-M*2-10 })
+          y += 20
+        }
+        if ((dna.core_products||[]).length) {
+          checkY(8); tt('Products: '+dna.core_products.join(' · '), M, y, { sz:7.5, col:C.dim, maxW:W-M*2 }); y += 8
+        }
+        y += 4
+        secHeader('Opportunity Analysis', C.green)
+        scoreBar('Market Opportunity', opp.market_opportunity_score)
+        scoreBar('Competition Difficulty', opp.competition_difficulty_score, true)
+        scoreBar('Conversion Potential', opp.conversion_potential_score)
+        y += 2
+        const oppMeta = [['Market Size',opp.market_size],['Best Platform',opp.best_platform],['Budget Efficiency',opp.budget_efficiency]].filter(([,v])=>v)
+        if (oppMeta.length) {
+          checkY(24); const mW=(W-M*2)/3
+          oppMeta.forEach(([lbl,val],i) => {
+            const mx=M+i*mW
+            doc.setFillColor(...C.card); doc.rect(mx, y, mW-3, 18, 'F')
+            tt(lbl, mx+(mW-3)/2, y+6.5, { sz:7, col:C.muted, align:'center' })
+            tt(val, mx+(mW-3)/2, y+13.5, { sz:9, col:C.white, bold:true, align:'center' })
+          })
+          y += 22
+        }
+        if (opp.best_platform_reason) { checkY(10); wrapText(opp.best_platform_reason, M, { sz:8, col:C.muted }) }
+
+        // ── PAGE 3: THREAT + POSITIONING ──────────────────────────────────────
+        addPage()
+        secHeader('Threat Intelligence', [249,115,22])
+        const thrC = scoreCol(threat.competitor_threat_score||0, true)
+        checkY(24)
+        const tMeta = [
+          ['Threat Score',`${threat.competitor_threat_score||0}/100`],
+          ['Threat Level',threat.threat_level],
+          ['Audience Overlap',`${threat.audience_overlap_pct||0}%`],
+          ['Pricing Overlap',`${threat.pricing_overlap_pct||0}%`],
+        ].filter(([,v])=>v)
+        const tCW=(W-M*2)/4
+        tMeta.forEach(([lbl,val],i) => {
+          const tx2=M+i*tCW
+          doc.setFillColor(...C.card); doc.rect(tx2, y, tCW-2, 18, 'F')
+          tt(lbl, tx2+(tCW-2)/2, y+6.5, { sz:6.5, col:C.muted, align:'center' })
+          tt(val, tx2+(tCW-2)/2, y+13.5, { sz:8.5, col:i===0?thrC:C.white, bold:true, align:'center' })
+        })
+        y += 22
+        const half=(W-M*2-4)/2; let lY=y, rY=y
+        if ((threat.key_threats||[]).length) {
+          doc.setFillColor(...C.red); doc.rect(M, lY, 2, 7, 'F')
+          tt('KEY THREATS', M+4, lY+5.5, { sz:7.5, col:C.red, bold:true }); lY += 10
+          for (const thr of (threat.key_threats||[]).slice(0,5)) {
+            const lines=doc.splitTextToSize(thr, half-7)
+            tt('▸', M, lY, { sz:8, col:C.red })
+            doc.setFontSize(8); doc.setTextColor(...C.white); doc.setFont('helvetica','normal'); doc.text(lines, M+5, lY)
+            lY += lines.length*4.5+2
+          }
+        }
+        if ((threat.differentiators||[]).length) {
+          const rx=M+half+4
+          doc.setFillColor(...C.green); doc.rect(rx, rY, 2, 7, 'F')
+          tt('DIFFERENTIATORS', rx+4, rY+5.5, { sz:7.5, col:C.green, bold:true }); rY += 10
+          for (const d of (threat.differentiators||[]).slice(0,5)) {
+            const lines=doc.splitTextToSize(d, half-7)
+            tt('✓', rx, rY, { sz:8, col:C.green })
+            doc.setFontSize(8); doc.setTextColor(...C.white); doc.setFont('helvetica','normal'); doc.text(lines, rx+5, rY)
+            rY += lines.length*4.5+2
+          }
+        }
+        y = Math.max(lY, rY) + 5
+        if (threat.moat_strength) {
+          checkY(10); doc.setFillColor(...C.card); doc.rect(M, y, W-M*2, 9, 'F')
+          tt(`Moat: ${threat.moat_strength}${threat.moat_reason?' — '+threat.moat_reason:''}`, M+4, y+6, { sz:8, col:C.white, maxW:W-M*2-8 }); y += 13
+        }
+        y += 4
+        secHeader('Positioning Engine', C.cyan)
+        if (pos.winning_position) {
+          checkY(24); doc.setFillColor(12,22,30); doc.rect(M, y, W-M*2, 22, 'F')
+          doc.setFillColor(...C.cyan); doc.rect(M, y, 3, 22, 'F')
+          tt('WINNING POSITION', M+6, y+5.5, { sz:6.5, col:C.cyan, bold:true })
+          const wLines=doc.splitTextToSize(pos.winning_position, W-M*2-10)
+          doc.setFontSize(10); doc.setTextColor(...C.white); doc.setFont('helvetica','bold'); doc.text(wLines, M+6, y+13)
+          y += Math.max(22, wLines.length*5.5+10)+4
+        }
+        if (pos.positioning_gap) {
+          checkY(16); doc.setFillColor(10,22,14); doc.rect(M, y, W-M*2, 14, 'F')
+          tt('POSITIONING GAP', M+4, y+5.5, { sz:6.5, col:C.green, bold:true })
+          const gLines=doc.splitTextToSize(pos.positioning_gap, W-M*2-8)
+          doc.setFontSize(8.5); doc.setTextColor(...C.white); doc.setFont('helvetica','normal'); doc.text(gLines, M+4, y+11)
+          y += Math.max(14, gLines.length*4.5+10)+3
+        }
+        if (pos.messaging_shift) { infoRow('Messaging Shift', pos.messaging_shift) }
+        if (pos.current_positioning) { checkY(12); wrapText('Current: '+pos.current_positioning, M, { sz:8, col:C.muted }); y += 2 }
+
+        // ── PAGE 4: AUDIENCE + EXEC ────────────────────────────────────────────
+        addPage()
+        secHeader('Audience Intelligence 2.0', [247,183,49])
+        for (const [i, seg] of (aud.validated_segments||[]).entries()) {
+          const isPrimary = i===(aud.primary_segment_index||0)
+          checkY(30)
+          doc.setFillColor(8,22,12); doc.rect(M, y, W-M*2, 28, 'F')
+          doc.setDrawColor(...C.green); doc.setLineWidth(0.3); doc.rect(M, y, W-M*2, 28, 'S')
+          tt(`${isPrimary?'★ ':''}${seg.segment_name||''}`, M+5, y+8, { sz:9.5, col:C.green, bold:true })
+          tt(`${seg.age_range||''} · ${seg.gender||''} · ${seg.income_level||''}`, M+5, y+15, { sz:7.5, col:C.muted })
+          tt(String(seg.confidence_score||0), W-M-4, y+8, { sz:10, col:C.green, bold:true, align:'right' })
+          if (seg.evidence_backing) {
+            const eLines=doc.splitTextToSize(`"${seg.evidence_backing}"`, W-M*2-10)
+            doc.setFontSize(7.5); doc.setTextColor(...C.dim); doc.setFont('helvetica','italic'); doc.text(eLines.slice(0,2), M+5, y+22)
+          }
+          y += 31
+        }
+        if ((aud.rejected_segments||[]).length) {
+          checkY(10); tt('REJECTED SEGMENTS', M, y, { sz:7.5, col:C.red, bold:true }); y += 6
+          for (const seg of aud.rejected_segments) {
+            checkY(7); tt(`✗ ${seg.segment||''}`, M+2, y, { sz:8, col:C.red })
+            tt(seg.rejection_reason||'', M+55, y, { sz:7.5, col:C.muted, maxW:W-M-60 }); y += 6
+          }
+        }
+        y += 6
+        secHeader('Executive Decisions', C.amber)
+        if (exec.highest_roi_action) {
+          checkY(22); doc.setFillColor(24,18,2); doc.rect(M, y, W-M*2, 20, 'F')
+          doc.setFillColor(...C.amber); doc.rect(M, y, 3, 20, 'F')
+          tt('HIGHEST ROI ACTION', M+6, y+5.5, { sz:6.5, col:C.amber, bold:true })
+          const roiLines=doc.splitTextToSize(exec.highest_roi_action, W-M*2-10)
+          doc.setFontSize(9.5); doc.setTextColor(254,243,199); doc.setFont('helvetica','bold'); doc.text(roiLines, M+6, y+13)
+          y += Math.max(20, roiLines.length*5+10)+3
+        }
+        for (const action of (exec.top_5_actions||[])) {
+          checkY(22); doc.setFillColor(...C.card); doc.rect(M, y, W-M*2, 20, 'F')
+          doc.setFillColor(30,42,62); doc.circle(M+8, y+10, 4, 'F')
+          tt(String(action.rank||''), M+8, y+13, { sz:8, col:C.indigo, bold:true, align:'center' })
+          tt(action.action||'', M+16, y+8, { sz:8.5, col:C.white, bold:true, maxW:W-M-24 })
+          tt(`${action.expected_impact||''} Impact · ${action.effort||''} Effort · ${action.timeline||''}`, M+16, y+15, { sz:7, col:C.muted })
+          y += 23
+        }
+        if (exec.plan_30_day||exec.plan_60_day||exec.plan_90_day) {
+          checkY(35); tt('30/60/90 DAY PLAN', M, y, { sz:8, col:C.gold, bold:true }); y += 8
+          const plans=[['30 Days',exec.plan_30_day,C.green],['60 Days',exec.plan_60_day,C.amber],['90 Days',exec.plan_90_day,C.indigo]]
+          const pW=(W-M*2)/3, planY=y
+          plans.forEach(([lbl,val,c],i) => {
+            if (!val) return
+            const px=M+i*pW, pLines=doc.splitTextToSize(val, pW-7), h=pLines.length*4.5+16
+            doc.setFillColor(...C.card); doc.rect(px, planY, pW-3, h, 'F')
+            doc.setFillColor(...c); doc.rect(px, planY, pW-3, 2, 'F')
+            tt(lbl, px+3, planY+9, { sz:7.5, col:c, bold:true })
+            doc.setFontSize(7.5); doc.setTextColor(...C.white); doc.setFont('helvetica','normal'); doc.text(pLines, px+3, planY+15)
+            y = Math.max(y, planY+h+4)
+          })
+        }
+        if (exec.biggest_risk||exec.biggest_opportunity) {
+          checkY(22); const h2=(W-M*2-4)/2, bY=y
+          if (exec.biggest_risk) {
+            doc.setFillColor(20,10,10); doc.rect(M, bY, h2, 18, 'F')
+            tt('BIGGEST RISK', M+4, bY+6, { sz:7, col:C.red, bold:true })
+            const rL=doc.splitTextToSize(exec.biggest_risk, h2-8)
+            doc.setFontSize(7.5); doc.setTextColor(...C.white); doc.setFont('helvetica','normal'); doc.text(rL, M+4, bY+12)
+          }
+          if (exec.biggest_opportunity) {
+            const rx=M+h2+4
+            doc.setFillColor(8,20,12); doc.rect(rx, bY, h2, 18, 'F')
+            tt('BIGGEST OPPORTUNITY', rx+4, bY+6, { sz:7, col:C.green, bold:true })
+            const oL=doc.splitTextToSize(exec.biggest_opportunity, h2-8)
+            doc.setFontSize(7.5); doc.setTextColor(...C.white); doc.setFont('helvetica','normal'); doc.text(oL, rx+4, bY+12)
+          }
+          y = bY + 22
+        }
+
+        // ── FOOTERS ────────────────────────────────────────────────────────────
+        const totalPg = doc.getNumberOfPages()
+        for (let p = 1; p <= totalPg; p++) {
+          doc.setPage(p)
+          doc.setFontSize(7); doc.setTextColor(...C.dim); doc.setFont('helvetica','normal')
+          doc.text('Sohscape · Business Intelligence Report · Confidential', M, PH-7)
+          doc.text(`${p} / ${totalPg}`, W-M, PH-7, { align:'right' })
+        }
+
+        const fname = `BI-Report-${result.url.replace(/https?:\/\//,'').replace(/[^a-zA-Z0-9]/g,'-').slice(0,30)}-${new Date().toISOString().split('T')[0]}.pdf`
+        doc.save(fname)
+      } catch(err) {
+        console.error('PDF failed:', err)
+        alert('PDF export failed. Try again.')
+      }
+    }
+
     return (
       <div style={{ minHeight: '100vh', background: '#080B12', fontFamily: 'system-ui, sans-serif', color: '#fff' }}>
 
@@ -213,6 +514,9 @@ function Intelligence() {
           <span style={{ fontWeight: '700', fontSize: '15px' }}>🧬 Business Intelligence</span>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             {!isMobile && <span style={{ color: '#475569', fontSize: '12px', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{result.url}</span>}
+            <button onClick={downloadPDF} style={{ background: '#D4AF3718', border: '1px solid #D4AF3740', color: '#D4AF37', padding: '6px 14px', borderRadius: '8px', fontSize: '13px', cursor: 'pointer', fontWeight: '600' }}>
+              ⬇ PDF
+            </button>
             <button onClick={() => setResult(null)} style={{ background: 'transparent', border: '1px solid #1E2A3E', color: '#64748B', padding: '6px 14px', borderRadius: '8px', fontSize: '13px', cursor: 'pointer' }}>
               ← New Analysis
             </button>
