@@ -226,7 +226,7 @@ function Intelligence() {
             <div>
               <p style={{ margin: 0, fontWeight: '700', fontSize: '15px', color: '#10B981' }}>✅ Intelligence Report Ready</p>
               <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#64748B' }}>
-                {ev.pages_crawled || 0} pages crawled · {ev.evidence_points || 0} evidence points · {Math.round((ev.avg_confidence || 0) * 100)}% avg confidence
+                {ev.pages_fetched || ev.pages_crawled || 0} pages fetched · {ev.pages_with_evidence || 0} with content · {ev.evidence_points || 0} evidence points · {Math.round((ev.avg_confidence || 0) * 100)}% avg confidence{ev.sitemap_crawled ? ' · sitemap ✓' : ''}
               </p>
             </div>
             <Badge label={exec.readiness_verdict || 'Analyzing'} type={verdictType(exec.readiness_verdict)} />
