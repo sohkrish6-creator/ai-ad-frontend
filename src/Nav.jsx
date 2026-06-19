@@ -28,13 +28,13 @@ function Nav() {
       <>
         <style>{`
           .nav-mobile-link { transition: color 0.1s; }
-          .nav-mobile-link:hover { color: #888 !important; }
+          .nav-mobile-link:hover { color: #333 !important; }
         `}</style>
         <div style={{
           position: 'fixed', bottom: 0, left: 0, right: 0,
           height: '56px',
-          background: '#000',
-          borderTop: '1px solid #1F1F1F',
+          background: '#fff',
+          borderTop: '1px solid #EAEAEA',
           display: 'flex',
           justifyContent: 'space-around',
           alignItems: 'center',
@@ -49,12 +49,12 @@ function Nav() {
                 flexDirection: 'column',
                 alignItems: 'center',
                 gap: '3px',
-                color: active ? '#fff' : '#444',
+                color: active ? '#171717' : '#AAAAAA',
                 fontSize: '9px',
                 fontWeight: active ? '500' : '400',
                 letterSpacing: '0.02em',
               }}>
-                <Icon size={15} strokeWidth={active ? 2 : 1.5} color={active ? GOLD : '#444'} />
+                <Icon size={15} strokeWidth={active ? 2 : 1.5} color={active ? GOLD : '#BBBBBB'} />
                 {label}
               </Link>
             )
@@ -68,24 +68,17 @@ function Nav() {
   return (
     <>
       <style>{`
-        .nav-link {
-          transition: background 0.1s, color 0.1s, border-color 0.1s;
-        }
-        .nav-link:hover {
-          background: #0F0F0F !important;
-          color: #888 !important;
-        }
-        .nav-link.active:hover {
-          color: #fff !important;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap');
+        .nav-link { transition: background 0.1s, color 0.1s; }
+        .nav-link:not(.active):hover { background: #F5F5F5 !important; color: #333 !important; }
       `}</style>
       <div style={{
         position: 'fixed', left: 0, top: 0,
         width: '220px',
         height: '100vh',
-        background: '#000',
-        borderRight: '1px solid #1F1F1F',
-        padding: '20px 12px 20px',
+        background: '#fff',
+        borderRight: '1px solid #EAEAEA',
+        padding: '20px 12px',
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
@@ -98,7 +91,7 @@ function Nav() {
             fontSize: '14px',
             fontWeight: '600',
             letterSpacing: '-0.3px',
-            color: '#fff',
+            color: '#171717',
           }}>
             <span style={{ color: GOLD, marginRight: '6px' }}>✦</span>
             AI Ad Manager
@@ -121,8 +114,8 @@ function Nav() {
                   gap: '8px',
                   padding: '6px 10px',
                   borderRadius: '6px',
-                  background: active ? '#111' : 'transparent',
-                  color: active ? '#fff' : '#555',
+                  background: active ? '#F0F0F0' : 'transparent',
+                  color: active ? '#171717' : '#888',
                   fontSize: '13px',
                   fontWeight: active ? '500' : '400',
                   letterSpacing: '-0.1px',
@@ -131,7 +124,7 @@ function Nav() {
                 <Icon
                   size={14}
                   strokeWidth={active ? 2 : 1.5}
-                  color={active ? GOLD : '#444'}
+                  color={active ? GOLD : '#BBBBBB'}
                   style={{ flexShrink: 0 }}
                 />
                 {label}
@@ -141,18 +134,15 @@ function Nav() {
         </div>
 
         {/* Footer */}
-        <div style={{
-          padding: '16px 10px 0',
-          borderTop: '1px solid #1A1A1A',
-        }}>
+        <div style={{ padding: '16px 10px 0', borderTop: '1px solid #EAEAEA' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
             <div style={{
-              width: '5px', height: '5px', borderRadius: '50%',
+              width: '6px', height: '6px', borderRadius: '50%',
               background: '#22C55E',
-              boxShadow: '0 0 0 2px #22C55E18',
+              boxShadow: '0 0 0 2px #22C55E20',
               flexShrink: 0,
             }} />
-            <span style={{ color: '#333', fontSize: '11px' }}>Krish · Sohscape</span>
+            <span style={{ color: '#AAAAAA', fontSize: '11px' }}>Krish · Sohscape</span>
           </div>
         </div>
       </div>
