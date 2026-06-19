@@ -19,9 +19,10 @@ function Layout() {
     <div>
       {showNav && <Nav />}
       <div style={{
-        marginLeft: showNav && !isMobile ? '200px' : '0',
-        paddingBottom: showNav && isMobile ? '64px' : '0',
+        marginLeft: showNav && !isMobile ? '220px' : '0',
+        paddingBottom: showNav && isMobile ? '56px' : '0',
         minHeight: '100vh',
+        background: '#FAFAFA',
       }}>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
