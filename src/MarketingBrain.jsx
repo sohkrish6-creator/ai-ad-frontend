@@ -1,5 +1,27 @@
 import { useState } from 'react'
 
+const GOLD = '#D4AF37'
+const card = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
+const inputSt = { width: '100%', padding: '10px 13px', borderRadius: '7px', border: '1px solid #E5E5E5', background: '#FAFAFA', color: '#171717', fontSize: '14px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
+const lbl = { display: 'block', color: '#999', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '7px' }
+
+function renderBlock(text) {
+  if (!text) return null
+  return text.split('\n').map((line, i) => {
+    const clean = line.replace(/\*\*/g, '').replace(/^#+\s*/, '')
+    if (clean.match(/^[A-Z\s()\/]+:$/)) {
+      return <h3 key={i} style={{ color: GOLD, fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: '20px', marginBottom: '9px', paddingBottom: '5px', borderBottom: '1px solid #EAEAEA' }}>{clean}</h3>
+    }
+    if (clean.match(/^\d+\./)) {
+      return <div key={i} style={{ background: '#F9F9F9', border: '1px solid #EAEAEA', borderRadius: '7px', padding: '9px 13px', marginBottom: '7px', fontSize: '14px', color: '#171717', lineHeight: '1.5' }}>{clean}</div>
+    }
+    if (clean.trim()) {
+      return <p key={i} style={{ color: '#666', fontSize: '14px', lineHeight: '1.6', margin: '4px 0' }}>{clean}</p>
+    }
+    return null
+  })
+}
+
 function MarketingBrain() {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
   const [url, setUrl] = useState('')
@@ -17,30 +39,19 @@ function MarketingBrain() {
   const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 
   async function handleRun() {
-    if (!url || !businessType || !budget || !goal) {
-      alert('Website, business type, budget aur goal bharo!')
-      return
-    }
-    setLoading(true)
-    setError(null)
-    setResult(null)
+    if (!url || !businessType || !budget || !goal) { alert('Website, business type, budget aur goal bharo!'); return }
+    setLoading(true); setError(null); setResult(null)
     try {
-      const response = await fetch(`${BACKEND}/full-report`, {
+      const res = await fetch(`${BACKEND}/full-report`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          url, business_type: businessType, budget: parseInt(budget), goal,
-          competitor_name: compName, competitor_website: compWebsite, language
-        })
+        body: JSON.stringify({ url, business_type: businessType, budget: parseInt(budget), goal, competitor_name: compName, competitor_website: compWebsite, language })
       })
-      const data = await response.json()
+      const data = await res.json()
       if (data.scan_failed) setError(data.message)
       else setResult(data)
-    } catch (err) {
-      setError('Backend se connect nahi ho paya.')
-    } finally {
-      setLoading(false)
-    }
+    } catch { setError('Backend se connect nahi ho paya.') }
+    setLoading(false)
   }
 
   const handleCopy = (key, text) => {
@@ -49,206 +60,157 @@ function MarketingBrain() {
     setTimeout(() => setCopied(prev => ({ ...prev, [key]: false })), 2000)
   }
 
-  const renderBlock = (text) => {
-    if (!text) return null
-    return text.split('\n').map((line, i) => {
-      const clean = line.replace(/\*\*/g, '').replace(/^#+\s*/, '')
-      if (clean.match(/^[A-Z\s()\/]+:$/)) {
-        return <h3 key={i} style={{ color: '#6366F1', fontSize: '13px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '18px', marginBottom: '8px', paddingBottom: '5px', borderBottom: '1px solid #1E2A3E' }}>{clean}</h3>
-      }
-      if (clean.match(/^\d+\./)) {
-        return <div key={i} style={{ background: '#131820', border: '1px solid #1E2A3E', borderRadius: '8px', padding: '9px 13px', marginBottom: '7px', fontSize: '14px', color: '#E2E8F0', lineHeight: '1.5' }}>{clean}</div>
-      }
-      if (clean.trim()) {
-        return <p key={i} style={{ color: '#94A3B8', fontSize: '14px', lineHeight: '1.6', margin: '4px 0' }}>{clean}</p>
-      }
-      return null
-    })
-  }
+  const page = { minHeight: '100vh', background: '#FAFAFA', padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '900px' }
 
-  if (loading) {
-    return (
-      <div style={{ minHeight: '100vh', background: '#080B12', fontFamily: 'system-ui, sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center', padding: '0 20px' }}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>🧠</div>
-          <h2 style={{ color: '#fff', fontSize: '18px', marginBottom: '8px' }}>Marketing Brain Soch Raha Hai...</h2>
-          <p style={{ color: '#64748B', fontSize: '14px' }}>Strategy + Competitor + Ad Intel + Creative + Audience — sab ban rahe hain</p>
-          <p style={{ color: '#6366F1', fontSize: '13px', marginTop: '8px' }}>1-2 minute lagenge ☕ (5 cheezein ek saath)</p>
-        </div>
+  if (loading) return (
+    <div style={page}>
+      <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Marketing Brain</h1>
+      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 32px' }}>Generating full report...</p>
+      <div style={{ ...card, padding: '40px', textAlign: 'center' }}>
+        <p style={{ color: '#666', fontSize: '14px', margin: '0 0 6px' }}>Strategy + Competitor + Ad Intel + Creative + Audience ban rahe hain...</p>
+        <p style={{ color: '#999', fontSize: '13px', margin: 0 }}>1–2 minute lagenge (5 cheezein ek saath)</p>
       </div>
-    )
-  }
+    </div>
+  )
 
-  if (result) {
-    return (
-      <div style={{ minHeight: '100vh', background: '#080B12', fontFamily: 'system-ui, sans-serif', color: '#fff' }}>
-        <div style={{ background: '#0D1117', borderBottom: '1px solid #1E2A3E', padding: '0 24px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontWeight: '700', fontSize: '15px' }}>🧠 Marketing Brain</span>
-          <button onClick={() => setResult(null)} style={{ background: 'transparent', border: '1px solid #1E2A3E', color: '#64748B', padding: '6px 16px', borderRadius: '8px', fontSize: '13px', cursor: 'pointer' }}>← Naya Report</button>
+  if (result) return (
+    <div style={page}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px', flexWrap: 'wrap', gap: '12px' }}>
+        <div>
+          <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Marketing Brain</h1>
+          <p style={{ color: '#999', fontSize: '13px', margin: 0 }}>{result.url} — full report ready</p>
         </div>
-
-        <div style={{ maxWidth: '800px', margin: '32px auto', padding: '0 24px' }}>
-          <div style={{ background: '#10B98115', border: '1px solid #10B98140', borderRadius: '12px', padding: '16px 20px', marginBottom: '24px' }}>
-            <p style={{ margin: 0, fontWeight: '600', color: '#10B981' }}>✅ Complete Marketing Report Taiyaar!</p>
-            <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748B' }}>{result.url} — strategy, competitor, ad intel, creative & audience</p>
-          </div>
-
-          {/* SECTION 1 — Strategy */}
-          <div style={{ background: '#0D1117', border: '1px solid #1E2A3E', borderRadius: '16px', padding: '26px', marginBottom: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-              <h2 style={{ fontSize: '16px', fontWeight: '700', margin: 0, color: '#818CF8' }}>📊 1. Marketing Strategy</h2>
-              <button onClick={() => handleCopy('strategy', result.strategy)} style={{ padding: '6px 12px', borderRadius: '6px', background: copied.strategy ? '#10B981' : '#1E2A3E', color: copied.strategy ? '#fff' : '#94A3B8', border: 'none', cursor: 'pointer', fontSize: '12px' }}>
-                {copied.strategy ? '✅ Copied' : '📋 Copy'}
-              </button>
-            </div>
-            <p style={{ fontSize: '12px', color: '#64748B', marginTop: '4px', marginBottom: '16px' }}>Targeting, budget, headlines, ad copy</p>
-            {renderBlock(result.strategy)}
-          </div>
-
-          {/* SECTION 2 — Competitor */}
-          {result.competitor && (
-            <div style={{ background: '#0D1117', border: '1px solid #1E2A3E', borderRadius: '16px', padding: '26px', marginBottom: '20px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                <h2 style={{ fontSize: '16px', fontWeight: '700', margin: 0, color: '#818CF8' }}>🔍 2. Competitor Analysis</h2>
-                <button onClick={() => handleCopy('competitor', result.competitor)} style={{ padding: '6px 12px', borderRadius: '6px', background: copied.competitor ? '#10B981' : '#1E2A3E', color: copied.competitor ? '#fff' : '#94A3B8', border: 'none', cursor: 'pointer', fontSize: '12px' }}>
-                  {copied.competitor ? '✅ Copied' : '📋 Copy'}
-                </button>
-              </div>
-              <p style={{ fontSize: '12px', color: '#64748B', marginTop: '4px', marginBottom: '16px' }}>Positioning, gaps, jeet ke mauke</p>
-              {renderBlock(result.competitor)}
-            </div>
-          )}
-
-          {/* SECTION 3 — Ad Intel */}
-          <div style={{ background: '#0D1117', border: '1px solid #1E2A3E', borderRadius: '16px', padding: '26px', marginBottom: '20px' }}>
-            <h2 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '4px', color: '#818CF8' }}>📡 3. Ad Intelligence</h2>
-            <p style={{ fontSize: '12px', color: '#64748B', marginTop: 0, marginBottom: '16px' }}>Competitor ke live ads + guide</p>
-            <a href={result.meta_ad_library_link} target="_blank" rel="noopener noreferrer" style={{ display: 'block', background: '#1877F2', color: '#fff', padding: '12px', borderRadius: '10px', textDecoration: 'none', fontWeight: '700', fontSize: '13px', textAlign: 'center', marginBottom: '10px' }}>
-              📘 Facebook & Instagram Live Ads →
-            </a>
-            <a href={result.google_ads_link} target="_blank" rel="noopener noreferrer" style={{ display: 'block', background: '#34A853', color: '#fff', padding: '12px', borderRadius: '10px', textDecoration: 'none', fontWeight: '700', fontSize: '13px', textAlign: 'center', marginBottom: '18px' }}>
-              🔍 Google Ads Transparency →
-            </a>
-            {renderBlock(result.ad_guide)}
-          </div>
-
-          {/* SECTION 4 — Smart Creative */}
-          {result.smart_creative && (
-            <div style={{ background: 'linear-gradient(135deg, #1a1030 0%, #0D1117 100%)', border: '1px solid #6366F1', borderRadius: '16px', padding: '26px', marginBottom: '20px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                <h2 style={{ fontSize: '16px', fontWeight: '700', margin: 0, color: '#A78BFA' }}>✨ 4. Smart Ad Creative</h2>
-                <button onClick={() => handleCopy('creative', result.smart_creative)} style={{ padding: '6px 12px', borderRadius: '6px', background: copied.creative ? '#10B981' : '#2D1B69', color: copied.creative ? '#fff' : '#94A3B8', border: 'none', cursor: 'pointer', fontSize: '12px' }}>
-                  {copied.creative ? '✅ Copied' : '📋 Copy'}
-                </button>
-              </div>
-              <p style={{ fontSize: '12px', color: '#64748B', marginTop: '4px', marginBottom: '16px' }}>Competitor se ALAG — market gap pe based</p>
-              {renderBlock(result.smart_creative)}
-            </div>
-          )}
-
-          {/* SECTION 5 — Audience Finder */}
-          {result.audience && (
-            <div style={{ background: 'linear-gradient(135deg, #0f2027 0%, #0D1117 100%)', border: '1px solid #f7b731', borderRadius: '16px', padding: '26px', marginBottom: '20px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                <h2 style={{ fontSize: '16px', fontWeight: '700', margin: 0, color: '#f7b731' }}>🎯 5. Audience & Targeting</h2>
-                <button onClick={() => handleCopy('audience', result.audience)} style={{ padding: '6px 12px', borderRadius: '6px', background: copied.audience ? '#10B981' : '#2a1f00', color: copied.audience ? '#fff' : '#94A3B8', border: 'none', cursor: 'pointer', fontSize: '12px' }}>
-                  {copied.audience ? '✅ Copied' : '📋 Copy'}
-                </button>
-              </div>
-              <p style={{ fontSize: '12px', color: '#64748B', marginTop: '4px', marginBottom: '16px' }}>Audience segments, where to find them, Meta + Google targeting</p>
-              {renderBlock(result.audience)}
-            </div>
-          )}
-
-        </div>
+        <button onClick={() => setResult(null)} style={{ background: 'transparent', border: '1px solid #E5E5E5', color: '#666', padding: '7px 16px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>← New Report</button>
       </div>
-    )
-  }
+
+      {/* Section 1 — Strategy */}
+      <div style={{ ...card, padding: '26px', marginBottom: '12px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+          <h2 style={{ fontSize: '15px', fontWeight: '600', margin: 0, color: '#171717' }}>1. Marketing Strategy</h2>
+          <button onClick={() => handleCopy('strategy', result.strategy)} style={{ padding: '5px 12px', borderRadius: '6px', background: copied.strategy ? '#22C55E' : '#F5F5F5', color: copied.strategy ? '#fff' : '#666', border: '1px solid #E5E5E5', cursor: 'pointer', fontSize: '12px' }}>
+            {copied.strategy ? '✓ Copied' : 'Copy'}
+          </button>
+        </div>
+        <p style={{ fontSize: '12px', color: '#999', margin: '4px 0 16px' }}>Targeting, budget, headlines, ad copy</p>
+        {renderBlock(result.strategy)}
+      </div>
+
+      {/* Section 2 — Competitor */}
+      {result.competitor && (
+        <div style={{ ...card, padding: '26px', marginBottom: '12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+            <h2 style={{ fontSize: '15px', fontWeight: '600', margin: 0, color: '#171717' }}>2. Competitor Analysis</h2>
+            <button onClick={() => handleCopy('competitor', result.competitor)} style={{ padding: '5px 12px', borderRadius: '6px', background: copied.competitor ? '#22C55E' : '#F5F5F5', color: copied.competitor ? '#fff' : '#666', border: '1px solid #E5E5E5', cursor: 'pointer', fontSize: '12px' }}>
+              {copied.competitor ? '✓ Copied' : 'Copy'}
+            </button>
+          </div>
+          <p style={{ fontSize: '12px', color: '#999', margin: '4px 0 16px' }}>Positioning, gaps, jeet ke mauke</p>
+          {renderBlock(result.competitor)}
+        </div>
+      )}
+
+      {/* Section 3 — Ad Intel */}
+      <div style={{ ...card, padding: '26px', marginBottom: '12px' }}>
+        <h2 style={{ fontSize: '15px', fontWeight: '600', marginBottom: '4px', color: '#171717' }}>3. Ad Intelligence</h2>
+        <p style={{ fontSize: '12px', color: '#999', margin: '0 0 16px' }}>Competitor ke live ads + guide</p>
+        <a href={result.meta_ad_library_link} target="_blank" rel="noopener noreferrer" style={{ display: 'block', background: '#1877F2', color: '#fff', padding: '12px', borderRadius: '8px', textDecoration: 'none', fontWeight: '600', fontSize: '13px', textAlign: 'center', marginBottom: '10px' }}>
+          Facebook &amp; Instagram Live Ads →
+        </a>
+        <a href={result.google_ads_link} target="_blank" rel="noopener noreferrer" style={{ display: 'block', background: '#34A853', color: '#fff', padding: '12px', borderRadius: '8px', textDecoration: 'none', fontWeight: '600', fontSize: '13px', textAlign: 'center', marginBottom: '18px' }}>
+          Google Ads Transparency →
+        </a>
+        {renderBlock(result.ad_guide)}
+      </div>
+
+      {/* Section 4 — Smart Creative */}
+      {result.smart_creative && (
+        <div style={{ ...card, padding: '26px', marginBottom: '12px', borderColor: '#E5DABB' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+            <h2 style={{ fontSize: '15px', fontWeight: '600', margin: 0, color: GOLD }}>4. Smart Ad Creative</h2>
+            <button onClick={() => handleCopy('creative', result.smart_creative)} style={{ padding: '5px 12px', borderRadius: '6px', background: copied.creative ? '#22C55E' : '#F5F5F5', color: copied.creative ? '#fff' : '#666', border: '1px solid #E5E5E5', cursor: 'pointer', fontSize: '12px' }}>
+              {copied.creative ? '✓ Copied' : 'Copy'}
+            </button>
+          </div>
+          <p style={{ fontSize: '12px', color: '#999', margin: '4px 0 16px' }}>Competitor se ALAG — market gap pe based</p>
+          {renderBlock(result.smart_creative)}
+        </div>
+      )}
+
+      {/* Section 5 — Audience */}
+      {result.audience && (
+        <div style={{ ...card, padding: '26px', marginBottom: '12px', borderColor: '#E5DABB' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+            <h2 style={{ fontSize: '15px', fontWeight: '600', margin: 0, color: GOLD }}>5. Audience &amp; Targeting</h2>
+            <button onClick={() => handleCopy('audience', result.audience)} style={{ padding: '5px 12px', borderRadius: '6px', background: copied.audience ? '#22C55E' : '#F5F5F5', color: copied.audience ? '#fff' : '#666', border: '1px solid #E5E5E5', cursor: 'pointer', fontSize: '12px' }}>
+              {copied.audience ? '✓ Copied' : 'Copy'}
+            </button>
+          </div>
+          <p style={{ fontSize: '12px', color: '#999', margin: '4px 0 16px' }}>Audience segments, where to find them, Meta + Google targeting</p>
+          {renderBlock(result.audience)}
+        </div>
+      )}
+    </div>
+  )
 
   return (
-    <div style={{ minHeight: '100vh', background: '#080B12', fontFamily: 'system-ui, sans-serif', color: '#fff' }}>
-      <div style={{ background: '#0D1117', borderBottom: '1px solid #1E2A3E', padding: '0 24px', height: '56px', display: 'flex', alignItems: 'center' }}>
-        <span style={{ fontWeight: '700', fontSize: '15px' }}>🧠 Marketing Brain</span>
-      </div>
+    <div style={page}>
+      <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Marketing Brain</h1>
+      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 32px' }}>Ek baar daalo — Strategy + Competitor + Ad Intel + Creative + Audience, sab ek saath</p>
 
-      <div style={{ maxWidth: '560px', margin: '40px auto', padding: '0 24px' }}>
-        <div style={{ marginBottom: '28px' }}>
-          <h1 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 8px 0' }}>🧠 AI Marketing Brain</h1>
-          <p style={{ color: '#64748B', fontSize: '14px', margin: 0 }}>Ek baar daalo — Strategy + Competitor + Ad Intel + Creative + Audience, sab ek saath</p>
-        </div>
+      <div style={{ maxWidth: '560px' }}>
+        <div style={{ ...card, padding: '28px' }}>
+          {error && <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '20px', color: '#BE123C', fontSize: '13px' }}>{error}</div>}
 
-        <div style={{ background: '#0D1117', border: '1px solid #1E2A3E', borderRadius: '16px', padding: '28px' }}>
-          {error && (
-            <div style={{ background: '#F43F5E15', border: '1px solid #F43F5E40', borderRadius: '8px', padding: '12px 16px', marginBottom: '20px', color: '#F43F5E', fontSize: '13px' }}>⚠️ {error}</div>
-          )}
-
-          <p style={{ fontSize: '11px', color: '#6366F1', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 14px 0' }}>Aapka Business</p>
+          <p style={{ fontSize: '11px', color: GOLD, fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 14px' }}>Aapka Business</p>
 
           <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', color: '#94A3B8', fontSize: '12px', fontWeight: '600', marginBottom: '7px' }}>Website URL</label>
-            <input type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://aapkibusiness.com" style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #1E2A3E', background: '#131820', color: '#fff', fontSize: '14px', boxSizing: 'border-box', outline: 'none' }} />
+            <label style={lbl}>Website URL</label>
+            <input type="url" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://aapkibusiness.com" style={inputSt} />
           </div>
 
           <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', color: '#94A3B8', fontSize: '12px', fontWeight: '600', marginBottom: '7px' }}>Business Type</label>
-            <select value={businessType} onChange={(e) => setBusinessType(e.target.value)} style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #1E2A3E', background: '#131820', color: businessType ? '#fff' : '#64748B', fontSize: '14px', boxSizing: 'border-box', outline: 'none' }}>
+            <label style={lbl}>Business Type</label>
+            <select value={businessType} onChange={e => setBusinessType(e.target.value)} style={{ ...inputSt, color: businessType ? '#171717' : '#999' }}>
               <option value="">Select karo...</option>
-              <option value="Wedding & Events">Wedding & Events</option>
-              <option value="Restaurant / Cafe">Restaurant / Cafe</option>
-              <option value="Healthcare / Clinic">Healthcare / Clinic</option>
-              <option value="Real Estate">Real Estate</option>
-              <option value="Education / Coaching">Education / Coaching</option>
-              <option value="Beauty & Skincare">Beauty & Skincare</option>
-              <option value="Retail Store">Retail Store</option>
-              <option value="Salon / Spa">Salon / Spa</option>
-              <option value="Travel & Tourism">Travel & Tourism</option>
-              <option value="Technology / SaaS">Technology / SaaS</option>
-              <option value="Digital Marketing Agency">Digital Marketing Agency</option>
-              <option value="Other">Other</option>
+              {['Wedding & Events','Restaurant / Cafe','Healthcare / Clinic','Real Estate','Education / Coaching','Beauty & Skincare','Retail Store','Salon / Spa','Travel & Tourism','Technology / SaaS','Digital Marketing Agency','Other'].map(o => <option key={o} value={o}>{o}</option>)}
             </select>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
             <div>
-              <label style={{ display: 'block', color: '#94A3B8', fontSize: '12px', fontWeight: '600', marginBottom: '7px' }}>Budget (₹/month)</label>
-              <input type="number" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="50000" style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #1E2A3E', background: '#131820', color: '#fff', fontSize: '14px', boxSizing: 'border-box', outline: 'none' }} />
+              <label style={lbl}>Budget (₹/month)</label>
+              <input type="number" value={budget} onChange={e => setBudget(e.target.value)} placeholder="50000" style={inputSt} />
             </div>
             <div>
-              <label style={{ display: 'block', color: '#94A3B8', fontSize: '12px', fontWeight: '600', marginBottom: '7px' }}>Goal</label>
-              <select value={goal} onChange={(e) => setGoal(e.target.value)} style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #1E2A3E', background: '#131820', color: goal ? '#fff' : '#64748B', fontSize: '14px', boxSizing: 'border-box', outline: 'none' }}>
+              <label style={lbl}>Goal</label>
+              <select value={goal} onChange={e => setGoal(e.target.value)} style={{ ...inputSt, color: goal ? '#171717' : '#999' }}>
                 <option value="">Select...</option>
-                <option value="Lead Generation">Lead Generation</option>
-                <option value="Sales / Revenue">Sales / Revenue</option>
-                <option value="Brand Awareness">Brand Awareness</option>
-                <option value="Website Traffic">Website Traffic</option>
-                <option value="WhatsApp Inquiries">WhatsApp Inquiries</option>
+                {['Lead Generation','Sales / Revenue','Brand Awareness','Website Traffic','WhatsApp Inquiries'].map(o => <option key={o} value={o}>{o}</option>)}
               </select>
             </div>
           </div>
 
           <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', color: '#94A3B8', fontSize: '12px', fontWeight: '600', marginBottom: '7px' }}>Language</label>
-            <select value={language} onChange={(e) => setLanguage(e.target.value)} style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #1E2A3E', background: '#131820', color: '#fff', fontSize: '14px', boxSizing: 'border-box', outline: 'none' }}>
-              <option value="Hinglish">Hinglish</option>
-              <option value="English">English</option>
-              <option value="Hindi">Hindi</option>
+            <label style={lbl}>Language</label>
+            <select value={language} onChange={e => setLanguage(e.target.value)} style={inputSt}>
+              {['Hinglish','English','Hindi'].map(o => <option key={o} value={o}>{o}</option>)}
             </select>
           </div>
 
-          <p style={{ fontSize: '11px', color: '#6366F1', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '24px 0 14px 0' }}>Competitor (Optional)</p>
+          <p style={{ fontSize: '11px', color: GOLD, fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '24px 0 14px' }}>Competitor (Optional)</p>
 
           <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', color: '#94A3B8', fontSize: '12px', fontWeight: '600', marginBottom: '7px' }}>Competitor ka Naam</label>
-            <input type="text" value={compName} onChange={(e) => setCompName(e.target.value)} placeholder="e.g. Mamaearth" style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #1E2A3E', background: '#131820', color: '#fff', fontSize: '14px', boxSizing: 'border-box', outline: 'none' }} />
+            <label style={lbl}>Competitor ka Naam</label>
+            <input type="text" value={compName} onChange={e => setCompName(e.target.value)} placeholder="e.g. Mamaearth" style={inputSt} />
           </div>
 
-          <div style={{ marginBottom: '24px' }}>
-            <label style={{ display: 'block', color: '#94A3B8', fontSize: '12px', fontWeight: '600', marginBottom: '7px' }}>Competitor ki Website</label>
-            <input type="text" value={compWebsite} onChange={(e) => setCompWebsite(e.target.value)} placeholder="e.g. mamaearth.in" style={{ width: '100%', padding: '11px 14px', borderRadius: '8px', border: '1px solid #1E2A3E', background: '#131820', color: '#fff', fontSize: '14px', boxSizing: 'border-box', outline: 'none' }} />
+          <div style={{ marginBottom: '28px' }}>
+            <label style={lbl}>Competitor ki Website</label>
+            <input type="text" value={compWebsite} onChange={e => setCompWebsite(e.target.value)} placeholder="e.g. mamaearth.in" style={inputSt} />
           </div>
 
-          <button onClick={handleRun} style={{ width: '100%', padding: '14px', borderRadius: '10px', border: 'none', background: '#6366F1', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}>
-            🧠 Full Marketing Report Banao
+          <button onClick={handleRun} style={{ width: '100%', padding: '13px', borderRadius: '8px', border: 'none', background: '#171717', color: '#fff', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
+            Generate Full Marketing Report
           </button>
         </div>
       </div>
