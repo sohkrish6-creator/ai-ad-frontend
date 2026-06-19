@@ -1,19 +1,23 @@
 import { Link, useLocation } from 'react-router-dom'
 
+const GOLD      = '#D4AF37'
+const GOLD_DIM  = '#D4AF3738'
+const GOLD_GLOW = '#D4AF3712'
+
 function Nav() {
   const location = useLocation()
   const isMobile = window.innerWidth < 768
 
   const links = [
-    { path: '/dashboard',    label: 'Dashboard',    icon: '📊' },
-    { path: '/intelligence', label: 'BI Platform',  icon: '🧬' },
-    { path: '/brain', label: 'Marketing Brain', icon: '🧠' },
-    { path: '/analyze', label: 'AI Analyzer', icon: '🌐' },
-    { path: '/competitor', label: 'Competitor', icon: '🔍' },
-    { path: '/ad-intel', label: 'Ad Intel', icon: '📡' },
-    { path: '/ad-creative', label: 'Ad Creative', icon: '🎨' },
-    { path: '/audience', label: 'Audience Finder', icon: '🎯' },
-    { path: '/leads', label: 'Leads', icon: '👥' },
+    { path: '/dashboard',    label: 'Dashboard',      icon: '📊' },
+    { path: '/intelligence', label: 'BI Platform',    icon: '🧬' },
+    { path: '/brain',        label: 'Marketing Brain', icon: '🧠' },
+    { path: '/analyze',      label: 'AI Analyzer',    icon: '🌐' },
+    { path: '/competitor',   label: 'Competitor',     icon: '🔍' },
+    { path: '/ad-intel',     label: 'Ad Intel',       icon: '📡' },
+    { path: '/ad-creative',  label: 'Ad Creative',    icon: '🎨' },
+    { path: '/audience',     label: 'Audience Finder', icon: '🎯' },
+    { path: '/leads',        label: 'Leads',          icon: '👥' },
   ]
 
   // MOBILE — bottom bar
@@ -21,12 +25,10 @@ function Nav() {
     return (
       <div style={{
         position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
+        bottom: 0, left: 0, right: 0,
         height: '64px',
-        background: '#0D1117',
-        borderTop: '1px solid #1E2A3E',
+        background: '#0D0D0D',
+        borderTop: `1px solid #1A1A1A`,
         display: 'flex',
         justifyContent: 'space-around',
         alignItems: 'center',
@@ -44,12 +46,12 @@ function Nav() {
                 flexDirection: 'column',
                 alignItems: 'center',
                 gap: '4px',
-                color: active ? '#818CF8' : '#64748B',
-                fontSize: '11px',
+                color: active ? GOLD : '#3A3A3A',
+                fontSize: '10px',
                 fontWeight: active ? '600' : '400',
               }}
             >
-              <span style={{ fontSize: '20px' }}>{link.icon}</span>
+              <span style={{ fontSize: '19px' }}>{link.icon}</span>
               {link.label}
             </Link>
           )
@@ -62,25 +64,38 @@ function Nav() {
   return (
     <div style={{
       position: 'fixed',
-      left: 0,
-      top: 0,
+      left: 0, top: 0,
       width: '200px',
       height: '100vh',
-      background: '#0D1117',
-      borderRight: '1px solid #1E2A3E',
-      padding: '24px 16px',
+      background: '#0D0D0D',
+      borderRight: '1px solid #1A1A1A',
+      padding: '24px 14px',
       boxSizing: 'border-box',
       display: 'flex',
       flexDirection: 'column',
     }}>
-      <div style={{ marginBottom: '32px', paddingLeft: '12px' }}>
-        <p style={{ color: '#fff', fontWeight: '700', fontSize: '16px', margin: '0 0 4px 0' }}>
-          ✦ AI Ad Manager
+      {/* Logo */}
+      <div style={{ marginBottom: '28px', paddingLeft: '10px' }}>
+        <p style={{ color: '#fff', fontWeight: '700', fontSize: '15px', margin: '0 0 5px 0', letterSpacing: '-0.2px' }}>
+          <span style={{ color: GOLD }}>✦</span> AI Ad Manager
         </p>
-        <p style={{ color: '#6366F1', fontSize: '12px', margin: 0 }}>Pro Plan</p>
+        <span style={{
+          display: 'inline-block',
+          background: GOLD_GLOW,
+          border: `1px solid ${GOLD_DIM}`,
+          borderRadius: '20px',
+          padding: '2px 10px',
+          fontSize: '10px',
+          fontWeight: '600',
+          color: GOLD,
+          letterSpacing: '0.04em',
+        }}>
+          Pro Plan
+        </span>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1 }}>
+      {/* Nav links */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
         {links.map(link => {
           const active = location.pathname === link.path
           return (
@@ -91,25 +106,28 @@ function Nav() {
                 textDecoration: 'none',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '12px',
-                padding: '11px 12px',
-                borderRadius: '8px',
-                background: active ? '#6366F115' : 'transparent',
-                border: `1px solid ${active ? '#6366F1' : 'transparent'}`,
-                color: active ? '#818CF8' : '#94A3B8',
-                fontSize: '14px',
+                gap: '10px',
+                padding: '9px 10px',
+                borderRadius: '7px',
+                background: active ? GOLD_GLOW : 'transparent',
+                border: `1px solid ${active ? GOLD_DIM : 'transparent'}`,
+                color: active ? GOLD : '#2E2E2E',
+                fontSize: '13px',
                 fontWeight: active ? '600' : '400',
+                boxShadow: active ? `0 0 12px ${GOLD_GLOW}` : 'none',
+                letterSpacing: active ? '-0.1px' : '0',
               }}
             >
-              <span>{link.icon}</span>
+              <span style={{ fontSize: '14px', opacity: active ? 1 : 0.5 }}>{link.icon}</span>
               {link.label}
             </Link>
           )
         })}
       </div>
 
-      <div style={{ paddingLeft: '12px', borderTop: '1px solid #1E2A3E', paddingTop: '16px' }}>
-        <p style={{ color: '#64748B', fontSize: '12px', margin: 0 }}>Krish · Sohscape</p>
+      {/* Footer */}
+      <div style={{ paddingLeft: '10px', borderTop: '1px solid #1A1A1A', paddingTop: '14px' }}>
+        <p style={{ color: '#252525', fontSize: '11px', margin: 0 }}>Krish · Sohscape</p>
       </div>
     </div>
   )

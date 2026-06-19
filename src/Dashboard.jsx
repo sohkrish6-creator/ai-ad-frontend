@@ -12,6 +12,7 @@ function Dashboard() {
   const [stats, setStats] = useState(null)
   const [analyses, setAnalyses] = useState([])
   const [loading, setLoading] = useState(true)
+  const [attempt, setAttempt] = useState(1)
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768)
@@ -20,23 +21,51 @@ function Dashboard() {
   }, [])
 
   useEffect(() => {
-    async function loadData() {
+    const EMPTY = { total: 0, whatsapp: 0, website: 0, form: 0, new: 0, converted: 0 }
+
+    async function fetchWithTimeout(url, ms = 12000) {
+      const ctrl = new AbortController()
+      const timer = setTimeout(() => ctrl.abort(), ms)
+      try {
+        const res = await fetch(url, { signal: ctrl.signal })
+        return res
+      } finally {
+        clearTimeout(timer)
+      }
+    }
+
+    async function tryLoad(attempt = 1) {
+      setAttempt(attempt)
       try {
         const [statsRes, analysesRes] = await Promise.all([
-          fetch(`${BACKEND}/leads/stats`),
-          fetch(`${BACKEND}/analyses`)
+          fetchWithTimeout(`${BACKEND}/leads/stats`),
+          fetchWithTimeout(`${BACKEND}/analyses`),
         ])
         const statsData = await statsRes.json()
         const analysesData = await analysesRes.json()
         setStats(statsData)
         setAnalyses(analysesData.analyses || [])
-      } catch (err) {
-        setStats({ total: 0, whatsapp: 0, website: 0, form: 0, new: 0, converted: 0 })
-      } finally {
         setLoading(false)
+      } catch (err) {
+        if (attempt < 3) {
+          // Retry after 5s (Render cold start can take 50s total across retries)
+          setTimeout(() => tryLoad(attempt + 1), 5000)
+        } else {
+          setStats(EMPTY)
+          setLoading(false)
+        }
       }
     }
-    loadData()
+
+    // After 8s show layout with zeros so user isn't stuck on spinner
+    const fallbackTimer = setTimeout(() => {
+      setStats(prev => prev ?? EMPTY)
+      setLoading(false)
+    }, 8000)
+
+    tryLoad().finally(() => clearTimeout(fallbackTimer))
+
+    return () => clearTimeout(fallbackTimer)
   }, [])
 
   const kpis = stats ? [
@@ -132,8 +161,25 @@ function Dashboard() {
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: '100px 0' }}>
-            <div style={{ fontSize: '32px', marginBottom: '14px', opacity: 0.3 }}>⏳</div>
-            <p style={{ fontSize: '14px', color: '#2A2A2A', margin: 0 }}>Data load ho raha hai...</p>
+            <div style={{ fontSize: '32px', marginBottom: '14px' }}>⏳</div>
+            <p style={{ fontSize: '14px', color: '#888', margin: '0 0 8px' }}>
+              Data load ho raha hai... ({attempt}/3)
+            </p>
+            <p style={{ fontSize: '12px', color: '#555', margin: '0 0 16px' }}>
+              Backend waking up — pehli baar ~30s lag sakti hai
+            </p>
+            <div style={{
+              display: 'inline-block',
+              fontSize: '11px',
+              color: '#D4AF37',
+              background: '#D4AF3712',
+              border: '1px solid #D4AF3740',
+              borderRadius: '20px',
+              padding: '5px 16px',
+              fontWeight: '600',
+            }}>
+              {attempt < 3 ? 'Retry ho rahi hai...' : 'Zeros ke saath load ho raha hai...'}
+            </div>
           </div>
         ) : (
         <>
