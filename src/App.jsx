@@ -7,6 +7,7 @@ import AdIntel from './AdIntel'
 import MarketingBrain from './MarketingBrain'
 import AdCreative from './AdCreative'
 import AudienceFinder from './AudienceFinder'
+import Intelligence from './Intelligence'
 import Nav from './Nav'
 
 function Layout() {
@@ -25,6 +26,7 @@ function Layout() {
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/intelligence" element={<Intelligence />} />
           <Route path="/brain" element={<MarketingBrain />} />
           <Route path="/ad-creative" element={<AdCreative />} />
           <Route path="/audience" element={<AudienceFinder />} />

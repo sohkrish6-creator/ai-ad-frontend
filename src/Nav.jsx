@@ -5,7 +5,8 @@ function Nav() {
   const isMobile = window.innerWidth < 768
 
   const links = [
-    { path: '/dashboard', label: 'Dashboard', icon: '📊' },
+    { path: '/dashboard',    label: 'Dashboard',    icon: '📊' },
+    { path: '/intelligence', label: 'BI Platform',  icon: '🧬' },
     { path: '/brain', label: 'Marketing Brain', icon: '🧠' },
     { path: '/analyze', label: 'AI Analyzer', icon: '🌐' },
     { path: '/competitor', label: 'Competitor', icon: '🔍' },
