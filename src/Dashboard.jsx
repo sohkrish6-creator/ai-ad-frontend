@@ -209,7 +209,7 @@ function Dashboard() {
                   }}>
                     {value}
                   </p>
-                  <p style={{ fontSize: '11px', color: '#BBBBBB', margin: 0, letterSpacing: '-0.1px' }}>
+                  <p style={{ fontSize: '11px', color: '#666', margin: 0, letterSpacing: '-0.1px' }}>
                     {sub}
                   </p>
                 </div>
@@ -229,7 +229,7 @@ function Dashboard() {
                 <Label>Lead Sources</Label>
 
                 {stats.total === 0 ? (
-                  <p style={{ color: '#CCC', fontSize: '13px', margin: 0 }}>
+                  <p style={{ color: '#666', fontSize: '13px', margin: 0 }}>
                     No leads yet.
                   </p>
                 ) : (
@@ -269,7 +269,7 @@ function Dashboard() {
                 <Label>Recent Analyses</Label>
 
                 {analyses.length === 0 ? (
-                  <p style={{ color: '#CCC', fontSize: '13px', margin: 0 }}>
+                  <p style={{ color: '#666', fontSize: '13px', margin: 0 }}>
                     No analyses yet. Run one from AI Analyzer.
                   </p>
                 ) : (
@@ -306,7 +306,7 @@ function Dashboard() {
               boxShadow: 'none',
             }}>
               <TrendingUp size={14} color="#D4D4D4" strokeWidth={1.5} style={{ flexShrink: 0 }} />
-              <p style={{ fontSize: '13px', color: '#BBBBBB', margin: 0, flex: 1, letterSpacing: '-0.1px' }}>
+              <p style={{ fontSize: '13px', color: '#555', margin: 0, flex: 1, letterSpacing: '-0.1px' }}>
                 Ad Performance Tracking — Google Ads &amp; Meta Ads live data
               </p>
               <span style={{
