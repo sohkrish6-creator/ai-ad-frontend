@@ -76,22 +76,9 @@ function Nav() {
     }}>
       {/* Logo */}
       <div style={{ marginBottom: '28px', paddingLeft: '10px' }}>
-        <p style={{ color: '#fff', fontWeight: '700', fontSize: '15px', margin: '0 0 5px 0', letterSpacing: '-0.2px' }}>
+        <p style={{ color: '#fff', fontWeight: '700', fontSize: '15px', margin: 0, letterSpacing: '-0.2px' }}>
           <span style={{ color: GOLD }}>✦</span> AI Ad Manager
         </p>
-        <span style={{
-          display: 'inline-block',
-          background: GOLD_GLOW,
-          border: `1px solid ${GOLD_DIM}`,
-          borderRadius: '20px',
-          padding: '2px 10px',
-          fontSize: '10px',
-          fontWeight: '600',
-          color: GOLD,
-          letterSpacing: '0.04em',
-        }}>
-          Pro Plan
-        </span>
       </div>
 
       {/* Nav links */}
