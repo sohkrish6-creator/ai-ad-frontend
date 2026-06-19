@@ -12,6 +12,7 @@ function MarketingBrain() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
+  const [copied, setCopied] = useState({})
 
   const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 
@@ -42,6 +43,12 @@ function MarketingBrain() {
     }
   }
 
+  const handleCopy = (key, text) => {
+    navigator.clipboard.writeText(text)
+    setCopied({ ...copied, [key]: true })
+    setTimeout(() => setCopied(prev => ({ ...prev, [key]: false })), 2000)
+  }
+
   const renderBlock = (text) => {
     if (!text) return null
     return text.split('\n').map((line, i) => {
@@ -65,8 +72,8 @@ function MarketingBrain() {
         <div style={{ textAlign: 'center', padding: '0 20px' }}>
           <div style={{ fontSize: '48px', marginBottom: '16px' }}>🧠</div>
           <h2 style={{ color: '#fff', fontSize: '18px', marginBottom: '8px' }}>Marketing Brain Soch Raha Hai...</h2>
-          <p style={{ color: '#64748B', fontSize: '14px' }}>Strategy + Competitor + Ad Intel — teeno ban rahe hain</p>
-          <p style={{ color: '#6366F1', fontSize: '13px', marginTop: '8px' }}>1-2 minute lagenge ☕ (3 cheezein ek saath)</p>
+          <p style={{ color: '#64748B', fontSize: '14px' }}>Strategy + Competitor + Ad Intel + Creative + Audience — sab ban rahe hain</p>
+          <p style={{ color: '#6366F1', fontSize: '13px', marginTop: '8px' }}>1-2 minute lagenge ☕ (5 cheezein ek saath)</p>
         </div>
       </div>
     )
@@ -83,48 +90,76 @@ function MarketingBrain() {
         <div style={{ maxWidth: '800px', margin: '32px auto', padding: '0 24px' }}>
           <div style={{ background: '#10B98115', border: '1px solid #10B98140', borderRadius: '12px', padding: '16px 20px', marginBottom: '24px' }}>
             <p style={{ margin: 0, fontWeight: '600', color: '#10B981' }}>✅ Complete Marketing Report Taiyaar!</p>
-            <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748B' }}>{result.url} — strategy, competitor & ad intelligence</p>
+            <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748B' }}>{result.url} — strategy, competitor, ad intel, creative & audience</p>
           </div>
 
           {/* SECTION 1 — Strategy */}
           <div style={{ background: '#0D1117', border: '1px solid #1E2A3E', borderRadius: '16px', padding: '26px', marginBottom: '20px' }}>
-            <h2 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '4px', color: '#818CF8' }}>📊 1. Marketing Strategy</h2>
-            <p style={{ fontSize: '12px', color: '#64748B', marginTop: 0, marginBottom: '16px' }}>Targeting, budget, headlines, ad copy</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+              <h2 style={{ fontSize: '16px', fontWeight: '700', margin: 0, color: '#818CF8' }}>📊 1. Marketing Strategy</h2>
+              <button onClick={() => handleCopy('strategy', result.strategy)} style={{ padding: '6px 12px', borderRadius: '6px', background: copied.strategy ? '#10B981' : '#1E2A3E', color: copied.strategy ? '#fff' : '#94A3B8', border: 'none', cursor: 'pointer', fontSize: '12px' }}>
+                {copied.strategy ? '✅ Copied' : '📋 Copy'}
+              </button>
+            </div>
+            <p style={{ fontSize: '12px', color: '#64748B', marginTop: '4px', marginBottom: '16px' }}>Targeting, budget, headlines, ad copy</p>
             {renderBlock(result.strategy)}
           </div>
 
           {/* SECTION 2 — Competitor */}
           {result.competitor && (
             <div style={{ background: '#0D1117', border: '1px solid #1E2A3E', borderRadius: '16px', padding: '26px', marginBottom: '20px' }}>
-              <h2 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '4px', color: '#818CF8' }}>🔍 2. Competitor Analysis</h2>
-              <p style={{ fontSize: '12px', color: '#64748B', marginTop: 0, marginBottom: '16px' }}>Positioning, gaps, jeet ke mauke</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                <h2 style={{ fontSize: '16px', fontWeight: '700', margin: 0, color: '#818CF8' }}>🔍 2. Competitor Analysis</h2>
+                <button onClick={() => handleCopy('competitor', result.competitor)} style={{ padding: '6px 12px', borderRadius: '6px', background: copied.competitor ? '#10B981' : '#1E2A3E', color: copied.competitor ? '#fff' : '#94A3B8', border: 'none', cursor: 'pointer', fontSize: '12px' }}>
+                  {copied.competitor ? '✅ Copied' : '📋 Copy'}
+                </button>
+              </div>
+              <p style={{ fontSize: '12px', color: '#64748B', marginTop: '4px', marginBottom: '16px' }}>Positioning, gaps, jeet ke mauke</p>
               {renderBlock(result.competitor)}
             </div>
           )}
 
           {/* SECTION 3 — Ad Intel */}
-          <div style={{ background: '#0D1117', border: '1px solid #1E2A3E', borderRadius: '16px', padding: '26px' }}>
+          <div style={{ background: '#0D1117', border: '1px solid #1E2A3E', borderRadius: '16px', padding: '26px', marginBottom: '20px' }}>
             <h2 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '4px', color: '#818CF8' }}>📡 3. Ad Intelligence</h2>
             <p style={{ fontSize: '12px', color: '#64748B', marginTop: 0, marginBottom: '16px' }}>Competitor ke live ads + guide</p>
-
             <a href={result.meta_ad_library_link} target="_blank" rel="noopener noreferrer" style={{ display: 'block', background: '#1877F2', color: '#fff', padding: '12px', borderRadius: '10px', textDecoration: 'none', fontWeight: '700', fontSize: '13px', textAlign: 'center', marginBottom: '10px' }}>
               📘 Facebook & Instagram Live Ads →
             </a>
             <a href={result.google_ads_link} target="_blank" rel="noopener noreferrer" style={{ display: 'block', background: '#34A853', color: '#fff', padding: '12px', borderRadius: '10px', textDecoration: 'none', fontWeight: '700', fontSize: '13px', textAlign: 'center', marginBottom: '18px' }}>
               🔍 Google Ads Transparency →
             </a>
-
             {renderBlock(result.ad_guide)}
           </div>
 
           {/* SECTION 4 — Smart Creative */}
           {result.smart_creative && (
-            <div style={{ background: 'linear-gradient(135deg, #1a1030 0%, #0D1117 100%)', border: '1px solid #6366F1', borderRadius: '16px', padding: '26px', marginTop: '20px' }}>
-              <h2 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '4px', color: '#A78BFA' }}>✨ 4. Smart Ad Creative</h2>
-              <p style={{ fontSize: '12px', color: '#64748B', marginTop: 0, marginBottom: '16px' }}>Competitor se ALAG — market gap pe based, ready-to-use ad</p>
+            <div style={{ background: 'linear-gradient(135deg, #1a1030 0%, #0D1117 100%)', border: '1px solid #6366F1', borderRadius: '16px', padding: '26px', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                <h2 style={{ fontSize: '16px', fontWeight: '700', margin: 0, color: '#A78BFA' }}>✨ 4. Smart Ad Creative</h2>
+                <button onClick={() => handleCopy('creative', result.smart_creative)} style={{ padding: '6px 12px', borderRadius: '6px', background: copied.creative ? '#10B981' : '#2D1B69', color: copied.creative ? '#fff' : '#94A3B8', border: 'none', cursor: 'pointer', fontSize: '12px' }}>
+                  {copied.creative ? '✅ Copied' : '📋 Copy'}
+                </button>
+              </div>
+              <p style={{ fontSize: '12px', color: '#64748B', marginTop: '4px', marginBottom: '16px' }}>Competitor se ALAG — market gap pe based</p>
               {renderBlock(result.smart_creative)}
             </div>
           )}
+
+          {/* SECTION 5 — Audience Finder */}
+          {result.audience && (
+            <div style={{ background: 'linear-gradient(135deg, #0f2027 0%, #0D1117 100%)', border: '1px solid #f7b731', borderRadius: '16px', padding: '26px', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                <h2 style={{ fontSize: '16px', fontWeight: '700', margin: 0, color: '#f7b731' }}>🎯 5. Audience & Targeting</h2>
+                <button onClick={() => handleCopy('audience', result.audience)} style={{ padding: '6px 12px', borderRadius: '6px', background: copied.audience ? '#10B981' : '#2a1f00', color: copied.audience ? '#fff' : '#94A3B8', border: 'none', cursor: 'pointer', fontSize: '12px' }}>
+                  {copied.audience ? '✅ Copied' : '📋 Copy'}
+                </button>
+              </div>
+              <p style={{ fontSize: '12px', color: '#64748B', marginTop: '4px', marginBottom: '16px' }}>Audience segments, where to find them, Meta + Google targeting</p>
+              {renderBlock(result.audience)}
+            </div>
+          )}
+
         </div>
       </div>
     )
@@ -139,7 +174,7 @@ function MarketingBrain() {
       <div style={{ maxWidth: '560px', margin: '40px auto', padding: '0 24px' }}>
         <div style={{ marginBottom: '28px' }}>
           <h1 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 8px 0' }}>🧠 AI Marketing Brain</h1>
-          <p style={{ color: '#64748B', fontSize: '14px', margin: 0 }}>Ek baar daalo — Strategy + Competitor + Ad Intel, teeno ek saath</p>
+          <p style={{ color: '#64748B', fontSize: '14px', margin: 0 }}>Ek baar daalo — Strategy + Competitor + Ad Intel + Creative + Audience, sab ek saath</p>
         </div>
 
         <div style={{ background: '#0D1117', border: '1px solid #1E2A3E', borderRadius: '16px', padding: '28px' }}>
