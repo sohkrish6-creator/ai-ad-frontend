@@ -185,9 +185,10 @@ function Intelligence() {
   // ── RESULTS ──────────────────────────────────────────────────────────────
   if (result) {
     const { intelligence, scores } = result
-    const dna    = intelligence?.business_dna       || {}
-    const opp    = intelligence?.opportunity_score  || {}
-    const threat = intelligence?.threat_intelligence || {}
+    const dna    = intelligence?.business_dna        || {}
+    const opp    = intelligence?.opportunity_score   || {}
+    const threat = intelligence?.threat_intelligence  || {}
+    const pos    = intelligence?.positioning          || {}
     const aud    = intelligence?.audience_intelligence || {}
     const exec   = intelligence?.executive_decisions   || {}
     const ev     = intelligence?.evidence_collection   || {}
@@ -236,16 +237,17 @@ function Intelligence() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <div>
                 <h2 style={{ fontSize: '16px', fontWeight: '700', margin: 0, color: '#818CF8' }}>⚡ Score Dashboard</h2>
-                <p style={{ color: '#64748B', fontSize: '12px', margin: '4px 0 0' }}>5 intelligence scores — Threat: lower is better</p>
+                <p style={{ color: '#64748B', fontSize: '12px', margin: '4px 0 0' }}>6 intelligence scores — Threat: lower is better</p>
               </div>
               <CopyBtn onClick={() => handleCopy('scores', scores)} copied={copied.scores} />
             </div>
             <div style={{ display: 'flex', gap: isMobile ? '12px' : '8px', justifyContent: 'space-around', flexWrap: 'wrap', rowGap: '20px' }}>
-              <ScoreRing score={scores?.dna_score}             label="DNA Score" />
-              <ScoreRing score={scores?.opportunity_score}     label="Opportunity" />
-              <ScoreRing score={scores?.threat_score}          label="Threat" inverse />
+              <ScoreRing score={scores?.dna_score}              label="DNA Score" />
+              <ScoreRing score={scores?.opportunity_score}      label="Opportunity" />
+              <ScoreRing score={scores?.threat_score}           label="Threat" inverse />
+              <ScoreRing score={scores?.positioning_score}      label="Positioning" />
               <ScoreRing score={scores?.audience_quality_score} label="Audience" />
-              <ScoreRing score={scores?.readiness_score}       label="Readiness" />
+              <ScoreRing score={scores?.readiness_score}        label="Readiness" />
             </div>
           </div>
 
@@ -403,7 +405,104 @@ function Intelligence() {
             </div>
           </SectionCard>
 
-          {/* ── 5. AUDIENCE INTELLIGENCE 2.0 ── */}
+          {/* ── 5. POSITIONING ENGINE ── */}
+          <SectionCard
+            title="🎯 Positioning Engine"
+            subtitle="Where you stand, where competitors stand, and the space you should own"
+            accent="#38BDF8"
+            onCopy={() => handleCopy('pos', pos)}
+            copied={copied.pos}
+          >
+            {/* Winning Position — hero callout */}
+            {pos.winning_position && (
+              <div style={{ background: 'linear-gradient(135deg, #0c1e2e 0%, #131820 100%)', border: '1px solid #38BDF840', borderRadius: '12px', padding: '18px 20px', marginBottom: '20px', borderLeft: '4px solid #38BDF8' }}>
+                <p style={{ color: '#38BDF8', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>Winning Position</p>
+                <p style={{ color: '#F0F9FF', fontSize: '16px', fontWeight: '700', margin: '0 0 8px', lineHeight: '1.4' }}>{pos.winning_position}</p>
+                {pos.category_ownership_opportunity && (
+                  <div style={{ display: 'inline-block', background: '#38BDF820', border: '1px solid #38BDF840', borderRadius: '20px', padding: '4px 14px', marginTop: '4px' }}>
+                    <span style={{ color: '#7DD3FC', fontSize: '13px', fontWeight: '600' }}>🏆 {pos.category_ownership_opportunity}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Current Positioning */}
+            {pos.current_positioning && (
+              <div style={{ marginBottom: '16px' }}>
+                <p style={{ color: '#64748B', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>Current Positioning</p>
+                <div style={{ background: '#131820', borderRadius: '10px', padding: '14px' }}>
+                  <p style={{ color: '#E2E8F0', fontSize: '13px', margin: 0, lineHeight: '1.6' }}>{pos.current_positioning}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Positioning Gap */}
+            {pos.positioning_gap && (
+              <div style={{ background: '#10B98110', border: '1px solid #10B98128', borderRadius: '10px', padding: '14px', marginBottom: '16px' }}>
+                <p style={{ color: '#10B981', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 6px' }}>Positioning Gap — Unoccupied Space</p>
+                <p style={{ color: '#E2E8F0', fontSize: '13px', margin: 0, lineHeight: '1.6' }}>{pos.positioning_gap}</p>
+              </div>
+            )}
+
+            {/* Competitor Positioning */}
+            {(pos.competitor_positioning || []).length > 0 && (
+              <div style={{ marginBottom: '16px' }}>
+                <p style={{ color: '#64748B', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 10px' }}>Competitor Positioning</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {pos.competitor_positioning.map((comp, i) => (
+                    <div key={i} style={{ background: '#131820', border: '1px solid #1E2A3E', borderRadius: '10px', padding: '13px 16px', display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+                      <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#F97316' + '18', border: '1px solid #F9731630', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>
+                        <span style={{ color: '#F97316', fontSize: '12px', fontWeight: '800' }}>{i + 1}</span>
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ color: '#E2E8F0', fontSize: '13px', fontWeight: '600', margin: '0 0 3px' }}>{comp.name}</p>
+                        <p style={{ color: '#94A3B8', fontSize: '12px', margin: '0 0 6px', lineHeight: '1.5' }}>{comp.position}</p>
+                        {comp.owned_category && (
+                          <Badge label={comp.owned_category} type="yellow" />
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Messaging Shift */}
+            {pos.messaging_shift && (
+              <div style={{ background: '#131820', borderRadius: '10px', padding: '14px', marginBottom: '16px' }}>
+                <p style={{ color: '#64748B', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 6px' }}>Messaging Shift</p>
+                <p style={{ color: '#94A3B8', fontSize: '13px', margin: 0, lineHeight: '1.6' }}>{pos.messaging_shift}</p>
+              </div>
+            )}
+
+            {/* Reasoning */}
+            {pos.reasoning && (
+              <div style={{ marginBottom: '16px' }}>
+                <p style={{ color: '#64748B', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>Reasoning</p>
+                <p style={{ color: '#94A3B8', fontSize: '13px', margin: 0, lineHeight: '1.6' }}>{pos.reasoning}</p>
+              </div>
+            )}
+
+            {/* Supporting Evidence + Confidence */}
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+              {(pos.supporting_evidence || []).length > 0 && (
+                <div style={{ flex: 1, minWidth: '220px', background: '#0c1018', borderRadius: '8px', padding: '12px 14px' }}>
+                  <p style={{ color: '#475569', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>Supporting Evidence</p>
+                  {pos.supporting_evidence.map((e, i) => (
+                    <p key={i} style={{ color: '#475569', fontSize: '12px', margin: '4px 0', fontStyle: 'italic', lineHeight: '1.5' }}>"{e}"</p>
+                  ))}
+                </div>
+              )}
+              {pos.confidence_score != null && (
+                <div style={{ background: '#131820', borderRadius: '10px', padding: '14px 18px', textAlign: 'center', minWidth: '100px' }}>
+                  <p style={{ color: pos.confidence_score >= 75 ? '#10B981' : pos.confidence_score >= 50 ? '#F59E0B' : '#F43F5E', fontSize: '26px', fontWeight: '800', margin: '0 0 4px' }}>{pos.confidence_score}</p>
+                  <p style={{ color: '#64748B', fontSize: '11px', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Confidence</p>
+                </div>
+              )}
+            </div>
+          </SectionCard>
+
+          {/* ── 6. AUDIENCE INTELLIGENCE 2.0 ── */}
           <SectionCard
             title="🎯 Audience Intelligence 2.0"
             subtitle="Segments generated ONLY from Business DNA evidence — rejections shown"
