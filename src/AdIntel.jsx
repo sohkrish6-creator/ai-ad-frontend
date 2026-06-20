@@ -44,7 +44,8 @@ function AdIntel() {
     setLoading(false)
   }
 
-  const page = { minHeight: '100vh', background: '#FAFAFA', padding: '40px 36px', maxWidth: '820px' }
+  const isMobile = window.innerWidth < 768
+  const page = { minHeight: '100vh', background: '#FAFAFA', padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '820px' }
 
   if (loading) return (
     <div style={page}>

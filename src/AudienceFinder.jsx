@@ -73,7 +73,7 @@ export default function AudienceFinder() {
             <input name="offer" value={form.offer} onChange={handleChange} placeholder="jaise: app download, product sale, lead generation" style={inputSt} />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
             <div>
               <label style={lbl}>Platform</label>
               <select name="platform" value={form.platform} onChange={handleChange} style={inputSt}>

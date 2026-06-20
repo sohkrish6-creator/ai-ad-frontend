@@ -514,7 +514,7 @@ function Intelligence() {
       <div style={{ minHeight: '100vh', background: '#FAFAFA', fontFamily: FONT, color: '#171717' }}>
 
         {/* Sticky Header */}
-        <div style={{ background: '#FFFFFF', borderBottom: '1px solid #EAEAEA', padding: '0 24px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 10 }}>
+        <div style={{ background: '#FFFFFF', borderBottom: '1px solid #EAEAEA', padding: '0 24px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: isMobile ? '48px' : 0, zIndex: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Dna size={15} color="#D4AF37" strokeWidth={1.5} />
             <span style={{ fontWeight: '600', fontSize: '15px', color: '#171717' }}>Business Intelligence</span>
@@ -530,7 +530,7 @@ function Intelligence() {
           </div>
         </div>
 
-        <div style={{ maxWidth: '860px', margin: '0 auto', padding: '28px 20px' }}>
+        <div style={{ maxWidth: '860px', margin: '0 auto', padding: isMobile ? '20px 16px' : '28px 20px' }}>
 
           {/* Success Banner */}
           <div style={{ background: '#F0FDF4', border: '1px solid #D4AF3535', borderRadius: '14px', padding: '16px 20px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
@@ -1012,14 +1012,14 @@ function Intelligence() {
         <span style={{ fontWeight: '600', fontSize: '15px' }}>Business Intelligence</span>
       </div>
 
-      <div style={{ maxWidth: '560px', margin: '40px auto', padding: '0 24px' }}>
+      <div style={{ maxWidth: '560px', margin: isMobile ? '20px auto' : '40px auto', padding: isMobile ? '0 16px' : '0 24px' }}>
 
         <div style={{ marginBottom: '28px' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#D4AF3712', border: '1px solid #D4AF3530', borderRadius: '20px', padding: '4px 14px', marginBottom: '14px' }}>
             <Dna size={11} color="#D4AF37" strokeWidth={1.5} />
             <span style={{ color: '#D4AF37', fontSize: '12px', fontWeight: '600' }}>Flagship Feature</span>
           </div>
-          <h1 style={{ fontSize: '24px', fontWeight: '800', margin: '0 0 10px', letterSpacing: '-0.4px' }}>
+          <h1 style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: '800', margin: '0 0 10px', letterSpacing: '-0.4px' }}>
             Business Intelligence Platform
           </h1>
           <p style={{ color: '#888', fontSize: '14px', margin: 0, lineHeight: '1.7' }}>
@@ -1027,7 +1027,7 @@ function Intelligence() {
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '28px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap: '10px', marginBottom: '28px' }}>
           {[
             [Search,     'Evidence Engine', '6 pages crawled'],
             [Dna,        'DNA Scoring',    'Evidence-only'],

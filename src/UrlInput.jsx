@@ -108,7 +108,8 @@ function UrlInput() {
     runAnalyze(null)
   }
 
-  const page = { minHeight: '100vh', background: '#FAFAFA', padding: '40px 36px', maxWidth: '820px' }
+  const isMobile = window.innerWidth < 768
+  const page = { minHeight: '100vh', background: '#FAFAFA', padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '820px' }
 
   // Password Screen
   if (!unlocked) return (
@@ -156,7 +157,7 @@ function UrlInput() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '18px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '10px', marginBottom: '18px' }}>
           {[['AI Detected', mismatch.recommended_category, GOLD], ['Confidence', `${mismatch.confidence_score}%`, '#22C55E']].map(([l, v, c]) => (
             <div key={l} style={{ ...card, padding: '14px 16px' }}>
               <p style={lbl}>{l}</p>
@@ -197,7 +198,7 @@ function UrlInput() {
             <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>AI Analyzer</h1>
             <p style={{ color: '#999', fontSize: '13px', margin: 0 }}>{result.url}{result.detected_category ? ` · ${result.detected_category}` : ''}</p>
           </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             <button onClick={downloadPDF} style={{ background: '#22C55E', border: 'none', color: '#fff', padding: '7px 16px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer', fontWeight: '600' }}>
               Download PDF
             </button>
@@ -263,7 +264,7 @@ function UrlInput() {
 
           <div style={{ marginBottom: '28px' }}>
             <label style={lbl}>Marketing Goal</label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '8px' }}>
               {['Lead Generation','Website Traffic','Brand Awareness','WhatsApp Inquiries','Sales / Revenue','App Downloads'].map(g => (
                 <div key={g} onClick={() => setGoal(g)} style={{ padding: '10px 13px', borderRadius: '7px', border: `1px solid ${goal === g ? GOLD + '60' : '#E5E5E5'}`, background: goal === g ? GOLD + '08' : '#FAFAFA', color: goal === g ? '#171717' : '#999', fontSize: '13px', cursor: 'pointer', fontWeight: goal === g ? '500' : '400', transition: 'all 0.1s' }}>
                   {g}

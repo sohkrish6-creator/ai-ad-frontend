@@ -20,7 +20,7 @@ function Layout() {
       {showNav && <Nav />}
       <div style={{
         marginLeft: showNav && !isMobile ? '220px' : '0',
-        paddingBottom: showNav && isMobile ? '56px' : '0',
+        paddingTop: showNav && isMobile ? '48px' : '0',
         minHeight: '100vh',
         background: '#FAFAFA',
       }}>
