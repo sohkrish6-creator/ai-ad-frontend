@@ -191,7 +191,6 @@ function Dashboard() {
       }
     }
 
-    fetchGAds.current = run
     run()
     return () => ctrl.abort()
   }, [gAdsDays, gAdsTick])

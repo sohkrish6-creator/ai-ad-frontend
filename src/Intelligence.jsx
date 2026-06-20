@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import { Copy, Check, Search, Dna, TrendingUp, Sword, Target, Zap, Download, ArrowLeft, AlertTriangle, ShieldCheck } from 'lucide-react'
+
+const FONT = '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif'
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 
@@ -43,12 +46,15 @@ function Badge({ label, type = 'default' }) {
 function CopyBtn({ onClick, copied }) {
   return (
     <button onClick={onClick} style={{
-      padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px',
-      border: 'none', flexShrink: 0,
-      background: copied ? '#10B981' : '#EAEAEA',
-      color: copied ? '#fff' : '#666',
+      display: 'flex', alignItems: 'center', gap: '5px',
+      padding: '5px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '500',
+      border: '1px solid #E5E5E5', flexShrink: 0,
+      background: copied ? '#F0FDF4' : '#F9F9F9',
+      color: copied ? '#16A34A' : '#666',
+      transition: 'all 0.15s ease',
     }}>
-      {copied ? '✅ Copied' : '📋 Copy'}
+      {copied ? <Check size={11} /> : <Copy size={11} />}
+      {copied ? 'Copied' : 'Copy'}
     </button>
   )
 }
@@ -148,37 +154,35 @@ function Intelligence() {
   }
 
   // ── LOADING ──────────────────────────────────────────────────────────────
+  const LOAD_STEPS = [
+    { Icon: Search,      title: 'Evidence Collection',  sub: 'Homepage + 5 sub-pages crawled'    },
+    { Icon: Dna,         title: 'Business DNA Engine',  sub: 'Industry, model, trust signals'    },
+    { Icon: TrendingUp,  title: 'Opportunity Score',    sub: 'Market + conversion analysis'      },
+    { Icon: Sword,       title: 'Threat Engine',        sub: 'Competition + overlap detection'   },
+    { Icon: Target,      title: 'Audience Intel 2.0',   sub: 'Evidence-backed segments only'     },
+    { Icon: Zap,         title: 'Executive Decisions',  sub: 'Top 5 actions + ROI plan'          },
+  ]
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#FAFAFA', fontFamily: 'system-ui, sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center', padding: '0 24px', maxWidth: '420px', width: '100%' }}>
-          <div style={{ fontSize: '52px', marginBottom: '16px' }}>🧬</div>
-          <h2 style={{ color: '#171717', fontSize: '20px', fontWeight: '800', margin: '0 0 8px', letterSpacing: '-0.3px' }}>Business Intelligence Running</h2>
-          <p style={{ color: '#888', fontSize: '13px', lineHeight: '1.6', margin: '0 0 28px' }}>
-            6 engines crawling, scoring, and analyzing in parallel
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {[
-              ['🔎', 'Evidence Collection', 'Homepage + 5 sub-pages crawled'],
-              ['🧬', 'Business DNA Engine', 'Industry, model, trust signals'],
-              ['📈', 'Opportunity Score', 'Market + conversion analysis'],
-              ['⚔️', 'Threat Engine', 'Competition + overlap detection'],
-              ['🎯', 'Audience Intel 2.0', 'Evidence-backed segments only'],
-              ['⚡', 'Executive Decisions', 'Top 5 actions + ROI plan'],
-            ].map(([icon, title, sub]) => (
-              <div key={title} style={{ background: '#FFFFFF', border: '1px solid #EAEAEA', borderRadius: '10px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '18px', flexShrink: 0 }}>{icon}</span>
-                <div style={{ textAlign: 'left', flex: 1 }}>
-                  <p style={{ color: '#171717', fontSize: '13px', fontWeight: '600', margin: 0 }}>{title}</p>
-                  <p style={{ color: '#888', fontSize: '11px', margin: 0 }}>{sub}</p>
-                </div>
-                <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#171717', flexShrink: 0,
-                  boxShadow: '0 0 0 3px #D4AF3730' }} />
+      <div style={{ minHeight: '100vh', background: '#FAFAFA', fontFamily: FONT, padding: isMobile ? '28px 16px' : '40px 36px' }}>
+        <style>{`@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }`}</style>
+        <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px', color: '#171717' }}>Business Intelligence</h1>
+        <p style={{ color: '#999', fontSize: '13px', margin: '0 0 24px' }}>6 engines running — 30–60 seconds</p>
+        <div style={{ maxWidth: '480px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {LOAD_STEPS.map(({ Icon, title, sub }) => (
+            <div key={title} style={{ background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#F9F9F9', border: '1px solid #EAEAEA', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Icon size={14} color="#D4AF37" strokeWidth={1.5} />
               </div>
-            ))}
-          </div>
-          <p style={{ color: '#475569', fontSize: '12px', marginTop: '20px' }}>30–60 seconds · structured JSON output</p>
+              <div style={{ flex: 1 }}>
+                <p style={{ color: '#171717', fontSize: '13px', fontWeight: '500', margin: '0 0 5px' }}>{title}</p>
+                <div style={{ height: '8px', borderRadius: '4px', background: 'linear-gradient(90deg, #F5F5F5 25%, #EBEBEB 50%, #F5F5F5 75%)', backgroundSize: '800px 100%', animation: 'shimmer 1.5s ease-in-out infinite', width: '65%' }} />
+              </div>
+              <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#D4AF37', opacity: 0.5, flexShrink: 0 }} />
+            </div>
+          ))}
         </div>
+        <p style={{ color: '#BBB', fontSize: '12px', marginTop: '16px' }}>30–60 seconds · structured JSON output</p>
       </div>
     )
   }
@@ -507,18 +511,21 @@ function Intelligence() {
     }
 
     return (
-      <div style={{ minHeight: '100vh', background: '#FAFAFA', fontFamily: 'system-ui, sans-serif', color: '#171717' }}>
+      <div style={{ minHeight: '100vh', background: '#FAFAFA', fontFamily: FONT, color: '#171717' }}>
 
         {/* Sticky Header */}
         <div style={{ background: '#FFFFFF', borderBottom: '1px solid #EAEAEA', padding: '0 24px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 10 }}>
-          <span style={{ fontWeight: '700', fontSize: '15px' }}>🧬 Business Intelligence</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Dna size={15} color="#D4AF37" strokeWidth={1.5} />
+            <span style={{ fontWeight: '600', fontSize: '15px', color: '#171717' }}>Business Intelligence</span>
+          </div>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            {!isMobile && <span style={{ color: '#475569', fontSize: '12px', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{result.url}</span>}
-            <button onClick={downloadPDF} style={{ background: '#D4AF3718', border: '1px solid #D4AF3740', color: '#D4AF37', padding: '6px 14px', borderRadius: '8px', fontSize: '13px', cursor: 'pointer', fontWeight: '600' }}>
-              ⬇ PDF
+            {!isMobile && <span style={{ color: '#999', fontSize: '12px', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{result.url}</span>}
+            <button onClick={downloadPDF} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#D4AF3712', border: '1px solid #D4AF3730', color: '#D4AF37', padding: '6px 14px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer', fontWeight: '600' }}>
+              <Download size={12} /> PDF
             </button>
-            <button onClick={() => setResult(null)} style={{ background: 'transparent', border: '1px solid #EAEAEA', color: '#888', padding: '6px 14px', borderRadius: '8px', fontSize: '13px', cursor: 'pointer' }}>
-              ← New Analysis
+            <button onClick={() => setResult(null)} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'transparent', border: '1px solid #EAEAEA', color: '#888', padding: '6px 14px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
+              <ArrowLeft size={12} /> New
             </button>
           </div>
         </div>
@@ -721,7 +728,7 @@ function Intelligence() {
             {pos.winning_position && (
               <div style={{ background: '#F0F9FF', border: '1px solid #38BDF840', borderRadius: '12px', padding: '18px 20px', marginBottom: '20px', borderLeft: '4px solid #38BDF8' }}>
                 <p style={{ color: '#38BDF8', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>Winning Position</p>
-                <p style={{ color: '#F0F9FF', fontSize: '16px', fontWeight: '700', margin: '0 0 8px', lineHeight: '1.4' }}>{pos.winning_position}</p>
+                <p style={{ color: '#171717', fontSize: '16px', fontWeight: '700', margin: '0 0 8px', lineHeight: '1.4' }}>{pos.winning_position}</p>
                 {pos.category_ownership_opportunity && (
                   <div style={{ display: 'inline-block', background: '#38BDF820', border: '1px solid #38BDF840', borderRadius: '20px', padding: '4px 14px', marginTop: '4px' }}>
                     <span style={{ color: '#7DD3FC', fontSize: '13px', fontWeight: '600' }}>🏆 {pos.category_ownership_opportunity}</span>
@@ -871,7 +878,7 @@ function Intelligence() {
                 {seg.evidence_backing && (
                   <div style={{ background: '#F0FDF4', borderRadius: '8px', padding: '10px 12px', marginTop: '8px' }}>
                     <p style={{ color: '#475569', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 4px' }}>Evidence Backing</p>
-                    <p style={{ color: '#6EE7B7', fontSize: '12px', margin: 0, fontStyle: 'italic', lineHeight: '1.5' }}>"{seg.evidence_backing}"</p>
+                    <p style={{ color: '#065F46', fontSize: '12px', margin: 0, fontStyle: 'italic', lineHeight: '1.5' }}>"{seg.evidence_backing}"</p>
                   </div>
                 )}
               </div>
@@ -883,9 +890,9 @@ function Intelligence() {
                   Rejected Segments — insufficient evidence
                 </p>
                 {aud.rejected_segments.map((seg, i) => (
-                  <div key={i} style={{ background: '#150a0a', border: '1px solid #F43F5E25', borderRadius: '10px', padding: '12px 16px', marginBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                    <span style={{ color: '#F43F5E', fontSize: '13px', fontWeight: '600' }}>✗ {seg.segment}</span>
-                    <span style={{ color: '#888', fontSize: '12px' }}>{seg.rejection_reason}</span>
+                  <div key={i} style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '8px', padding: '12px 16px', marginBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#BE123C', fontSize: '13px', fontWeight: '600' }}><AlertTriangle size={12} />{seg.segment}</span>
+                    <span style={{ color: '#666', fontSize: '12px' }}>{seg.rejection_reason}</span>
                   </div>
                 ))}
               </div>
@@ -909,7 +916,7 @@ function Intelligence() {
             {exec.highest_roi_action && (
               <div style={{ background: '#FFFBEB', border: '1px solid #F59E0B40', borderRadius: '12px', padding: '16px 18px', marginBottom: '20px', borderLeft: '4px solid #F59E0B' }}>
                 <p style={{ color: '#F59E0B', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 6px' }}>⚡ Highest ROI Action</p>
-                <p style={{ color: '#FEF3C7', fontSize: '15px', fontWeight: '700', margin: '0 0 6px', lineHeight: '1.4' }}>{exec.highest_roi_action}</p>
+                <p style={{ color: '#171717', fontSize: '15px', fontWeight: '700', margin: '0 0 6px', lineHeight: '1.4' }}>{exec.highest_roi_action}</p>
                 {exec.highest_roi_reason && <p style={{ color: '#666', fontSize: '13px', margin: 0, lineHeight: '1.5' }}>{exec.highest_roi_reason}</p>}
               </div>
             )}
@@ -977,8 +984,8 @@ function Intelligence() {
             {(exec.biggest_risk || exec.biggest_opportunity) && (
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '10px' }}>
                 {exec.biggest_risk && (
-                  <div style={{ background: '#150a0a', border: '1px solid #F43F5E20', borderRadius: '10px', padding: '14px' }}>
-                    <p style={{ color: '#F43F5E', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 6px' }}>Biggest Risk</p>
+                  <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '10px', padding: '14px' }}>
+                    <p style={{ color: '#BE123C', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 6px' }}>Biggest Risk</p>
                     <p style={{ color: '#171717', fontSize: '13px', margin: 0, lineHeight: '1.5' }}>{exec.biggest_risk}</p>
                   </div>
                 )}
@@ -999,16 +1006,18 @@ function Intelligence() {
 
   // ── FORM ─────────────────────────────────────────────────────────────────
   return (
-    <div style={{ minHeight: '100vh', background: '#FAFAFA', fontFamily: 'system-ui, sans-serif', color: '#171717' }}>
-      <div style={{ background: '#FFFFFF', borderBottom: '1px solid #EAEAEA', padding: '0 24px', height: '56px', display: 'flex', alignItems: 'center' }}>
-        <span style={{ fontWeight: '700', fontSize: '15px' }}>🧬 Business Intelligence</span>
+    <div style={{ minHeight: '100vh', background: '#FAFAFA', fontFamily: FONT, color: '#171717' }}>
+      <div style={{ background: '#FFFFFF', borderBottom: '1px solid #EAEAEA', padding: '0 24px', height: '56px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <Dna size={15} color="#D4AF37" strokeWidth={1.5} />
+        <span style={{ fontWeight: '600', fontSize: '15px' }}>Business Intelligence</span>
       </div>
 
       <div style={{ maxWidth: '560px', margin: '40px auto', padding: '0 24px' }}>
 
         <div style={{ marginBottom: '28px' }}>
-          <div style={{ display: 'inline-block', background: '#D4AF3712', border: '1px solid #D4AF3535', borderRadius: '20px', padding: '4px 14px', marginBottom: '14px' }}>
-            <span style={{ color: '#D4AF37', fontSize: '12px', fontWeight: '600' }}>🧬 Flagship Feature</span>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#D4AF3712', border: '1px solid #D4AF3530', borderRadius: '20px', padding: '4px 14px', marginBottom: '14px' }}>
+            <Dna size={11} color="#D4AF37" strokeWidth={1.5} />
+            <span style={{ color: '#D4AF37', fontSize: '12px', fontWeight: '600' }}>Flagship Feature</span>
           </div>
           <h1 style={{ fontSize: '24px', fontWeight: '800', margin: '0 0 10px', letterSpacing: '-0.4px' }}>
             Business Intelligence Platform
@@ -1020,12 +1029,14 @@ function Intelligence() {
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '28px' }}>
           {[
-            ['🔎', 'Evidence Engine', '6 pages crawled'],
-            ['🧬', 'DNA Scoring',    'Evidence-only'],
-            ['⚡', '5 BI Scores',    'Real-time output'],
-          ].map(([icon, title, sub]) => (
-            <div key={title} style={{ background: '#FFFFFF', border: '1px solid #EAEAEA', borderRadius: '12px', padding: '14px', textAlign: 'center' }}>
-              <div style={{ fontSize: '22px', marginBottom: '6px' }}>{icon}</div>
+            [Search,     'Evidence Engine', '6 pages crawled'],
+            [Dna,        'DNA Scoring',    'Evidence-only'],
+            [Zap,        '5 BI Scores',    'Real-time output'],
+          ].map(([Icon, title, sub]) => (
+            <div key={title} style={{ background: '#FFFFFF', border: '1px solid #EAEAEA', borderRadius: '10px', padding: '14px', textAlign: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
+                <Icon size={18} color="#D4AF37" strokeWidth={1.5} />
+              </div>
               <p style={{ color: '#171717', fontSize: '12px', fontWeight: '600', margin: '0 0 3px' }}>{title}</p>
               <p style={{ color: '#888', fontSize: '11px', margin: 0 }}>{sub}</p>
             </div>
@@ -1094,9 +1105,9 @@ function Intelligence() {
 
           <button
             onClick={handleRun}
-            style={{ width: '100%', padding: '14px', borderRadius: '10px', border: 'none', background: '#171717', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer', letterSpacing: '0.02em' }}
+            style={{ width: '100%', padding: '14px', borderRadius: '10px', border: 'none', background: '#171717', color: '#fff', fontSize: '14px', fontWeight: '600', cursor: 'pointer', letterSpacing: '0.02em', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
           >
-            🧬 Run Business Intelligence
+            <Dna size={15} /> Run Business Intelligence
           </button>
           <p style={{ textAlign: 'center', color: '#475569', fontSize: '12px', margin: '12px 0 0' }}>
             30–60 seconds · 6 engines · evidence-backed JSON output
