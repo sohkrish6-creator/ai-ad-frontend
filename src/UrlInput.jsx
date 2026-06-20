@@ -109,12 +109,12 @@ function UrlInput() {
   }
 
   const isMobile = window.innerWidth < 768
-  const page = { minHeight: '100vh', background: '#FAFAFA', padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '820px' }
+  const page = { minHeight: '100vh', background: '#FAFAFA', padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '820px', width: '100%', boxSizing: 'border-box' }
 
   // Password Screen
   if (!unlocked) return (
-    <div style={{ minHeight: '100vh', background: '#FAFAFA', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ ...card, padding: '36px', width: '320px', textAlign: 'center' }}>
+    <div style={{ minHeight: '100vh', background: '#FAFAFA', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px', boxSizing: 'border-box' }}>
+      <div style={{ ...card, padding: '32px 24px', width: '100%', maxWidth: '320px', textAlign: 'center' }}>
         <div style={{ width: '48px', height: '48px', background: '#F5F5F5', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px', fontSize: '22px' }}>🔐</div>
         <h2 style={{ color: '#171717', fontSize: '16px', fontWeight: '600', margin: '0 0 6px' }}>AI Analyzer</h2>
         <p style={{ color: '#999', fontSize: '13px', margin: '0 0 22px' }}>Access code daalo</p>
@@ -146,7 +146,7 @@ function UrlInput() {
     <div style={page}>
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>AI Analyzer</h1>
       <p style={{ color: '#999', fontSize: '13px', margin: '0 0 32px' }}>Category confirmation needed</p>
-      <div style={{ maxWidth: '600px' }}>
+      <div style={{ maxWidth: '600px', width: '100%' }}>
         <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '8px', padding: '18px 20px', marginBottom: '20px', display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
           <span style={{ fontSize: '20px', flexShrink: 0 }}>⚠️</span>
           <div>
@@ -239,8 +239,8 @@ function UrlInput() {
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>AI Analyzer</h1>
       <p style={{ color: '#999', fontSize: '13px', margin: '0 0 32px' }}>Apni website URL daalo — AI real strategy banayega</p>
 
-      <div style={{ maxWidth: '560px' }}>
-        <div style={{ ...card, padding: '28px' }}>
+      <div style={{ maxWidth: '560px', width: '100%' }}>
+        <div style={{ ...card, padding: isMobile ? '20px 16px' : '28px' }}>
           {error && <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '20px', color: '#BE123C', fontSize: '13px' }}>{error}</div>}
 
           <div style={{ marginBottom: '18px' }}>

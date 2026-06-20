@@ -45,7 +45,7 @@ function AdIntel() {
   }
 
   const isMobile = window.innerWidth < 768
-  const page = { minHeight: '100vh', background: '#FAFAFA', padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '820px' }
+  const page = { minHeight: '100vh', background: '#FAFAFA', padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '820px', width: '100%', boxSizing: 'border-box' }
 
   if (loading) return (
     <div style={page}>
@@ -93,7 +93,7 @@ function AdIntel() {
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Ad Intelligence</h1>
       <p style={{ color: '#999', fontSize: '13px', margin: '0 0 32px' }}>Competitor ke LIVE ads dekho aur AI se analysis guide pao</p>
 
-      <div style={{ maxWidth: '560px' }}>
+      <div style={{ maxWidth: '560px', width: '100%' }}>
         <div style={{ ...card, padding: '28px' }}>
           {error && <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '20px', color: '#BE123C', fontSize: '13px' }}>{error}</div>}
 

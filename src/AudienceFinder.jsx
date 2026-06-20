@@ -40,15 +40,15 @@ export default function AudienceFinder() {
 
   const handleCopy = () => { navigator.clipboard.writeText(result); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
-  const page = { minHeight: '100vh', background: '#FAFAFA', padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '820px' }
+  const page = { minHeight: '100vh', background: '#FAFAFA', padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '820px', width: '100%', boxSizing: 'border-box' }
 
   return (
     <div style={page}>
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Audience Finder</h1>
       <p style={{ color: '#999', fontSize: '13px', margin: '0 0 32px' }}>URL ya Niche do — exact audience, segments aur "where to find them" milega</p>
 
-      <div style={{ maxWidth: '600px' }}>
-        <div style={{ ...card, padding: '28px', marginBottom: '16px' }}>
+      <div style={{ maxWidth: '600px', width: '100%' }}>
+        <div style={{ ...card, padding: isMobile ? '20px 16px' : '28px', marginBottom: '16px' }}>
 
           <div style={{ marginBottom: '16px' }}>
             <label style={lbl}>Website URL <span style={{ color: '#CCC', fontWeight: '400', textTransform: 'none', letterSpacing: 0 }}>(optional agar Niche doge)</span></label>

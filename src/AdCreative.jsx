@@ -39,7 +39,7 @@ function AdCreative() {
     return text.split(/CREATIVE \d+:/).filter(b => b.trim()).map(b => b.trim())
   }
 
-  const page = { minHeight: '100vh', background: '#FAFAFA', padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '820px' }
+  const page = { minHeight: '100vh', background: '#FAFAFA', padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '820px', width: '100%', boxSizing: 'border-box' }
 
   if (loading) return (
     <div style={page}>
@@ -100,7 +100,7 @@ function AdCreative() {
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Ad Creative</h1>
       <p style={{ color: '#999', fontSize: '13px', margin: '0 0 32px' }}>Offer daalo — AI poori ad creative banayega (copy + image idea + layout)</p>
 
-      <div style={{ maxWidth: '560px' }}>
+      <div style={{ maxWidth: '560px', width: '100%' }}>
         <div style={{ ...card, padding: '28px' }}>
           {error && <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '20px', color: '#BE123C', fontSize: '13px' }}>{error}</div>}
 

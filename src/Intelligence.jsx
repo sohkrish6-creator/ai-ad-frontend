@@ -77,7 +77,7 @@ function InfoRow({ label, value }) {
   if (!value) return null
   return (
     <div style={{ display: 'flex', gap: '12px', padding: '9px 0', borderBottom: '1px solid #EAEAEA30' }}>
-      <span style={{ color: '#888', fontSize: '13px', minWidth: '140px', flexShrink: 0 }}>{label}</span>
+      <span style={{ color: '#888', fontSize: '13px', minWidth: '110px', flexShrink: 0 }}>{label}</span>
       <span style={{ color: '#171717', fontSize: '13px', fontWeight: '500', lineHeight: '1.5' }}>{value}</span>
     </div>
   )
@@ -164,11 +164,11 @@ function Intelligence() {
   ]
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#FAFAFA', fontFamily: FONT, padding: isMobile ? '28px 16px' : '40px 36px' }}>
+      <div style={{ minHeight: '100vh', background: '#FAFAFA', fontFamily: FONT, padding: isMobile ? '28px 16px' : '40px 36px', width: '100%', boxSizing: 'border-box' }}>
         <style>{`@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }`}</style>
         <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px', color: '#171717' }}>Business Intelligence</h1>
         <p style={{ color: '#999', fontSize: '13px', margin: '0 0 24px' }}>6 engines running — 30–60 seconds</p>
-        <div style={{ maxWidth: '480px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div style={{ maxWidth: '480px', width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {LOAD_STEPS.map(({ Icon, title, sub }) => (
             <div key={title} style={{ background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
               <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#F9F9F9', border: '1px solid #EAEAEA', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -511,7 +511,7 @@ function Intelligence() {
     }
 
     return (
-      <div style={{ minHeight: '100vh', background: '#FAFAFA', fontFamily: FONT, color: '#171717' }}>
+      <div style={{ minHeight: '100vh', background: '#FAFAFA', fontFamily: FONT, color: '#171717', width: '100%', boxSizing: 'border-box', overflowX: 'hidden' }}>
 
         {/* Sticky Header */}
         <div style={{ background: '#FFFFFF', borderBottom: '1px solid #EAEAEA', padding: '0 24px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: isMobile ? '48px' : 0, zIndex: 10 }}>
@@ -797,7 +797,7 @@ function Intelligence() {
             {/* Supporting Evidence + Confidence */}
             <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
               {(pos.supporting_evidence || []).length > 0 && (
-                <div style={{ flex: 1, minWidth: '220px', background: '#F9F9F9', borderRadius: '8px', padding: '12px 14px' }}>
+                <div style={{ flex: 1, minWidth: '160px', background: '#F9F9F9', borderRadius: '8px', padding: '12px 14px' }}>
                   <p style={{ color: '#475569', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>Supporting Evidence</p>
                   {pos.supporting_evidence.map((e, i) => (
                     <p key={i} style={{ color: '#475569', fontSize: '12px', margin: '4px 0', fontStyle: 'italic', lineHeight: '1.5' }}>"{e}"</p>
@@ -1006,8 +1006,8 @@ function Intelligence() {
 
   // ── FORM ─────────────────────────────────────────────────────────────────
   return (
-    <div style={{ minHeight: '100vh', background: '#FAFAFA', fontFamily: FONT, color: '#171717' }}>
-      <div style={{ background: '#FFFFFF', borderBottom: '1px solid #EAEAEA', padding: '0 24px', height: '56px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+    <div style={{ minHeight: '100vh', background: '#FAFAFA', fontFamily: FONT, color: '#171717', width: '100%', boxSizing: 'border-box', overflowX: 'hidden' }}>
+      <div style={{ background: '#FFFFFF', borderBottom: '1px solid #EAEAEA', padding: '0 16px', height: '56px', display: 'flex', alignItems: 'center', gap: '8px' }}>
         <Dna size={15} color="#D4AF37" strokeWidth={1.5} />
         <span style={{ fontWeight: '600', fontSize: '15px' }}>Business Intelligence</span>
       </div>

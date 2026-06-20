@@ -303,6 +303,8 @@ function Dashboard() {
         color: '#171717',
         padding: isMobile ? '28px 16px' : '40px 36px',
         maxWidth: '960px',
+        width: '100%',
+        boxSizing: 'border-box',
       }}>
 
         {/* Page header */}

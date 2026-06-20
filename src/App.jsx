@@ -23,6 +23,9 @@ function Layout() {
         paddingTop: showNav && isMobile ? '48px' : '0',
         minHeight: '100vh',
         background: '#FAFAFA',
+        overflowX: 'hidden',
+        width: showNav && !isMobile ? 'calc(100% - 220px)' : '100%',
+        boxSizing: 'border-box',
       }}>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
