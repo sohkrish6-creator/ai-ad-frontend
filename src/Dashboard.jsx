@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import {
   Users, Bot, CheckCircle, MessageCircle,
-  TrendingUp, Activity, Eye, MousePointerClick, IndianRupee, Percent, Zap,
+  TrendingUp, Activity, Eye, MousePointerClick, IndianRupee, Percent, Zap, RefreshCw,
 } from 'lucide-react'
+import {
+  AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+} from 'recharts'
 
 const GOLD = '#D4AF37'
 
@@ -110,10 +113,15 @@ function Dashboard() {
   const [attempt, setAttempt]     = useState(1)
   const [barsVisible, setBarsVisible] = useState(false)
   const [cardsIn, setCardsIn]     = useState(false)
-  const [gAds, setGAds]           = useState(null)
+  const [gAdsDays, setGAdsDays]       = useState(30)
+  const [gAds, setGAds]               = useState(null)
+  const [gAdsCampaigns, setGAdsCampaigns] = useState(null)
+  const [gAdsDaily, setGAdsDaily]     = useState(null)
   const [gAdsLoading, setGAdsLoading] = useState(true)
-  const [gAdsError, setGAdsError] = useState(false)
-  const [gAdsWaking, setGAdsWaking] = useState(false)
+  const [gAdsError, setGAdsError]     = useState(false)
+  const [gAdsWaking, setGAdsWaking]   = useState(false)
+  const [gAdsRefreshing, setGAdsRefreshing] = useState(false)
+  const [gAdsTick, setGAdsTick]             = useState(0)
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768)
@@ -152,27 +160,41 @@ function Dashboard() {
     return () => clearTimeout(fallback)
   }, [])
 
-  // Fetch Google Ads performance (60s timeout — Render free tier wakes ~50s)
+  // Fetch all Google Ads data (performance + campaigns + daily)
+  const isFirstGAdsLoad = useRef(true)
   useEffect(() => {
-    async function fetchGAds() {
-      const wakingTimer = setTimeout(() => setGAdsWaking(true), 5000)
-      const ctrl = new AbortController()
-      const timeout = setTimeout(() => ctrl.abort(), 70000)
+    const isFirstLoad = isFirstGAdsLoad.current
+    isFirstGAdsLoad.current = false
+    if (isFirstLoad) { setGAdsLoading(true) } else { setGAdsRefreshing(true) }
+    const wakingTimer = isFirstLoad ? setTimeout(() => setGAdsWaking(true), 5000) : null
+    const ctrl = new AbortController()
+    const timeout = setTimeout(() => ctrl.abort(), 70000)
+
+    async function run() {
       try {
-        const res = await fetch(`${BACKEND}/google-ads/performance`, { signal: ctrl.signal })
-        const d = await res.json()
-        if (d.success) { setGAds(d); setGAdsError(false) }
-        else setGAdsError(true)
+        const [perfRes, campRes, dailyRes] = await Promise.all([
+          fetch(`${BACKEND}/google-ads/performance?days=${gAdsDays}`, { signal: ctrl.signal }),
+          fetch(`${BACKEND}/google-ads/campaigns?days=${gAdsDays}`,   { signal: ctrl.signal }),
+          fetch(`${BACKEND}/google-ads/daily?days=${gAdsDays}`,       { signal: ctrl.signal }),
+        ])
+        const [perf, camp, daily] = await Promise.all([perfRes.json(), campRes.json(), dailyRes.json()])
+        if (perf.success) { setGAds(perf); setGAdsError(false) } else setGAdsError(true)
+        if (camp.success)  setGAdsCampaigns(camp.campaigns)
+        if (daily.success) setGAdsDaily(daily.daily)
       } catch { setGAdsError(true) }
       finally {
-        clearTimeout(wakingTimer)
+        if (wakingTimer) clearTimeout(wakingTimer)
         clearTimeout(timeout)
         setGAdsLoading(false)
         setGAdsWaking(false)
+        setGAdsRefreshing(false)
       }
     }
-    fetchGAds()
-  }, [])
+
+    fetchGAds.current = run
+    run()
+    return () => ctrl.abort()
+  }, [gAdsDays, gAdsTick])
 
   // Trigger entrance animations after data loads
   useEffect(() => {
@@ -261,6 +283,18 @@ function Dashboard() {
         .live-dot {
           animation: pulse-dot 2s ease-in-out infinite;
         }
+
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
+        }
+        .spin { animation: spin 0.8s linear infinite; }
+
+        .campaign-row {
+          transition: background 0.12s ease;
+          border-radius: 4px;
+        }
+        .campaign-row:hover { background: #F9F9F9 !important; }
       `}</style>
 
       <div style={{
@@ -473,23 +507,42 @@ function Dashboard() {
                 animationDelay: '520ms',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                <p style={{
-                  fontSize: '11px', fontWeight: '500', textTransform: 'uppercase',
-                  letterSpacing: '0.07em', color: '#999', margin: 0,
-                }}>
+              {/* Header row */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', gap: '10px', flexWrap: 'wrap' }}>
+                <p style={{ fontSize: '11px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.07em', color: '#999', margin: 0 }}>
                   Google Ads Performance
                 </p>
-                {gAds && (
-                  <span style={{ fontSize: '11px', color: '#BBB', letterSpacing: '-0.1px' }}>
-                    Last {gAds.period_days} days · {gAds.start_date} – {gAds.end_date}
-                  </span>
-                )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  {/* Day selector */}
+                  {[7, 30, 90].map(d => (
+                    <button
+                      key={d}
+                      onClick={() => setGAdsDays(d)}
+                      disabled={gAdsLoading || gAdsRefreshing}
+                      style={{
+                        padding: '3px 10px', borderRadius: '5px', fontSize: '11px', fontWeight: '600',
+                        cursor: 'pointer', border: '1px solid',
+                        borderColor: gAdsDays === d ? GOLD : '#E5E5E5',
+                        background:  gAdsDays === d ? `${GOLD}12` : 'transparent',
+                        color:        gAdsDays === d ? GOLD : '#999',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >{d}d</button>
+                  ))}
+                  {/* Refresh */}
+                  <button
+                    onClick={() => { setGAdsRefreshing(true); setGAdsTick(t => t + 1) }}
+                    disabled={gAdsLoading || gAdsRefreshing}
+                    style={{ display: 'flex', alignItems: 'center', padding: '4px 8px', borderRadius: '5px', border: '1px solid #E5E5E5', background: 'transparent', cursor: 'pointer', color: '#999' }}
+                  >
+                    <RefreshCw size={11} className={gAdsRefreshing ? 'spin' : ''} />
+                  </button>
+                </div>
               </div>
 
               {gAdsLoading ? (
                 <>
-                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(3, 1fr)', gap: '8px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(3, 1fr)', gap: '8px', marginBottom: '8px' }}>
                     {[0,1,2,3,4,5].map(i => (
                       <div key={i} style={{ background: '#F9F9F9', borderRadius: '6px', padding: '14px 12px' }}>
                         <Skeleton w="55%" h="9px" style={{ marginBottom: '12px' }} />
@@ -498,51 +551,135 @@ function Dashboard() {
                     ))}
                   </div>
                   {gAdsWaking && (
-                    <p style={{ fontSize: '12px', color: '#BBB', margin: '10px 0 0', letterSpacing: '-0.1px' }}>
+                    <p style={{ fontSize: '12px', color: '#BBB', margin: '10px 0 0' }}>
                       Server waking up — Google Ads data loads in up to a minute...
                     </p>
                   )}
                 </>
               ) : gAdsError ? (
-                <div style={{
-                  background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '6px',
-                  padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '8px',
-                }}>
+                <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '6px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <TrendingUp size={13} color="#BE123C" />
-                  <p style={{ fontSize: '13px', color: '#BE123C', margin: 0 }}>
-                    Google Ads data unavailable — check API credentials
-                  </p>
+                  <p style={{ fontSize: '13px', color: '#BE123C', margin: 0 }}>Google Ads data unavailable — check API credentials</p>
                 </div>
               ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(3, 1fr)', gap: '8px' }}>
-                  {[
-                    { label: 'Impressions', val: gAds.impressions,  Icon: Eye,              type: 'int'     },
-                    { label: 'Clicks',      val: gAds.clicks,       Icon: MousePointerClick, type: 'int'    },
-                    { label: 'Cost (₹)',    val: gAds.cost_inr,     Icon: IndianRupee,       type: 'decimal', prefix: '₹' },
-                    { label: 'CTR',         val: gAds.ctr_pct,      Icon: Percent,           type: 'decimal', suffix: '%' },
-                    { label: 'Avg CPC (₹)', val: gAds.avg_cpc_inr, Icon: Zap,               type: 'decimal', prefix: '₹' },
-                    { label: 'Conversions', val: gAds.conversions,  Icon: CheckCircle,       type: 'decimal', decimals: 1 },
-                  ].map(({ label, val, Icon, type, prefix, suffix, decimals }) => (
-                    <div key={label} style={{
-                      background: '#F9F9F9', border: '1px solid #EAEAEA',
-                      borderRadius: '6px', padding: '14px 12px',
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                        <p style={{
-                          fontSize: '10px', fontWeight: '500', textTransform: 'uppercase',
-                          letterSpacing: '0.06em', color: '#999', margin: 0,
-                        }}>
-                          {label}
-                        </p>
-                        <Icon size={11} color="#D4D4D4" strokeWidth={1.5} />
+                <>
+                  {/* 6 KPI mini-cards */}
+                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(3, 1fr)', gap: '8px', marginBottom: '20px' }}>
+                    {[
+                      { label: 'Impressions', val: gAds.impressions,  Icon: Eye,               type: 'int'                          },
+                      { label: 'Clicks',      val: gAds.clicks,       Icon: MousePointerClick,  type: 'int'                          },
+                      { label: 'Cost (₹)',    val: gAds.cost_inr,     Icon: IndianRupee,        type: 'decimal', prefix: '₹'         },
+                      { label: 'CTR',         val: gAds.ctr_pct,      Icon: Percent,            type: 'decimal', suffix: '%'         },
+                      { label: 'Avg CPC (₹)', val: gAds.avg_cpc_inr, Icon: Zap,                type: 'decimal', prefix: '₹'         },
+                      { label: 'Conversions', val: gAds.conversions,  Icon: CheckCircle,        type: 'decimal', decimals: 1         },
+                    ].map(({ label, val, Icon, type, prefix, suffix, decimals }) => (
+                      <div key={label} style={{ background: '#F9F9F9', border: '1px solid #EAEAEA', borderRadius: '6px', padding: '14px 12px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                          <p style={{ fontSize: '10px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.06em', color: '#999', margin: 0 }}>{label}</p>
+                          <Icon size={11} color="#D4D4D4" strokeWidth={1.5} />
+                        </div>
+                        {type === 'int'
+                          ? <AnimatedNumber value={val} size="22px" />
+                          : <AnimatedDecimal value={val} prefix={prefix} suffix={suffix} decimals={decimals ?? 2} size="22px" />
+                        }
                       </div>
-                      {type === 'int'
-                        ? <AnimatedNumber value={val} size="22px" />
-                        : <AnimatedDecimal value={val} prefix={prefix} suffix={suffix} decimals={decimals ?? 2} size="22px" />
-                      }
+                    ))}
+                  </div>
+
+                  {/* Trend chart */}
+                  {gAdsDaily && gAdsDaily.length > 0 && (
+                    <div style={{ marginBottom: '20px' }}>
+                      <p style={{ fontSize: '10px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.07em', color: '#CCC', margin: '0 0 10px' }}>Daily Trend</p>
+                      <ResponsiveContainer width="100%" height={120}>
+                        <AreaChart data={gAdsDaily} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%"  stopColor={GOLD} stopOpacity={0.18} />
+                              <stop offset="95%" stopColor={GOLD} stopOpacity={0}    />
+                            </linearGradient>
+                            <linearGradient id="clickGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%"  stopColor="#171717" stopOpacity={0.08} />
+                              <stop offset="95%" stopColor="#171717" stopOpacity={0}    />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid stroke="#F0F0F0" strokeDasharray="3 3" vertical={false} />
+                          <XAxis
+                            dataKey="date"
+                            tick={{ fontSize: 10, fill: '#CCC' }}
+                            tickLine={false}
+                            axisLine={false}
+                            tickFormatter={d => d ? d.slice(5) : ''}
+                            interval="preserveStartEnd"
+                          />
+                          <Tooltip
+                            contentStyle={{ background: '#fff', border: '1px solid #EAEAEA', borderRadius: '6px', fontSize: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
+                            labelStyle={{ color: '#999', fontWeight: '500', marginBottom: '4px' }}
+                            formatter={(val, name) => {
+                              if (name === 'impressions') return [val.toLocaleString(), 'Impressions']
+                              if (name === 'clicks')      return [val.toLocaleString(), 'Clicks']
+                              if (name === 'cost_inr')    return [`₹${val}`, 'Cost']
+                              return [val, name]
+                            }}
+                          />
+                          <Area type="monotone" dataKey="impressions" stroke={GOLD}      strokeWidth={1.5} fill="url(#goldGrad)"  dot={false} />
+                          <Area type="monotone" dataKey="clicks"      stroke="#171717"   strokeWidth={1}   fill="url(#clickGrad)" dot={false} />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                      <div style={{ display: 'flex', gap: '14px', marginTop: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <div style={{ width: '12px', height: '2px', background: GOLD, borderRadius: '1px' }} />
+                          <span style={{ fontSize: '10px', color: '#BBB' }}>Impressions</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <div style={{ width: '12px', height: '2px', background: '#171717', borderRadius: '1px' }} />
+                          <span style={{ fontSize: '10px', color: '#BBB' }}>Clicks</span>
+                        </div>
+                      </div>
                     </div>
-                  ))}
-                </div>
+                  )}
+
+                  {/* Campaign breakdown */}
+                  {gAdsCampaigns && gAdsCampaigns.length > 0 && (
+                    <div>
+                      <p style={{ fontSize: '10px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.07em', color: '#CCC', margin: '0 0 8px' }}>Campaigns</p>
+                      <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                          <thead>
+                            <tr style={{ borderBottom: '1px solid #F0F0F0' }}>
+                              {['Campaign', 'Status', 'Impr.', 'Clicks', 'Cost', 'CTR', 'CPC'].map(h => (
+                                <th key={h} style={{ textAlign: h === 'Campaign' ? 'left' : 'right', padding: '6px 8px', fontSize: '10px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#CCC', whiteSpace: 'nowrap' }}>{h}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {gAdsCampaigns.map((c, i) => (
+                              <tr key={c.campaign_id} className="campaign-row" style={{ borderBottom: i < gAdsCampaigns.length - 1 ? '1px solid #F5F5F5' : 'none' }}>
+                                <td style={{ padding: '8px 8px', color: '#171717', fontWeight: '500', maxWidth: isMobile ? '100px' : '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</td>
+                                <td style={{ padding: '8px 8px', textAlign: 'right' }}>
+                                  <span style={{
+                                    padding: '2px 7px', borderRadius: '20px', fontSize: '10px', fontWeight: '600',
+                                    background: c.status === 'ENABLED' ? '#F0FDF4' : '#F5F5F5',
+                                    color:      c.status === 'ENABLED' ? '#16A34A' : '#999',
+                                  }}>{c.status === 'ENABLED' ? 'Active' : 'Paused'}</span>
+                                </td>
+                                <td style={{ padding: '8px 8px', textAlign: 'right', color: '#666' }}>{c.impressions.toLocaleString()}</td>
+                                <td style={{ padding: '8px 8px', textAlign: 'right', color: '#666' }}>{c.clicks.toLocaleString()}</td>
+                                <td style={{ padding: '8px 8px', textAlign: 'right', color: '#171717', fontWeight: '500' }}>₹{c.cost_inr}</td>
+                                <td style={{ padding: '8px 8px', textAlign: 'right', color: '#666' }}>{c.ctr_pct}%</td>
+                                <td style={{ padding: '8px 8px', textAlign: 'right', color: '#666' }}>₹{c.avg_cpc_inr}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Date range footer */}
+                  <p style={{ fontSize: '11px', color: '#CCC', margin: '14px 0 0', letterSpacing: '-0.1px' }}>
+                    {gAds.start_date} – {gAds.end_date}
+                  </p>
+                </>
               )}
             </div>
           </>
