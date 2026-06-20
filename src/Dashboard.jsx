@@ -113,6 +113,7 @@ function Dashboard() {
   const [gAds, setGAds]           = useState(null)
   const [gAdsLoading, setGAdsLoading] = useState(true)
   const [gAdsError, setGAdsError] = useState(false)
+  const [gAdsWaking, setGAdsWaking] = useState(false)
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768)
@@ -151,16 +152,24 @@ function Dashboard() {
     return () => clearTimeout(fallback)
   }, [])
 
-  // Fetch Google Ads performance
+  // Fetch Google Ads performance (60s timeout — Render free tier wakes ~50s)
   useEffect(() => {
     async function fetchGAds() {
+      const wakingTimer = setTimeout(() => setGAdsWaking(true), 5000)
+      const ctrl = new AbortController()
+      const timeout = setTimeout(() => ctrl.abort(), 70000)
       try {
-        const res = await fetch(`${BACKEND}/google-ads/performance`)
+        const res = await fetch(`${BACKEND}/google-ads/performance`, { signal: ctrl.signal })
         const d = await res.json()
         if (d.success) { setGAds(d); setGAdsError(false) }
         else setGAdsError(true)
       } catch { setGAdsError(true) }
-      finally { setGAdsLoading(false) }
+      finally {
+        clearTimeout(wakingTimer)
+        clearTimeout(timeout)
+        setGAdsLoading(false)
+        setGAdsWaking(false)
+      }
     }
     fetchGAds()
   }, [])
@@ -479,14 +488,21 @@ function Dashboard() {
               </div>
 
               {gAdsLoading ? (
-                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(3, 1fr)', gap: '8px' }}>
-                  {[0,1,2,3,4,5].map(i => (
-                    <div key={i} style={{ background: '#F9F9F9', borderRadius: '6px', padding: '14px 12px' }}>
-                      <Skeleton w="55%" h="9px" style={{ marginBottom: '12px' }} />
-                      <Skeleton w="45%" h="22px" />
-                    </div>
-                  ))}
-                </div>
+                <>
+                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(3, 1fr)', gap: '8px' }}>
+                    {[0,1,2,3,4,5].map(i => (
+                      <div key={i} style={{ background: '#F9F9F9', borderRadius: '6px', padding: '14px 12px' }}>
+                        <Skeleton w="55%" h="9px" style={{ marginBottom: '12px' }} />
+                        <Skeleton w="45%" h="22px" />
+                      </div>
+                    ))}
+                  </div>
+                  {gAdsWaking && (
+                    <p style={{ fontSize: '12px', color: '#BBB', margin: '10px 0 0', letterSpacing: '-0.1px' }}>
+                      Server waking up — Google Ads data loads in up to a minute...
+                    </p>
+                  )}
+                </>
               ) : gAdsError ? (
                 <div style={{
                   background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '6px',
