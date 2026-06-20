@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import {
   Users, Bot, CheckCircle, MessageCircle,
-  TrendingUp, Activity,
+  TrendingUp, Activity, Eye, MousePointerClick, IndianRupee, Percent, Zap,
 } from 'lucide-react'
 
 const GOLD = '#D4AF37'
@@ -40,6 +40,20 @@ function AnimatedNumber({ value, gold, size }) {
       textShadow: gold ? '0 0 24px rgba(212,175,55,0.35)' : 'none',
     }}>
       {n}
+    </p>
+  )
+}
+
+// ── Animated decimal number (for CTR, cost, CPC) ───────────────────────────
+function AnimatedDecimal({ value, prefix = '', suffix = '', decimals = 2, size = '28px', gold = false }) {
+  const int = useCountUp(Math.round(value * 100), 900, true)
+  const display = (int / 100).toFixed(decimals)
+  return (
+    <p style={{
+      fontSize: size, fontWeight: '600', margin: '0 0 5px 0',
+      letterSpacing: '-1px', color: gold ? GOLD : '#171717', lineHeight: 1,
+    }}>
+      {prefix}{display}{suffix}
     </p>
   )
 }
@@ -96,6 +110,9 @@ function Dashboard() {
   const [attempt, setAttempt]     = useState(1)
   const [barsVisible, setBarsVisible] = useState(false)
   const [cardsIn, setCardsIn]     = useState(false)
+  const [gAds, setGAds]           = useState(null)
+  const [gAdsLoading, setGAdsLoading] = useState(true)
+  const [gAdsError, setGAdsError] = useState(false)
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768)
@@ -132,6 +149,20 @@ function Dashboard() {
     const fallback = setTimeout(() => { setStats(p => p ?? EMPTY); setLoading(false) }, 8000)
     tryLoad().finally(() => clearTimeout(fallback))
     return () => clearTimeout(fallback)
+  }, [])
+
+  // Fetch Google Ads performance
+  useEffect(() => {
+    async function fetchGAds() {
+      try {
+        const res = await fetch(`${BACKEND}/google-ads/performance`)
+        const d = await res.json()
+        if (d.success) { setGAds(d); setGAdsError(false) }
+        else setGAdsError(true)
+      } catch { setGAdsError(true) }
+      finally { setGAdsLoading(false) }
+    }
+    fetchGAds()
   }, [])
 
   // Trigger entrance animations after data loads
@@ -422,28 +453,81 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* Coming soon */}
-            <div style={{
-              ...card,
-              padding: '13px 18px',
-              display: 'flex', alignItems: 'center', gap: '12px',
-              borderStyle: 'dashed', boxShadow: 'none',
-              opacity: cardsIn ? 1 : 0,
-              animation: cardsIn ? 'fadeSlideUp 0.4s ease both' : 'none',
-              animationDelay: '520ms',
-            }}>
-              <TrendingUp size={14} color="#D4D4D4" strokeWidth={1.5} style={{ flexShrink: 0 }} />
-              <p style={{ fontSize: '13px', color: '#555', margin: 0, flex: 1, letterSpacing: '-0.1px' }}>
-                Ad Performance Tracking — Google Ads &amp; Meta Ads live data
-              </p>
-              <span style={{
-                fontSize: '10px', fontWeight: '600', color: GOLD,
-                border: `1px solid ${GOLD}33`, borderRadius: '4px',
-                padding: '2px 8px', letterSpacing: '0.06em',
-                whiteSpace: 'nowrap', flexShrink: 0,
-              }}>
-                PHASE 4
-              </span>
+            {/* ── Google Ads Performance ── */}
+            <div
+              className="section-card"
+              style={{
+                ...card,
+                padding: isMobile ? '18px 16px' : '22px 20px',
+                opacity: cardsIn ? 1 : 0,
+                animation: cardsIn ? 'fadeSlideUp 0.4s ease both' : 'none',
+                animationDelay: '520ms',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <p style={{
+                  fontSize: '11px', fontWeight: '500', textTransform: 'uppercase',
+                  letterSpacing: '0.07em', color: '#999', margin: 0,
+                }}>
+                  Google Ads Performance
+                </p>
+                {gAds && (
+                  <span style={{ fontSize: '11px', color: '#BBB', letterSpacing: '-0.1px' }}>
+                    Last {gAds.period_days} days · {gAds.start_date} – {gAds.end_date}
+                  </span>
+                )}
+              </div>
+
+              {gAdsLoading ? (
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(3, 1fr)', gap: '8px' }}>
+                  {[0,1,2,3,4,5].map(i => (
+                    <div key={i} style={{ background: '#F9F9F9', borderRadius: '6px', padding: '14px 12px' }}>
+                      <Skeleton w="55%" h="9px" style={{ marginBottom: '12px' }} />
+                      <Skeleton w="45%" h="22px" />
+                    </div>
+                  ))}
+                </div>
+              ) : gAdsError ? (
+                <div style={{
+                  background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '6px',
+                  padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '8px',
+                }}>
+                  <TrendingUp size={13} color="#BE123C" />
+                  <p style={{ fontSize: '13px', color: '#BE123C', margin: 0 }}>
+                    Google Ads data unavailable — check API credentials
+                  </p>
+                </div>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(3, 1fr)', gap: '8px' }}>
+                  {[
+                    { label: 'Impressions', val: gAds.impressions,  Icon: Eye,              type: 'int'     },
+                    { label: 'Clicks',      val: gAds.clicks,       Icon: MousePointerClick, type: 'int'    },
+                    { label: 'Cost (₹)',    val: gAds.cost_inr,     Icon: IndianRupee,       type: 'decimal', prefix: '₹' },
+                    { label: 'CTR',         val: gAds.ctr_pct,      Icon: Percent,           type: 'decimal', suffix: '%' },
+                    { label: 'Avg CPC (₹)', val: gAds.avg_cpc_inr, Icon: Zap,               type: 'decimal', prefix: '₹' },
+                    { label: 'Conversions', val: gAds.conversions,  Icon: CheckCircle,       type: 'decimal', decimals: 1 },
+                  ].map(({ label, val, Icon, type, prefix, suffix, decimals }) => (
+                    <div key={label} style={{
+                      background: '#F9F9F9', border: '1px solid #EAEAEA',
+                      borderRadius: '6px', padding: '14px 12px',
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                        <p style={{
+                          fontSize: '10px', fontWeight: '500', textTransform: 'uppercase',
+                          letterSpacing: '0.06em', color: '#999', margin: 0,
+                        }}>
+                          {label}
+                        </p>
+                        <Icon size={11} color="#D4D4D4" strokeWidth={1.5} />
+                      </div>
+                      {type === 'int'
+                        ? <AnimatedNumber value={val} size="22px" />
+                        : <AnimatedDecimal value={val} prefix={prefix} suffix={suffix} decimals={decimals ?? 2} size="22px" />
+                      }
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </>
         )}
