@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Copy, Check, ExternalLink } from 'lucide-react'
+import { Copy, Check, ExternalLink, Download } from 'lucide-react'
 
 const FONT = '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif'
 const GOLD = '#D4AF37'
@@ -7,13 +7,31 @@ const card = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8
 const inputSt = { width: '100%', padding: '10px 13px', borderRadius: '7px', border: '1px solid #E5E5E5', background: '#FAFAFA', color: '#171717', fontSize: '14px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
 const lbl = { display: 'block', color: '#999', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '7px' }
 
+const SECTIONS = [
+  { key: 'business_understanding',  num: 1,  title: 'Business Understanding',          sub: 'UVP, trust signals, detected industry, core products from BI',          fallback: 'strategy',       gold: false },
+  { key: 'market_understanding',    num: 2,  title: 'Market Understanding',            sub: 'Market size, growth, saturation, real opportunity gaps',                 fallback: null,             gold: false },
+  { key: 'competitor_insights',     num: 3,  title: 'Competitor Insights',             sub: 'Competitor landscape, strengths, weaknesses, positioning gaps',           fallback: 'competitor',     gold: false },
+  { key: 'positioning_strategy',    num: 4,  title: 'Positioning Strategy',            sub: 'Market position to own, category opportunity, messaging shift',           fallback: null,             gold: true  },
+  { key: 'audience_strategy',       num: 5,  title: 'Audience Strategy',               sub: '3 validated segments with pain points, desires, BI evidence',             fallback: 'audience',       gold: false },
+  { key: 'safe_strategy',           num: 6,  title: 'Safe Industry Strategy',          sub: 'Proven approach, budget split, reliable platforms and formats',            fallback: null,             gold: false },
+  { key: 'competitive_advantage',   num: 7,  title: 'Competitive Advantage Strategy',  sub: 'Ads built on BI strengths and competitor gaps specifically',               fallback: null,             gold: false },
+  { key: 'category_dominating',     num: 8,  title: 'Category Dominating Strategy',    sub: 'Positioning-led brand strategy to own the market category',               fallback: null,             gold: true  },
+  { key: 'marketing_plan',          num: 9,  title: 'Full Marketing Plan',             sub: 'Google Ads, Meta Ads, remarketing sequences, landing page tips',           fallback: 'strategy',       gold: false },
+  { key: 'ad_assets',               num: 10, title: 'Ad Assets',                       sub: 'Headlines, descriptions, hook lines, creative briefs',                    fallback: 'smart_creative', gold: false },
+  { key: 'revenue_recommendations', num: 11, title: 'Revenue Recommendations',         sub: 'Highest ROI actions, fastest revenue path, offer structure, quick wins',  fallback: null,             gold: true  },
+]
+
+function getContent(result, key, fallback) {
+  return result?.sections?.[key] || (fallback ? result?.[fallback] : null) || null
+}
+
 function CopyBtn({ onClick, copied }) {
   return (
     <button onClick={onClick} style={{
       display: 'flex', alignItems: 'center', gap: '5px',
       padding: '5px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '500',
       border: '1px solid #E5E5E5', background: copied ? '#F0FDF4' : '#F9F9F9',
-      color: copied ? '#16A34A' : '#666', transition: 'all 0.15s ease',
+      color: copied ? '#16A34A' : '#666', transition: 'all 0.15s ease', flexShrink: 0,
     }}>
       {copied ? <Check size={11} /> : <Copy size={11} />}
       {copied ? 'Copied' : 'Copy'}
@@ -21,10 +39,10 @@ function CopyBtn({ onClick, copied }) {
   )
 }
 
-function Shimmer({ h = '14px', w = '100%', radius = '4px', mb = '0' }) {
+function Shimmer({ h = '14px', w = '100%', radius = '4px' }) {
   return (
     <div style={{
-      width: w, height: h, borderRadius: radius, marginBottom: mb,
+      width: w, height: h, borderRadius: radius,
       background: 'linear-gradient(90deg, #F5F5F5 25%, #EBEBEB 50%, #F5F5F5 75%)',
       backgroundSize: '800px 100%', animation: 'shimmer 1.5s ease-in-out infinite',
     }} />
@@ -35,7 +53,7 @@ function renderBlock(text) {
   if (!text) return null
   return text.split('\n').map((line, i) => {
     const clean = line.replace(/\*\*/g, '').replace(/^#+\s*/, '')
-    if (clean.match(/^[A-Z\s()\/]+:$/)) {
+    if (clean.match(/^[A-Z\s()\/\d]+:$/)) {
       return <h3 key={i} style={{ color: GOLD, fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: '20px', marginBottom: '9px', paddingBottom: '5px', borderBottom: '1px solid #EAEAEA' }}>{clean}</h3>
     }
     if (clean.match(/^\d+\./)) {
@@ -82,8 +100,204 @@ function MarketingBrain() {
 
   const handleCopy = (key, text) => {
     navigator.clipboard.writeText(text)
-    setCopied({ ...copied, [key]: true })
-    setTimeout(() => setCopied(prev => ({ ...prev, [key]: false })), 2000)
+    setCopied(p => ({ ...p, [key]: true }))
+    setTimeout(() => setCopied(p => ({ ...p, [key]: false })), 2000)
+  }
+
+  const downloadPDF = async () => {
+    try {
+      const { jsPDF } = await import('jspdf')
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+      const W = 210, PH = 297, M = 18
+      let y = M
+
+      // Light theme colours
+      const C = {
+        bg:    [255, 255, 255],
+        panel: [250, 250, 250],
+        border:[234, 234, 234],
+        gold:  [212, 175, 55],
+        goldD: [160, 128, 30],
+        dark:  [23,  23,  23],
+        mid:   [80,  80,  80],
+        muted: [150, 150, 150],
+        line:  [212, 175, 55],
+      }
+
+      const initPage = () => {
+        doc.setFillColor(...C.bg)
+        doc.rect(0, 0, W, PH, 'F')
+        doc.setFillColor(...C.gold)
+        doc.rect(0, 0, W, 1.8, 'F')
+        doc.rect(0, PH - 1.8, W, 1.8, 'F')
+      }
+
+      const addPage = () => { doc.addPage(); initPage(); y = M + 6 }
+
+      const checkY = (need) => { if (y + need > PH - 22) addPage() }
+
+      const tt = (str, x, yy, { sz = 9, col = C.dark, bold = false, align = 'left', maxW } = {}) => {
+        if (str == null || str === '') return
+        doc.setFontSize(sz)
+        doc.setTextColor(...col)
+        doc.setFont('helvetica', bold ? 'bold' : 'normal')
+        doc.text(String(str), x, yy, { align, ...(maxW ? { maxWidth: maxW } : {}) })
+      }
+
+      const wrapText = (str, x, { sz = 8.5, col = C.mid, maxW = W - M * 2, lh = 5 } = {}) => {
+        if (!str) return
+        doc.setFontSize(sz); doc.setTextColor(...col); doc.setFont('helvetica', 'normal')
+        doc.splitTextToSize(String(str), maxW).forEach(line => { checkY(lh + 1); doc.text(line, x, y); y += lh })
+      }
+
+      const sectionHeader = (num, title) => {
+        checkY(20)
+        doc.setFillColor(...C.panel)
+        doc.rect(M, y, W - M * 2, 14, 'F')
+        doc.setFillColor(...C.gold)
+        doc.rect(M, y, 3, 14, 'F')
+        // number circle
+        doc.setFillColor(...C.gold)
+        doc.circle(M + 12, y + 7, 5, 'F')
+        tt(String(num), M + 12, y + 9.5, { sz: 8, col: C.bg, bold: true, align: 'center' })
+        tt(title.toUpperCase(), M + 22, y + 9.5, { sz: 9.5, col: C.dark, bold: true })
+        doc.setDrawColor(...C.border)
+        doc.setLineWidth(0.3)
+        doc.rect(M, y, W - M * 2, 14, 'S')
+        y += 18
+      }
+
+      // ── COVER ──────────────────────────────────────────────────────────
+      initPage()
+
+      // decorative gold lines
+      doc.setFillColor(...C.gold)
+      doc.rect(M, 44, W - M * 2, 0.8, 'F')
+      doc.rect(M, PH - 50, W - M * 2, 0.8, 'F')
+
+      tt('SOHSCAPE', W / 2, 64, { sz: 32, col: C.gold, bold: true, align: 'center' })
+      tt('Marketing Intelligence Report', W / 2, 76, { sz: 14, col: C.dark, align: 'center' })
+
+      // gold separator under subtitle
+      doc.setFillColor(...C.gold)
+      doc.rect(W / 2 - 20, 80, 40, 0.5, 'F')
+
+      const cleanUrl = result.url.replace(/https?:\/\//, '').replace(/\/$/, '')
+      tt(cleanUrl, W / 2, 92, { sz: 10, col: C.mid, align: 'center' })
+      tt(new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }), W / 2, 100, { sz: 8.5, col: C.muted, align: 'center' })
+
+      // meta info pills
+      const metaItems = [businessType || result.business_type, goal, `Rs ${budget || '—'}/month`, language].filter(Boolean)
+      const pillW = (W - M * 2) / metaItems.length
+      metaItems.forEach((item, i) => {
+        const px = M + i * pillW
+        doc.setFillColor(...C.panel)
+        doc.rect(px + 1, 116, pillW - 3, 12, 'F')
+        doc.setDrawColor(...C.border)
+        doc.setLineWidth(0.25)
+        doc.rect(px + 1, 116, pillW - 3, 12, 'S')
+        tt(item, px + pillW / 2 - 0.5, 124, { sz: 7.5, col: C.mid, align: 'center' })
+      })
+
+      // BI cached badge
+      if (result.bi_cached != null) {
+        const badge = result.bi_cached ? 'BI Data: Cached' : 'BI Data: Fresh Scan'
+        tt(badge, W / 2, 142, { sz: 8, col: C.gold, align: 'center' })
+      }
+
+      tt('Powered by Sohscape AI  ·  Confidential', W / 2, PH - 22, { sz: 8, col: C.muted, align: 'center' })
+
+      // ── SECTION PAGES ──────────────────────────────────────────────────
+      addPage()
+
+      for (const { key, num, title, fallback } of SECTIONS) {
+        const content = getContent(result, key, fallback)
+        if (!content) continue
+
+        sectionHeader(num, title)
+
+        // Clean and wrap the text
+        const lines = content.split('\n')
+        for (const rawLine of lines) {
+          const line = rawLine.replace(/\*\*/g, '').trim()
+          if (!line) { y += 2; continue }
+
+          // Section sub-header (ALL CAPS ending with colon)
+          if (/^[A-Z\s()\/\d\-_]+:$/.test(line)) {
+            checkY(12)
+            y += 2
+            doc.setFillColor(...C.panel)
+            doc.rect(M, y - 4, W - M * 2, 9, 'F')
+            doc.setFillColor(...C.gold)
+            doc.rect(M, y - 4, 2, 9, 'F')
+            tt(line, M + 6, y + 2, { sz: 8, col: C.goldD, bold: true })
+            y += 8
+          }
+          // Numbered item
+          else if (/^\d+\./.test(line)) {
+            checkY(10)
+            doc.setFillColor(...C.panel)
+            doc.rect(M, y - 3.5, W - M * 2, 8, 'F')
+            const wrapped = doc.splitTextToSize(line, W - M * 2 - 6)
+            doc.setFontSize(8.5); doc.setTextColor(...C.dark); doc.setFont('helvetica', 'normal')
+            doc.text(wrapped[0], M + 4, y + 1)
+            y += 7
+            if (wrapped.length > 1) {
+              for (const extra of wrapped.slice(1)) {
+                checkY(6)
+                doc.text(extra, M + 4, y)
+                y += 5
+              }
+            }
+          }
+          // Key: Value lines
+          else if (/^[A-Za-z ]+:/.test(line) && line.indexOf(':') < 30) {
+            checkY(8)
+            const colonIdx = line.indexOf(':')
+            const label = line.slice(0, colonIdx).trim()
+            const value = line.slice(colonIdx + 1).trim()
+            tt(label + ':', M, y, { sz: 7.5, col: C.muted })
+            if (value) {
+              const vLines = doc.splitTextToSize(value, W - M - 58)
+              doc.setFontSize(8); doc.setTextColor(...C.dark); doc.setFont('helvetica', 'normal')
+              doc.text(vLines, M + 54, y)
+              y += Math.max(6, vLines.length * 4.5)
+            } else {
+              y += 6
+            }
+          }
+          // Regular paragraph
+          else {
+            checkY(7)
+            wrapText(line, M, { sz: 8.5, col: C.mid, maxW: W - M * 2 })
+          }
+        }
+
+        y += 8
+      }
+
+      // ── AD INTEL SECTION ───────────────────────────────────────────────
+      if (result.ad_guide) {
+        addPage()
+        sectionHeader('★', 'Ad Intelligence')
+        wrapText(result.ad_guide, M, { sz: 8.5, col: C.mid })
+      }
+
+      // ── FOOTERS ────────────────────────────────────────────────────────
+      const totalPg = doc.getNumberOfPages()
+      for (let p = 1; p <= totalPg; p++) {
+        doc.setPage(p)
+        doc.setFontSize(7); doc.setTextColor(...C.muted); doc.setFont('helvetica', 'normal')
+        doc.text('Sohscape · Marketing Intelligence Report · Confidential', M, PH - 8)
+        doc.text(`${p} / ${totalPg}`, W - M, PH - 8, { align: 'right' })
+      }
+
+      const fname = `Marketing-Report-${cleanUrl.replace(/[^a-zA-Z0-9]/g, '-').slice(0, 30)}-${new Date().toISOString().split('T')[0]}.pdf`
+      doc.save(fname)
+    } catch (err) {
+      console.error('PDF failed:', err)
+      alert('PDF export failed. Try again.')
+    }
   }
 
   const page = { minHeight: '100vh', background: '#FAFAFA', padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '900px', fontFamily: FONT, width: '100%', boxSizing: 'border-box' }
@@ -92,9 +306,9 @@ function MarketingBrain() {
     <div style={page}>
       <style>{`@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }`}</style>
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Marketing Brain</h1>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 24px' }}>5 engines running in parallel...</p>
+      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 24px' }}>BI scan + 4 engines running in parallel...</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        {['Marketing Strategy', 'Competitor Analysis', 'Ad Intelligence', 'Smart Creative', 'Audience & Targeting'].map((label, i) => (
+        {['Business Intelligence Scan', 'Business & Market Analysis', 'Audience & Strategies', 'Marketing Plan & Ad Assets', 'Ad Intelligence'].map((label, i) => (
           <div key={label} style={{ ...card, padding: '18px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
             <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#F5F5F5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <span style={{ fontSize: '12px', color: '#BBB', fontWeight: '700' }}>{i + 1}</span>
@@ -107,43 +321,66 @@ function MarketingBrain() {
           </div>
         ))}
       </div>
-      <p style={{ color: '#BBB', fontSize: '12px', margin: '16px 0 0', textAlign: 'center' }}>1–2 minutes · 5 reports generating</p>
+      <p style={{ color: '#BBB', fontSize: '12px', margin: '16px 0 0', textAlign: 'center' }}>2–3 minutes · BI scan + 11 sections generating</p>
     </div>
   )
 
-  const sections = [
-    { key: 'strategy',      num: 1, title: 'Marketing Strategy',   sub: 'Targeting, budget, headlines, ad copy',                       content: result?.strategy,       gold: false },
-    { key: 'competitor',    num: 2, title: 'Competitor Analysis',   sub: 'Positioning, gaps, jeet ke mauke',                            content: result?.competitor,     gold: false },
-    { key: 'smart_creative',num: 4, title: 'Smart Ad Creative',     sub: 'Competitor se ALAG — market gap pe based',                    content: result?.smart_creative, gold: true  },
-    { key: 'audience',      num: 5, title: 'Audience & Targeting',  sub: 'Audience segments, where to find them, Meta + Google targeting', content: result?.audience,     gold: true  },
-  ]
-
   if (result) return (
     <div style={page}>
+      <style>{`@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }`}</style>
+
+      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Marketing Brain</h1>
-          <p style={{ color: '#999', fontSize: '13px', margin: 0 }}>{result.url} — full report ready</p>
+          <p style={{ color: '#999', fontSize: '13px', margin: 0 }}>
+            {result.url} — full report ready
+            {result.bi_cached != null && (
+              <span style={{ marginLeft: '8px', color: result.bi_cached ? '#22C55E' : GOLD, fontSize: '11px', fontWeight: '600' }}>
+                {result.bi_cached ? '· BI cached' : '· fresh BI scan'}
+              </span>
+            )}
+          </p>
         </div>
-        <button onClick={() => setResult(null)} style={{ background: 'transparent', border: '1px solid #E5E5E5', color: '#666', padding: '7px 16px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>← New Report</button>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button onClick={downloadPDF} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#D4AF3712', border: '1px solid #D4AF3730', color: GOLD, padding: '7px 14px', borderRadius: '7px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
+            <Download size={12} /> PDF
+          </button>
+          <button onClick={() => setResult(null)} style={{ background: 'transparent', border: '1px solid #E5E5E5', color: '#666', padding: '7px 16px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
+            ← New Report
+          </button>
+        </div>
       </div>
 
-      {sections.map(({ key, num, title, sub, content, gold }) => content ? (
-        <div key={key} style={{ ...card, padding: '26px', marginBottom: '12px', borderColor: gold ? '#E5DABB' : '#EAEAEA' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-            <h2 style={{ fontSize: '15px', fontWeight: '600', margin: 0, color: gold ? GOLD : '#171717' }}>{num}. {title}</h2>
-            <CopyBtn onClick={() => handleCopy(key, content)} copied={!!copied[key]} />
+      {/* 11 Section Cards */}
+      {SECTIONS.map(({ key, num, title, sub, fallback, gold }) => {
+        const content = getContent(result, key, fallback)
+        if (!content) return null
+        return (
+          <div key={key} style={{ ...card, padding: '26px', marginBottom: '12px', borderColor: gold ? '#E5DABB' : '#EAEAEA' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '24px', height: '24px', borderRadius: '6px', background: gold ? '#D4AF3718' : '#F5F5F5', border: `1px solid ${gold ? '#D4AF3740' : '#EAEAEA'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ fontSize: '11px', fontWeight: '700', color: gold ? GOLD : '#999' }}>{num}</span>
+                </div>
+                <h2 style={{ fontSize: '15px', fontWeight: '600', margin: 0, color: gold ? GOLD : '#171717' }}>{title}</h2>
+              </div>
+              <CopyBtn onClick={() => handleCopy(key, content)} copied={!!copied[key]} />
+            </div>
+            <p style={{ fontSize: '12px', color: '#999', margin: '4px 0 16px 34px' }}>{sub}</p>
+            <div style={{ marginLeft: '0' }}>{renderBlock(content)}</div>
           </div>
-          <p style={{ fontSize: '12px', color: '#999', margin: '4px 0 16px' }}>{sub}</p>
-          {renderBlock(content)}
-        </div>
-      ) : null)}
+        )
+      })}
 
-      {/* Section 3 — Ad Intel */}
+      {/* Ad Intelligence — Meta + Google links + guide */}
       <div style={{ ...card, padding: '26px', marginBottom: '12px' }}>
-        <h2 style={{ fontSize: '15px', fontWeight: '600', marginBottom: '4px', color: '#171717' }}>3. Ad Intelligence</h2>
-        <p style={{ fontSize: '12px', color: '#999', margin: '0 0 16px' }}>Competitor ke live ads + guide</p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '18px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+          <h2 style={{ fontSize: '15px', fontWeight: '600', margin: 0, color: '#171717' }}>Ad Intelligence</h2>
+          {result.ad_guide && <CopyBtn onClick={() => handleCopy('ad_guide', result.ad_guide)} copied={!!copied['ad_guide']} />}
+        </div>
+        <p style={{ fontSize: '12px', color: '#999', margin: '4px 0 16px' }}>Competitor ke live ads + BI-based winning angle</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: result.ad_guide ? '18px' : '0' }}>
           {[
             { href: result.meta_ad_library_link, label: 'Facebook & Instagram Live Ads', color: '#1877F2' },
             { href: result.google_ads_link,      label: 'Google Ads Transparency',       color: '#34A853' },
@@ -157,7 +394,7 @@ function MarketingBrain() {
             </a>
           ))}
         </div>
-        {renderBlock(result.ad_guide)}
+        {result.ad_guide && renderBlock(result.ad_guide)}
       </div>
     </div>
   )
@@ -166,7 +403,7 @@ function MarketingBrain() {
     <div style={page}>
       <style>{`@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }`}</style>
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Marketing Brain</h1>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 32px' }}>Ek baar daalo — Strategy + Competitor + Ad Intel + Creative + Audience, sab ek saath</p>
+      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 32px' }}>Ek baar daalo — BI scan + 11 section full marketing report, sab ek saath</p>
 
       <div style={{ maxWidth: '560px', width: '100%' }}>
         <div style={{ ...card, padding: '28px' }}>
