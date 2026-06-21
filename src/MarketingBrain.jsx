@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Copy, Check, ExternalLink, Download } from 'lucide-react'
+import { Copy, Check, ExternalLink, Download, TrendingUp } from 'lucide-react'
 
 const FONT = '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif'
 const GOLD = '#D4AF37'
@@ -20,6 +20,38 @@ const SECTIONS = [
   { key: 'ad_assets',               num: 10, title: 'Ad Assets',                       sub: 'Headlines, descriptions, hook lines, creative briefs',                    fallback: 'smart_creative', gold: false },
   { key: 'revenue_recommendations', num: 11, title: 'Revenue Recommendations',         sub: 'Highest ROI actions, fastest revenue path, offer structure, quick wins',  fallback: null,             gold: true  },
 ]
+
+const MEDIA_SECTIONS = [
+  { num: 1,  key: 'campaign_objective',       header: 'CAMPAIGN OBJECTIVE:',        title: 'Campaign Objective',        sub: 'Primary goal and why' },
+  { num: 2,  key: 'platform_recommendations', header: 'PLATFORM RECOMMENDATIONS:',  title: 'Platform Recommendations',  sub: 'Platform priority ranking with reasoning' },
+  { num: 3,  key: 'budget_allocation',        header: 'BUDGET ALLOCATION:',         title: 'Budget Allocation',         sub: 'Monthly/daily budget + platform split' },
+  { num: 4,  key: 'bid_strategy',             header: 'BID STRATEGY:',              title: 'Bid Strategy',              sub: 'Recommended bid strategy and why' },
+  { num: 5,  key: 'launch_plan',              header: 'LAUNCH PLAN:',               title: 'Launch Plan',               sub: 'Launch date and pre-launch checklist' },
+  { num: 6,  key: 'learning_phase',           header: 'LEARNING PHASE:',            title: 'Learning Phase',            sub: 'Duration, minimum data, when not to judge' },
+  { num: 7,  key: 'scaling_plan',             header: 'SCALING PLAN:',              title: 'Scaling Plan',              sub: 'When and how to scale safely vs aggressively' },
+  { num: 8,  key: 'pause_rules',              header: 'PAUSE RULES:',               title: 'Pause Rules',               sub: 'Conditions to pause ads' },
+  { num: 9,  key: 'stop_rules',               header: 'STOP RULES:',                title: 'Stop Rules',                sub: 'When to stop campaign entirely' },
+  { num: 10, key: 'optimization_plan',        header: 'OPTIMIZATION PLAN:',         title: 'Optimization Plan',         sub: 'Audience, creative, landing page, offer, budget checklist' },
+  { num: 11, key: 'risk_analysis',            header: 'RISK ANALYSIS:',             title: 'Risk Analysis',             sub: 'Risk level + top risks to watch' },
+  { num: 12, key: 'media_buyer_playbook',     header: 'MEDIA BUYER PLAYBOOK:',      title: 'Media Buyer Playbook',      sub: 'Day 1 → Day 3 → Day 7 → Day 14 → Day 30 actions' },
+  { num: 13, key: 'industry_benchmarks',      header: 'INDUSTRY BENCHMARKS:',       title: 'Industry Benchmarks',       sub: 'CTR, CPC, CPA, conversion rate ranges for this industry' },
+]
+
+function parseMediaPlan(text) {
+  if (!text) return {}
+  const headers = MEDIA_SECTIONS.map(s => s.header)
+  const result = {}
+  headers.forEach((header, i) => {
+    const nextHeader = headers[i + 1]
+    const startMatch = text.search(new RegExp(header.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'))
+    if (startMatch === -1) { result[MEDIA_SECTIONS[i].key] = ''; return }
+    const contentStart = startMatch + header.length
+    const remaining = text.slice(contentStart)
+    const endMatch = nextHeader ? remaining.search(new RegExp(nextHeader.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')) : -1
+    result[MEDIA_SECTIONS[i].key] = (endMatch === -1 ? remaining : remaining.slice(0, endMatch)).trim()
+  })
+  return result
+}
 
 function getContent(result, key, fallback) {
   return result?.sections?.[key] || (fallback ? result?.[fallback] : null) || null
@@ -82,6 +114,9 @@ function MarketingBrain() {
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
   const [copied, setCopied] = useState({})
+  const [mediaPlan, setMediaPlan] = useState(null)
+  const [mediaLoading, setMediaLoading] = useState(false)
+  const [mediaError, setMediaError] = useState(null)
 
   const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 
@@ -107,6 +142,107 @@ function MarketingBrain() {
     navigator.clipboard.writeText(text)
     setCopied(p => ({ ...p, [key]: true }))
     setTimeout(() => setCopied(p => ({ ...p, [key]: false })), 2000)
+  }
+
+  async function handleMediaBuyingPlan() {
+    if (!result) return
+    setMediaLoading(true); setMediaError(null); setMediaPlan(null)
+    const marketingSummary = SECTIONS.slice(0, 4).map(s => {
+      const content = getContent(result, s.key, s.fallback)
+      return content ? `${s.title}:\n${content.slice(0, 300)}` : ''
+    }).filter(Boolean).join('\n\n')
+    try {
+      const res = await fetch(`${BACKEND}/media-buying-plan`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url,
+          industry: resolvedIndustry || businessType,
+          city: targetCity,
+          budget: parseInt(budget),
+          goal,
+          language,
+          bi_data: result.bi_data || {},
+          marketing_summary: marketingSummary,
+        })
+      })
+      const data = await res.json()
+      if (data.success) setMediaPlan(data.media_plan)
+      else setMediaError('Media buying plan generate nahi hua. Dobara try karo.')
+    } catch { setMediaError('Backend se connect nahi ho paya.') }
+    setMediaLoading(false)
+  }
+
+  const downloadMediaPDF = async () => {
+    if (!mediaPlan) return
+    try {
+      const { jsPDF } = await import('jspdf')
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+      const W = 210, PH = 297, M = 18
+      let y = M
+      const C = {
+        bg: [255, 255, 255], panel: [250, 250, 250], border: [234, 234, 234],
+        gold: [212, 175, 55], dark: [23, 23, 23], mid: [80, 80, 80], muted: [150, 150, 150],
+      }
+      const initPage = () => {
+        doc.setFillColor(...C.bg); doc.rect(0, 0, W, PH, 'F')
+        doc.setFillColor(...C.gold); doc.rect(0, 0, W, 1.8, 'F'); doc.rect(0, PH - 1.8, W, 1.8, 'F')
+      }
+      const addPage = () => { doc.addPage(); initPage(); y = M + 6 }
+      const checkY = (need) => { if (y + need > PH - 22) addPage() }
+      const tt = (str, x, yy, { sz = 9, col = C.dark, bold = false, align = 'left' } = {}) => {
+        if (!str) return
+        doc.setFontSize(sz); doc.setTextColor(...col); doc.setFont('helvetica', bold ? 'bold' : 'normal')
+        doc.text(String(str), x, yy, { align })
+      }
+      const wrapText = (str, x, { sz = 8.5, col = C.mid, maxW = W - M * 2, lh = 5 } = {}) => {
+        if (!str) return
+        doc.setFontSize(sz); doc.setTextColor(...col); doc.setFont('helvetica', 'normal')
+        doc.splitTextToSize(String(str), maxW).forEach(line => { checkY(lh + 1); doc.text(line, x, y); y += lh })
+      }
+      const sectionHeader = (num, title) => {
+        checkY(20)
+        doc.setFillColor(...C.panel); doc.rect(M, y, W - M * 2, 14, 'F')
+        doc.setFillColor(...C.gold); doc.rect(M, y, 3, 14, 'F')
+        doc.setFillColor(...C.gold); doc.circle(M + 12, y + 7, 5, 'F')
+        tt(String(num), M + 12, y + 9.5, { sz: 8, col: C.bg, bold: true, align: 'center' })
+        tt(title.toUpperCase(), M + 22, y + 9.5, { sz: 9.5, col: C.dark, bold: true })
+        doc.setDrawColor(...C.border); doc.setLineWidth(0.3); doc.rect(M, y, W - M * 2, 14, 'S')
+        y += 18
+      }
+
+      // Cover
+      initPage()
+      doc.setFillColor(...C.gold); doc.rect(0, 70, W, 0.5, 'F'); doc.rect(0, 110, W, 0.5, 'F')
+      tt('SOHSCAPE INTELLIGENCE', W / 2, 58, { sz: 10, col: C.gold, bold: true, align: 'center' })
+      tt('MEDIA BUYING PLAN', W / 2, 82, { sz: 28, col: C.dark, bold: true, align: 'center' })
+      tt(url || 'Campaign Report', W / 2, 95, { sz: 12, col: C.mid, align: 'center' })
+      tt(`Budget: ₹${parseInt(budget).toLocaleString('en-IN')}/mo  ·  Goal: ${goal}`, W / 2, 118, { sz: 9, col: C.muted, align: 'center' })
+      tt(new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }), W / 2, 128, { sz: 8, col: C.muted, align: 'center' })
+
+      // Sections
+      const parsed = parseMediaPlan(mediaPlan)
+      MEDIA_SECTIONS.forEach(({ num, key, title }) => {
+        const content = parsed[key]
+        if (!content) return
+        addPage(); sectionHeader(num, title)
+        wrapText(content, M, { sz: 8.5, col: C.mid })
+        y += 4
+      })
+
+      const totalPg = doc.getNumberOfPages()
+      for (let p = 1; p <= totalPg; p++) {
+        doc.setPage(p)
+        doc.setFontSize(7); doc.setTextColor(...C.muted); doc.setFont('helvetica', 'normal')
+        doc.text('Sohscape · Media Buying Plan · Confidential', M, PH - 8)
+        doc.text(`${p} / ${totalPg}`, W - M, PH - 8, { align: 'right' })
+      }
+      const fname = `Media-Buying-Plan-${(url || 'report').replace(/[^a-zA-Z0-9]/g, '-').slice(0, 30)}-${new Date().toISOString().split('T')[0]}.pdf`
+      doc.save(fname)
+    } catch (err) {
+      console.error('PDF failed:', err)
+      alert('PDF export failed. Try again.')
+    }
   }
 
   const downloadPDF = async () => {
@@ -351,7 +487,7 @@ function MarketingBrain() {
           <button onClick={downloadPDF} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#D4AF3712', border: '1px solid #D4AF3730', color: GOLD, padding: '7px 14px', borderRadius: '7px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
             <Download size={12} /> PDF
           </button>
-          <button onClick={() => setResult(null)} style={{ background: 'transparent', border: '1px solid #E5E5E5', color: '#666', padding: '7px 16px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
+          <button onClick={() => { setResult(null); setMediaPlan(null); setMediaError(null) }} style={{ background: 'transparent', border: '1px solid #E5E5E5', color: '#666', padding: '7px 16px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
             ← New Report
           </button>
         </div>
@@ -401,6 +537,80 @@ function MarketingBrain() {
         </div>
         {result.ad_guide && renderBlock(result.ad_guide)}
       </div>
+
+      {/* Media Buying Plan CTA */}
+      {!mediaPlan && !mediaLoading && (
+        <div style={{ ...card, padding: '24px', marginBottom: '12px', borderColor: '#E5DABB', background: '#FFFDF5' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+            <div>
+              <h2 style={{ fontSize: '15px', fontWeight: '600', margin: '0 0 4px', color: '#171717' }}>Media Buying Plan</h2>
+              <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>13-section plan — platform priorities, budget split, bid strategy, Day 1→30 playbook</p>
+            </div>
+            <button onClick={handleMediaBuyingPlan} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: GOLD, border: 'none', color: '#fff', padding: '10px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', flexShrink: 0 }}>
+              <TrendingUp size={14} /> Generate Media Buying Plan
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Media Buying Plan Loading */}
+      {mediaLoading && (
+        <div style={{ ...card, padding: '28px', marginBottom: '12px', borderColor: '#E5DABB', textAlign: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: GOLD, animation: 'pulse 1s ease-in-out infinite alternate' }} />
+            <p style={{ color: '#666', fontSize: '14px', margin: 0, fontWeight: '500' }}>Generating Media Buying Plan...</p>
+          </div>
+          <p style={{ color: '#BBB', fontSize: '12px', margin: '8px 0 0' }}>13 sections — budget split, playbook, benchmarks</p>
+        </div>
+      )}
+
+      {/* Media Buying Plan Error */}
+      {mediaError && (
+        <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '8px', padding: '14px 18px', marginBottom: '12px', color: '#BE123C', fontSize: '13px' }}>{mediaError}</div>
+      )}
+
+      {/* Media Buying Plan Results */}
+      {mediaPlan && (() => {
+        const parsed = parseMediaPlan(mediaPlan)
+        return (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '28px 0 16px', flexWrap: 'wrap', gap: '10px' }}>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: '600', margin: '0 0 3px', color: GOLD, letterSpacing: '-0.3px' }}>Media Buying Plan</h2>
+                <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>13-section plan ready</p>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button onClick={downloadMediaPDF} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#D4AF3712', border: '1px solid #D4AF3730', color: GOLD, padding: '7px 14px', borderRadius: '7px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
+                  <Download size={12} /> PDF
+                </button>
+                <button onClick={() => { setMediaPlan(null); setMediaError(null) }} style={{ background: 'transparent', border: '1px solid #E5E5E5', color: '#666', padding: '7px 14px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
+                  Regenerate
+                </button>
+              </div>
+            </div>
+            {MEDIA_SECTIONS.map(({ num, key, title, sub }) => {
+              const content = parsed[key]
+              if (!content) return null
+              const isGold = [3, 7, 12, 13].includes(num)
+              return (
+                <div key={key} style={{ ...card, padding: '26px', marginBottom: '12px', borderColor: isGold ? '#E5DABB' : '#EAEAEA' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '24px', height: '24px', borderRadius: '6px', background: isGold ? '#D4AF3718' : '#F5F5F5', border: `1px solid ${isGold ? '#D4AF3740' : '#EAEAEA'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <span style={{ fontSize: '11px', fontWeight: '700', color: isGold ? GOLD : '#999' }}>{num}</span>
+                      </div>
+                      <h2 style={{ fontSize: '15px', fontWeight: '600', margin: 0, color: isGold ? GOLD : '#171717' }}>{title}</h2>
+                    </div>
+                    <CopyBtn onClick={() => handleCopy(`media_${key}`, content)} copied={!!copied[`media_${key}`]} />
+                  </div>
+                  <p style={{ fontSize: '12px', color: '#999', margin: '4px 0 16px 34px' }}>{sub}</p>
+                  <div>{renderBlock(content)}</div>
+                </div>
+              )
+            })}
+          </>
+        )
+      })()}
     </div>
   )
 
