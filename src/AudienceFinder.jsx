@@ -15,13 +15,28 @@ const BUSINESS_TYPES = [
   'Entertainment / Media','NGO / Non-profit','Other',
 ]
 
+const INDUSTRIES = [
+  'Hospitality (Hotels, Restaurants, Cafes)','Schools & Education','Healthcare & Clinics',
+  'Real Estate','Retail & Fashion','Food & Beverage','Wellness & Fitness','Wedding & Events',
+  'Auto & Transport','Professional Services','Coaching & Tutoring','Jewellery & Accessories',
+  'Interior Design & Architecture','Photography & Videography','Legal & CA Services',
+  'IT & Software Companies','Travel & Tourism','Salon & Beauty','Gym & Sports Academy',
+  'NGO & Social Enterprise','Agriculture & Dairy','Logistics & Transport','Printing & Packaging',
+  'Construction & Builders','Media & Entertainment','Other',
+]
+
 export default function AudienceFinder() {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
   const [form, setForm] = useState({ url: '', niche: '', business_type: '', offer: '', platform: 'Both', language: 'Hinglish' })
+  const [targetIndustry, setTargetIndustry] = useState('')
+  const [targetIndustryOther, setTargetIndustryOther] = useState('')
+  const [targetCity, setTargetCity] = useState('Jaipur')
   const [result, setResult] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [copied, setCopied] = useState(false)
+
+  const resolvedIndustry = targetIndustry === 'Other' ? targetIndustryOther : targetIndustry
 
   const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value })
 
@@ -30,7 +45,7 @@ export default function AudienceFinder() {
     if (!form.url.trim() && !form.niche.trim()) { setError('URL ya Niche — kuch toh do!'); return }
     setError(''); setLoading(true); setResult('')
     try {
-      const res = await fetch(`${API}/audience-finder`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
+      const res = await fetch(`${API}/audience-finder`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...form, target_industry: resolvedIndustry, target_city: targetCity }) })
       const data = await res.json()
       if (data.success) setResult(data.audience)
       else setError(data.message || 'Kuch toh gadbad hai, dobara try karo.')
@@ -49,6 +64,39 @@ export default function AudienceFinder() {
 
       <div style={{ maxWidth: '600px', width: '100%' }}>
         <div style={{ ...card, padding: isMobile ? '20px 16px' : '28px', marginBottom: '16px' }}>
+
+          <p style={{ fontSize: '11px', color: GOLD, fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 14px' }}>B2B Industry Campaign (Optional)</p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '8px' }}>
+            <div>
+              <label style={lbl}>Target Industry</label>
+              <select value={targetIndustry} onChange={e => setTargetIndustry(e.target.value)} style={{ ...inputSt, color: targetIndustry ? '#171717' : '#999' }}>
+                <option value="">— Select (optional) —</option>
+                {INDUSTRIES.map(o => <option key={o} value={o}>{o}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={lbl}>Target City</label>
+              <input type="text" value={targetCity} onChange={e => setTargetCity(e.target.value)} placeholder="e.g. Jaipur" style={inputSt} />
+            </div>
+          </div>
+
+          {targetIndustry === 'Other' && (
+            <div style={{ marginBottom: '8px' }}>
+              <label style={lbl}>Specify Industry</label>
+              <input type="text" value={targetIndustryOther} onChange={e => setTargetIndustryOther(e.target.value)} placeholder="e.g. Interior Designers" style={inputSt} />
+            </div>
+          )}
+
+          {targetIndustry && (
+            <div style={{ background: '#D4AF3710', border: '1px solid #D4AF3730', borderRadius: '7px', padding: '10px 13px', marginBottom: '16px', fontSize: '12px', color: GOLD }}>
+              B2B mode: Audience report will target owners/managers of {resolvedIndustry || targetIndustry} businesses in {targetCity || 'India'}
+            </div>
+          )}
+
+          {!targetIndustry && <div style={{ marginBottom: '20px' }} />}
+
+          <p style={{ fontSize: '11px', color: GOLD, fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 14px' }}>Aapka Business</p>
 
           <div style={{ marginBottom: '16px' }}>
             <label style={lbl}>Website URL <span style={{ color: '#CCC', fontWeight: '400', textTransform: 'none', letterSpacing: 0 }}>(optional agar Niche doge)</span></label>
@@ -93,7 +141,7 @@ export default function AudienceFinder() {
           {error && <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '10px 14px', color: '#BE123C', fontSize: '13px', marginBottom: '16px' }}>{error}</div>}
 
           <button onClick={handleSubmit} disabled={loading} style={{ width: '100%', padding: '13px', borderRadius: '8px', border: 'none', background: loading ? '#999' : '#171717', color: '#fff', fontWeight: '600', fontSize: '14px', cursor: loading ? 'not-allowed' : 'pointer' }}>
-            {loading ? 'Audience dhundh raha hoon...' : 'Find My Audience'}
+            {loading ? 'Audience dhundh raha hoon...' : resolvedIndustry ? `Find ${resolvedIndustry} Business Owners` : 'Find My Audience'}
           </button>
         </div>
 

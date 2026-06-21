@@ -421,7 +421,7 @@ function MarketingBrain() {
               <label style={lbl}>Target Industry</label>
               <select value={targetIndustry} onChange={e => setTargetIndustry(e.target.value)} style={{ ...inputSt, color: targetIndustry ? '#171717' : '#999' }}>
                 <option value="">— Select (optional) —</option>
-                {['Hospitality (Hotels, Restaurants, Cafes)','Schools & Education','Healthcare & Clinics','Real Estate','Retail & Fashion','Food & Beverage','Wellness & Fitness','Wedding & Events','Auto & Transport','Professional Services','Other'].map(o => <option key={o} value={o}>{o}</option>)}
+                {['Hospitality (Hotels, Restaurants, Cafes)','Schools & Education','Healthcare & Clinics','Real Estate','Retail & Fashion','Food & Beverage','Wellness & Fitness','Wedding & Events','Auto & Transport','Professional Services','Coaching & Tutoring','Jewellery & Accessories','Interior Design & Architecture','Photography & Videography','Legal & CA Services','IT & Software Companies','Travel & Tourism','Salon & Beauty','Gym & Sports Academy','NGO & Social Enterprise','Agriculture & Dairy','Logistics & Transport','Printing & Packaging','Construction & Builders','Media & Entertainment','Other'].map(o => <option key={o} value={o}>{o}</option>)}
               </select>
             </div>
             <div>
