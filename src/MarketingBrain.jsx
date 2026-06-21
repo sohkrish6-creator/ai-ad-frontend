@@ -75,12 +75,17 @@ function MarketingBrain() {
   const [language, setLanguage] = useState('Hinglish')
   const [compName, setCompName] = useState('')
   const [compWebsite, setCompWebsite] = useState('')
+  const [targetIndustry, setTargetIndustry] = useState('')
+  const [targetIndustryOther, setTargetIndustryOther] = useState('')
+  const [targetCity, setTargetCity] = useState('Jaipur')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
   const [copied, setCopied] = useState({})
 
   const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+
+  const resolvedIndustry = targetIndustry === 'Other' ? targetIndustryOther : targetIndustry
 
   async function handleRun() {
     if (!url || !businessType || !budget || !goal) { alert('Website, business type, budget aur goal bharo!'); return }
@@ -89,7 +94,7 @@ function MarketingBrain() {
       const res = await fetch(`${BACKEND}/full-report`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, business_type: businessType, budget: parseInt(budget), goal, competitor_name: compName, competitor_website: compWebsite, language })
+        body: JSON.stringify({ url, business_type: businessType, budget: parseInt(budget), goal, competitor_name: compName, competitor_website: compWebsite, language, target_industry: resolvedIndustry, target_city: targetCity })
       })
       const data = await res.json()
       if (data.scan_failed) setError(data.message)
@@ -334,7 +339,7 @@ function MarketingBrain() {
         <div>
           <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Marketing Brain</h1>
           <p style={{ color: '#999', fontSize: '13px', margin: 0 }}>
-            {result.url} — full report ready
+            {result.url} — {result.target_industry ? `B2B campaign for ${result.target_industry}` : 'full report'} ready
             {result.bi_cached != null && (
               <span style={{ marginLeft: '8px', color: result.bi_cached ? '#22C55E' : GOLD, fontSize: '11px', fontWeight: '600' }}>
                 {result.bi_cached ? '· BI cached' : '· fresh BI scan'}
@@ -409,6 +414,37 @@ function MarketingBrain() {
         <div style={{ ...card, padding: '28px' }}>
           {error && <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '20px', color: '#BE123C', fontSize: '13px' }}>{error}</div>}
 
+          <p style={{ fontSize: '11px', color: GOLD, fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 14px' }}>B2B Industry Campaign (Optional)</p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '8px' }}>
+            <div>
+              <label style={lbl}>Target Industry</label>
+              <select value={targetIndustry} onChange={e => setTargetIndustry(e.target.value)} style={{ ...inputSt, color: targetIndustry ? '#171717' : '#999' }}>
+                <option value="">— Select (optional) —</option>
+                {['Hospitality (Hotels, Restaurants, Cafes)','Schools & Education','Healthcare & Clinics','Real Estate','Retail & Fashion','Food & Beverage','Wellness & Fitness','Wedding & Events','Auto & Transport','Professional Services','Other'].map(o => <option key={o} value={o}>{o}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={lbl}>Target City</label>
+              <input type="text" value={targetCity} onChange={e => setTargetCity(e.target.value)} placeholder="e.g. Jaipur" style={inputSt} />
+            </div>
+          </div>
+
+          {targetIndustry === 'Other' && (
+            <div style={{ marginBottom: '8px' }}>
+              <label style={lbl}>Specify Industry</label>
+              <input type="text" value={targetIndustryOther} onChange={e => setTargetIndustryOther(e.target.value)} placeholder="e.g. Interior Designers" style={inputSt} />
+            </div>
+          )}
+
+          {targetIndustry && (
+            <div style={{ background: '#D4AF3710', border: '1px solid #D4AF3730', borderRadius: '7px', padding: '10px 13px', marginBottom: '20px', fontSize: '12px', color: GOLD }}>
+              B2B mode: Report will target owners/managers of {resolvedIndustry || targetIndustry} businesses in {targetCity || 'India'} — outreach scripts, pain points, where to find leads
+            </div>
+          )}
+
+          {!targetIndustry && <div style={{ marginBottom: '20px' }} />}
+
           <p style={{ fontSize: '11px', color: GOLD, fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 14px' }}>Aapka Business</p>
 
           <div style={{ marginBottom: '16px' }}>
@@ -458,7 +494,7 @@ function MarketingBrain() {
           </div>
 
           <button onClick={handleRun} style={{ width: '100%', padding: '13px', borderRadius: '8px', border: 'none', background: '#171717', color: '#fff', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
-            Generate Full Marketing Report
+            {resolvedIndustry ? `Generate Industry Campaign — ${resolvedIndustry}` : 'Generate Full Marketing Report'}
           </button>
         </div>
       </div>
