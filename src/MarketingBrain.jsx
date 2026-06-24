@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Copy, Check, ExternalLink, Download, TrendingUp } from 'lucide-react'
+import { Copy, Check, ExternalLink, Download, TrendingUp, Rocket } from 'lucide-react'
 
 const FONT = '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif'
 const GOLD = '#D4AF37'
@@ -112,6 +112,10 @@ function MarketingBrain() {
   const [mediaPlan, setMediaPlan] = useState(null)
   const [mediaLoading, setMediaLoading] = useState(false)
   const [mediaError, setMediaError] = useState(null)
+  const [launchKit, setLaunchKit] = useState(null)
+  const [launchLoading, setLaunchLoading] = useState(false)
+  const [launchError, setLaunchError] = useState(null)
+  const [launchTab, setLaunchTab] = useState('meta')
 
   const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 
@@ -166,6 +170,39 @@ function MarketingBrain() {
       else setMediaError('Media buying plan generate nahi hua. Dobara try karo.')
     } catch { setMediaError('Backend se connect nahi ho paya.') }
     setMediaLoading(false)
+  }
+
+  async function handleLaunchKit() {
+    if (!result) return
+    setLaunchLoading(true); setLaunchError(null); setLaunchKit(null); setLaunchTab('meta')
+    try {
+      const res = await fetch(`${BACKEND}/campaign-launch-kit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url,
+          industry: resolvedIndustry || businessType,
+          city: targetCity,
+          budget: parseInt(budget),
+          goal,
+          language,
+          sections: result.sections || {},
+        })
+      })
+      const data = await res.json()
+      if (data.success) setLaunchKit(data)
+      else setLaunchError('Campaign Launch Kit generate nahi hua. Dobara try karo.')
+    } catch { setLaunchError('Backend se connect nahi ho paya.') }
+    setLaunchLoading(false)
+  }
+
+  function downloadTxt(text, filename) {
+    const blob = new Blob([text], { type: 'text/plain' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = filename
+    a.click()
+    URL.revokeObjectURL(a.href)
   }
 
   const downloadMediaPDF = async () => {
@@ -550,7 +587,7 @@ function MarketingBrain() {
             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: GOLD, animation: 'pulse 1s ease-in-out infinite alternate' }} />
             <p style={{ color: '#666', fontSize: '14px', margin: 0, fontWeight: '500' }}>Generating Media Buying Plan...</p>
           </div>
-          <p style={{ color: '#BBB', fontSize: '12px', margin: '8px 0 0' }}>13 sections — budget split, playbook, benchmarks</p>
+          <p style={{ color: '#BBB', fontSize: '12px', margin: '8px 0 0' }}>8 sections — budget split, scaling rules, benchmarks</p>
         </div>
       )}
 
@@ -598,6 +635,89 @@ function MarketingBrain() {
                 </div>
               )
             })}
+          </>
+        )
+      })()}
+
+      {/* Campaign Launch Kit CTA */}
+      {!launchKit && !launchLoading && (
+        <div style={{ ...card, padding: '24px', marginBottom: '12px', borderColor: '#E5DABB', background: '#FFFDF5' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+            <div>
+              <h2 style={{ fontSize: '15px', fontWeight: '600', margin: '0 0 4px', color: '#171717' }}>Campaign Launch Kit</h2>
+              <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>Ready-to-paste Meta Ads + Google Ads + Remarketing kit — audiences, copy, keywords, budgets</p>
+            </div>
+            <button onClick={handleLaunchKit} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: GOLD, border: 'none', color: '#fff', padding: '10px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', flexShrink: 0 }}>
+              <Rocket size={14} /> Generate Campaign Launch Kit
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Campaign Launch Kit Loading */}
+      {launchLoading && (
+        <div style={{ ...card, padding: '28px', marginBottom: '12px', borderColor: '#E5DABB', textAlign: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: GOLD, animation: 'pulse 1s ease-in-out infinite alternate' }} />
+            <p style={{ color: '#666', fontSize: '14px', margin: 0, fontWeight: '500' }}>Building Campaign Launch Kit...</p>
+          </div>
+          <p style={{ color: '#BBB', fontSize: '12px', margin: '8px 0 0' }}>Meta Ads, Google Ads + Remarketing — copy-paste ready</p>
+        </div>
+      )}
+
+      {/* Campaign Launch Kit Error */}
+      {launchError && (
+        <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '8px', padding: '14px 18px', marginBottom: '12px', color: '#BE123C', fontSize: '13px' }}>{launchError}</div>
+      )}
+
+      {/* Campaign Launch Kit Results */}
+      {launchKit && (() => {
+        const tabs = [
+          { id: 'meta',        label: 'Meta Ads',    content: launchKit.meta_kit,        filename: 'meta-ads-launch-kit.txt' },
+          { id: 'google',      label: 'Google Ads',  content: launchKit.google_kit,       filename: 'google-ads-launch-kit.txt' },
+          { id: 'remarketing', label: 'Remarketing', content: launchKit.remarketing_kit,  filename: 'remarketing-kit.txt' },
+        ]
+        const active = tabs.find(t => t.id === launchTab) || tabs[0]
+        return (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '28px 0 16px', flexWrap: 'wrap', gap: '10px' }}>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: '600', margin: '0 0 3px', color: GOLD, letterSpacing: '-0.3px' }}>Campaign Launch Kit</h2>
+                <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>Ready to paste into Meta Ads Manager and Google Ads</p>
+              </div>
+              <button onClick={() => { setLaunchKit(null); setLaunchError(null) }} style={{ background: 'transparent', border: '1px solid #E5E5E5', color: '#666', padding: '7px 14px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
+                Regenerate
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <div style={{ display: 'flex', gap: '6px', marginBottom: '16px' }}>
+              {tabs.map(t => (
+                <button key={t.id} onClick={() => setLaunchTab(t.id)} style={{
+                  padding: '8px 18px', borderRadius: '7px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', border: 'none',
+                  background: launchTab === t.id ? GOLD : '#F5F5F5',
+                  color: launchTab === t.id ? '#fff' : '#666',
+                }}>
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Kit Content */}
+            <div style={{ ...card, padding: '0', marginBottom: '12px', borderColor: '#E5DABB', overflow: 'hidden' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', padding: '12px 16px', borderBottom: '1px solid #EAEAEA', background: '#FAFAFA' }}>
+                <button onClick={() => handleCopy(`kit_${active.id}`, active.content)} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: copied[`kit_${active.id}`] ? '#16A34A' : '#F5F5F5', border: '1px solid #E5E5E5', color: copied[`kit_${active.id}`] ? '#fff' : '#666', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>
+                  {copied[`kit_${active.id}`] ? <Check size={11} /> : <Copy size={11} />}
+                  {copied[`kit_${active.id}`] ? 'Copied!' : 'Copy'}
+                </button>
+                <button onClick={() => downloadTxt(active.content, active.filename)} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#D4AF3712', border: '1px solid #D4AF3730', color: GOLD, padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>
+                  <Download size={11} /> Download TXT
+                </button>
+              </div>
+              <pre style={{ margin: 0, padding: '20px', fontFamily: '"Geist Mono", "JetBrains Mono", "Fira Code", monospace', fontSize: '12.5px', lineHeight: '1.7', color: '#171717', whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: '#fff', maxHeight: '600px', overflowY: 'auto' }}>
+                {active.content}
+              </pre>
+            </div>
           </>
         )
       })()}
