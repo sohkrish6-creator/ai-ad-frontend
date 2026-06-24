@@ -8,33 +8,28 @@ const inputSt = { width: '100%', padding: '10px 13px', borderRadius: '7px', bord
 const lbl = { display: 'block', color: '#999', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '7px' }
 
 const SECTIONS = [
-  { key: 'business_understanding',  num: 1,  title: 'Business Understanding',          sub: 'UVP, trust signals, detected industry, core products from BI',          fallback: 'strategy',       gold: false },
-  { key: 'market_understanding',    num: 2,  title: 'Market Understanding',            sub: 'Market size, growth, saturation, real opportunity gaps',                 fallback: null,             gold: false },
-  { key: 'competitor_insights',     num: 3,  title: 'Competitor Insights',             sub: 'Competitor landscape, strengths, weaknesses, positioning gaps',           fallback: 'competitor',     gold: false },
-  { key: 'positioning_strategy',    num: 4,  title: 'Positioning Strategy',            sub: 'Market position to own, category opportunity, messaging shift',           fallback: null,             gold: true  },
-  { key: 'audience_strategy',       num: 5,  title: 'Audience Strategy',               sub: '3 validated segments with pain points, desires, BI evidence',             fallback: 'audience',       gold: false },
-  { key: 'safe_strategy',           num: 6,  title: 'Safe Industry Strategy',          sub: 'Proven approach, budget split, reliable platforms and formats',            fallback: null,             gold: false },
-  { key: 'competitive_advantage',   num: 7,  title: 'Competitive Advantage Strategy',  sub: 'Ads built on BI strengths and competitor gaps specifically',               fallback: null,             gold: false },
-  { key: 'category_dominating',     num: 8,  title: 'Category Dominating Strategy',    sub: 'Positioning-led brand strategy to own the market category',               fallback: null,             gold: true  },
-  { key: 'marketing_plan',          num: 9,  title: 'Full Marketing Plan',             sub: 'Google Ads, Meta Ads, remarketing sequences, landing page tips',           fallback: 'strategy',       gold: false },
-  { key: 'ad_assets',               num: 10, title: 'Ad Assets',                       sub: 'Headlines, descriptions, hook lines, creative briefs',                    fallback: 'smart_creative', gold: false },
-  { key: 'revenue_recommendations', num: 11, title: 'Revenue Recommendations',         sub: 'Highest ROI actions, fastest revenue path, offer structure, quick wins',  fallback: null,             gold: true  },
+  { key: 'business_understanding', num: 1,  title: 'Business Understanding', sub: 'UVP, trust signals, detected industry, core products from BI',                        fallback: 'strategy',       gold: false },
+  { key: 'market_understanding',   num: 2,  title: 'Market Understanding',   sub: 'Market size, growth, saturation, real opportunity gaps',                               fallback: null,             gold: false },
+  { key: 'competitor_insights',    num: 3,  title: 'Competitor Insights',    sub: 'Competitor landscape, strengths, weaknesses, positioning gaps',                         fallback: 'competitor',     gold: false },
+  { key: 'positioning_strategy',   num: 4,  title: 'Positioning Strategy',   sub: 'Market position to own, category opportunity, messaging shift',                         fallback: null,             gold: true  },
+  { key: 'audience_strategy',      num: 5,  title: 'Audience Strategy',      sub: 'Buyer intelligence — pain points, income, search behavior, online hangouts',            fallback: 'audience',       gold: false },
+  { key: 'lead_sources',           num: 6,  title: 'Lead Sources',           sub: 'Google Maps terms, hashtags, FB groups, directories, seasonal timing',                 fallback: null,             gold: false },
+  { key: 'outreach_scripts',       num: 7,  title: 'Outreach Scripts',       sub: 'WhatsApp x2, Instagram DM, Cold Call, objection handling',                             fallback: null,             gold: false },
+  { key: 'pitch_close',            num: 8,  title: 'Pitch & Close',          sub: 'Meeting agenda, key questions, closing offer, follow-up Day 1/3/7',                    fallback: null,             gold: true  },
+  { key: 'marketing_plan',         num: 9,  title: 'Marketing Plan',         sub: 'Google Ads keywords, Meta targeting, remarketing sequences, landing page tips',         fallback: 'strategy',       gold: false },
+  { key: 'ad_assets',              num: 10, title: 'Ad Assets',              sub: 'Headlines, descriptions, hook lines, CTAs, creative briefs',                           fallback: 'smart_creative', gold: false },
+  { key: 'media_buying_plan',      num: 11, title: 'Media Buying Plan',      sub: 'Campaign objective, platform priority, budget split, bid strategy, scaling rules, benchmarks', fallback: null, gold: true  },
 ]
 
 const MEDIA_SECTIONS = [
-  { num: 1,  key: 'campaign_objective',       header: 'CAMPAIGN OBJECTIVE:',        title: 'Campaign Objective',        sub: 'Primary goal and why' },
-  { num: 2,  key: 'platform_recommendations', header: 'PLATFORM RECOMMENDATIONS:',  title: 'Platform Recommendations',  sub: 'Platform priority ranking with reasoning' },
-  { num: 3,  key: 'budget_allocation',        header: 'BUDGET ALLOCATION:',         title: 'Budget Allocation',         sub: 'Monthly/daily budget + platform split' },
-  { num: 4,  key: 'bid_strategy',             header: 'BID STRATEGY:',              title: 'Bid Strategy',              sub: 'Recommended bid strategy and why' },
-  { num: 5,  key: 'launch_plan',              header: 'LAUNCH PLAN:',               title: 'Launch Plan',               sub: 'Launch date and pre-launch checklist' },
-  { num: 6,  key: 'learning_phase',           header: 'LEARNING PHASE:',            title: 'Learning Phase',            sub: 'Duration, minimum data, when not to judge' },
-  { num: 7,  key: 'scaling_plan',             header: 'SCALING PLAN:',              title: 'Scaling Plan',              sub: 'When and how to scale safely vs aggressively' },
-  { num: 8,  key: 'pause_rules',              header: 'PAUSE RULES:',               title: 'Pause Rules',               sub: 'Conditions to pause ads' },
-  { num: 9,  key: 'stop_rules',               header: 'STOP RULES:',                title: 'Stop Rules',                sub: 'When to stop campaign entirely' },
-  { num: 10, key: 'optimization_plan',        header: 'OPTIMIZATION PLAN:',         title: 'Optimization Plan',         sub: 'Audience, creative, landing page, offer, budget checklist' },
-  { num: 11, key: 'risk_analysis',            header: 'RISK ANALYSIS:',             title: 'Risk Analysis',             sub: 'Risk level + top risks to watch' },
-  { num: 12, key: 'media_buyer_playbook',     header: 'MEDIA BUYER PLAYBOOK:',      title: 'Media Buyer Playbook',      sub: 'Day 1 → Day 3 → Day 7 → Day 14 → Day 30 actions' },
-  { num: 13, key: 'industry_benchmarks',      header: 'INDUSTRY BENCHMARKS:',       title: 'Industry Benchmarks',       sub: 'CTR, CPC, CPA, conversion rate ranges for this industry' },
+  { num: 1, key: 'campaign_objective',       header: 'CAMPAIGN OBJECTIVE:',       title: 'Campaign Objective',   sub: 'Primary goal and why' },
+  { num: 2, key: 'platform_recommendations', header: 'PLATFORM RECOMMENDATIONS:', title: 'Platform Priority',    sub: 'Platform ranking with reasoning' },
+  { num: 3, key: 'budget_allocation',        header: 'BUDGET ALLOCATION:',        title: 'Budget Split',         sub: 'Monthly/daily budget + platform allocation' },
+  { num: 4, key: 'bid_strategy',             header: 'BID STRATEGY:',             title: 'Bid Strategy',         sub: 'Recommended bid strategy and why' },
+  { num: 5, key: 'launch_plan',              header: 'LAUNCH PLAN:',              title: 'Launch Plan',          sub: 'Launch date and pre-launch checklist' },
+  { num: 6, key: 'scaling_plan',             header: 'SCALING PLAN:',             title: 'Scaling Rules',        sub: 'When and how to scale — conditions and thresholds' },
+  { num: 7, key: 'pause_rules',              header: 'PAUSE RULES:',              title: 'Pause Rules',          sub: 'Exact conditions to pause ads' },
+  { num: 8, key: 'industry_benchmarks',      header: 'INDUSTRY BENCHMARKS:',      title: 'Benchmarks',           sub: 'CTR, CPC, CPA, conversion rate ranges for this industry' },
 ]
 
 function parseMediaPlan(text) {
@@ -123,7 +118,7 @@ function MarketingBrain() {
   const resolvedIndustry = targetIndustry === 'Other' ? targetIndustryOther : targetIndustry
 
   async function handleRun() {
-    if (!url || !businessType || !budget || !goal) { alert('Website, business type, budget aur goal bharo!'); return }
+    if ((!url && !resolvedIndustry) || !businessType || !budget || !goal) { alert(resolvedIndustry ? 'Business type, budget aur goal bharo!' : 'Website, business type, budget aur goal bharo!'); return }
     setLoading(true); setError(null); setResult(null)
     try {
       const res = await fetch(`${BACKEND}/full-report`, {
@@ -417,8 +412,8 @@ function MarketingBrain() {
         y += 8
       }
 
-      // ── AD INTEL SECTION ───────────────────────────────────────────────
-      if (result.ad_guide) {
+      // ── (Ad Intelligence removed) ──────────────────────────────────────
+      if (false && result.ad_guide) {
         addPage()
         sectionHeader('★', 'Ad Intelligence')
         wrapText(result.ad_guide, M, { sz: 8.5, col: C.mid })
@@ -449,7 +444,7 @@ function MarketingBrain() {
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Marketing Brain</h1>
       <p style={{ color: '#999', fontSize: '13px', margin: '0 0 24px' }}>BI scan + 4 engines running in parallel...</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        {['Business Intelligence Scan', 'Business & Market Analysis', 'Audience & Strategies', 'Marketing Plan & Ad Assets', 'Ad Intelligence'].map((label, i) => (
+        {['Business Intelligence Scan', 'Business & Market Analysis', 'Audience & Outreach', 'Marketing Plan & Ad Assets', 'Media Buying Plan'].map((label, i) => (
           <div key={label} style={{ ...card, padding: '18px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
             <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#F5F5F5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <span style={{ fontSize: '12px', color: '#BBB', fontWeight: '700' }}>{i + 1}</span>
@@ -462,7 +457,7 @@ function MarketingBrain() {
           </div>
         ))}
       </div>
-      <p style={{ color: '#BBB', fontSize: '12px', margin: '16px 0 0', textAlign: 'center' }}>2–3 minutes · BI scan + 11 sections generating</p>
+      <p style={{ color: '#BBB', fontSize: '12px', margin: '16px 0 0', textAlign: 'center' }}>2–3 minutes · BI scan + Growth OS V3 generating</p>
     </div>
   )
 
@@ -514,14 +509,10 @@ function MarketingBrain() {
         )
       })}
 
-      {/* Ad Intelligence — Meta + Google links + guide */}
-      <div style={{ ...card, padding: '26px', marginBottom: '12px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-          <h2 style={{ fontSize: '15px', fontWeight: '600', margin: 0, color: '#171717' }}>Ad Intelligence</h2>
-          {result.ad_guide && <CopyBtn onClick={() => handleCopy('ad_guide', result.ad_guide)} copied={!!copied['ad_guide']} />}
-        </div>
-        <p style={{ fontSize: '12px', color: '#999', margin: '4px 0 16px' }}>Competitor ke live ads + BI-based winning angle</p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: result.ad_guide ? '18px' : '0' }}>
+      {/* Competitor Ad Links */}
+      <div style={{ ...card, padding: '20px', marginBottom: '12px' }}>
+        <h2 style={{ fontSize: '14px', fontWeight: '600', margin: '0 0 12px', color: '#171717' }}>Live Competitor Ads</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {[
             { href: result.meta_ad_library_link, label: 'Facebook & Instagram Live Ads', color: '#1877F2' },
             { href: result.google_ads_link,      label: 'Google Ads Transparency',       color: '#34A853' },
@@ -535,7 +526,6 @@ function MarketingBrain() {
             </a>
           ))}
         </div>
-        {result.ad_guide && renderBlock(result.ad_guide)}
       </div>
 
       {/* Media Buying Plan CTA */}
@@ -544,7 +534,7 @@ function MarketingBrain() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
             <div>
               <h2 style={{ fontSize: '15px', fontWeight: '600', margin: '0 0 4px', color: '#171717' }}>Media Buying Plan</h2>
-              <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>13-section plan — platform priorities, budget split, bid strategy, Day 1→30 playbook</p>
+              <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>Detailed 8-section plan — platform priorities, budget split, bid strategy, scaling rules, benchmarks</p>
             </div>
             <button onClick={handleMediaBuyingPlan} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: GOLD, border: 'none', color: '#fff', padding: '10px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', flexShrink: 0 }}>
               <TrendingUp size={14} /> Generate Media Buying Plan
@@ -618,7 +608,7 @@ function MarketingBrain() {
     <div style={page}>
       <style>{`@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }`}</style>
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Marketing Brain</h1>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 32px' }}>Ek baar daalo — BI scan + 11 section full marketing report, sab ek saath</p>
+      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 32px' }}>Ek baar daalo — BI scan + Growth OS V3 report (11 sections), sab ek saath</p>
 
       <div style={{ maxWidth: '560px', width: '100%' }}>
         <div style={{ ...card, padding: '28px' }}>
@@ -660,6 +650,11 @@ function MarketingBrain() {
           <div style={{ marginBottom: '16px' }}>
             <label style={lbl}>Website URL</label>
             <input type="url" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://aapkibusiness.com" style={inputSt} />
+            {targetIndustry && (
+              <div style={{ fontSize: '12px', color: '#888', fontStyle: 'italic', marginTop: '4px' }}>
+                URL optional in B2B mode — leave blank for pure industry analysis
+              </div>
+            )}
           </div>
 
           <div style={{ marginBottom: '16px' }}>
