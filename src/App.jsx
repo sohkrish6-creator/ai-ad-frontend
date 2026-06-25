@@ -8,6 +8,7 @@ import MarketingBrain from './MarketingBrain'
 import AdCreative from './AdCreative'
 import AudienceFinder from './AudienceFinder'
 import Intelligence from './Intelligence'
+import YouTube from './YouTube'
 import Nav from './Nav'
 
 function Layout() {
@@ -38,6 +39,7 @@ function Layout() {
           <Route path="/competitor" element={<Competitor />} />
           <Route path="/ad-intel" element={<AdIntel />} />
           <Route path="/leads" element={<Leads />} />
+          <Route path="/youtube" element={<YouTube />} />
         </Routes>
       </div>
     </div>
