@@ -52,7 +52,7 @@ function Nav() {
             position: 'absolute', left: '50%', transform: 'translateX(-50%)',
             pointerEvents: 'none',
           }}>
-            <span style={{ color: GOLD, marginRight: '5px' }}>✦</span>AI Ad Manager
+            <span style={{ color: GOLD, marginRight: '5px' }}>✦</span>Adsoh
           </span>
           <div style={{ width: '32px' }} />
         </div>
@@ -83,7 +83,7 @@ function Nav() {
           {/* Drawer header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 4px 22px' }}>
             <span style={{ fontSize: '14px', fontWeight: '600', letterSpacing: '-0.3px', color: '#171717' }}>
-              <span style={{ color: GOLD, marginRight: '5px' }}>✦</span>AI Ad Manager
+              <span style={{ color: GOLD, marginRight: '5px' }}>✦</span>Adsoh
             </span>
             <button
               onClick={() => setDrawerOpen(false)}
@@ -151,7 +151,7 @@ function Nav() {
       }}>
         <div style={{ padding: '4px 10px 28px' }}>
           <span style={{ fontSize: '14px', fontWeight: '600', letterSpacing: '-0.3px', color: '#171717' }}>
-            <span style={{ color: GOLD, marginRight: '6px' }}>✦</span>AI Ad Manager
+            <span style={{ color: GOLD, marginRight: '6px' }}>✦</span>Adsoh
           </span>
         </div>
 

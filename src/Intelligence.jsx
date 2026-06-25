@@ -310,7 +310,7 @@ function Intelligence() {
         if (dna.detected_industry) tt(`${dna.detected_industry}${dna.detected_sub_industry?' · '+dna.detected_sub_industry:''}`, W/2, 197, { sz:8.5, col:C.muted, align:'center' })
         const evStats = `${ev.pages_fetched||0} pages crawled · ${ev.evidence_points||0} evidence points · ${Math.round((ev.avg_confidence||0)*100)}% confidence`
         tt(evStats, W/2, PH-28, { sz:8, col:C.dim, align:'center' })
-        tt('Powered by Sohscape AI  ·  Confidential', W/2, PH-20, { sz:8, col:C.dim, align:'center' })
+        tt('Powered by Adsoh  ·  Confidential', W/2, PH-20, { sz:8, col:C.dim, align:'center' })
 
         // ── PAGE 2: DNA + OPPORTUNITY ──────────────────────────────────────────
         addPage()
@@ -498,7 +498,7 @@ function Intelligence() {
         for (let p = 1; p <= totalPg; p++) {
           doc.setPage(p)
           doc.setFontSize(7); doc.setTextColor(...C.dim); doc.setFont('helvetica','normal')
-          doc.text('Sohscape · Business Intelligence Report · Confidential', M, PH-7)
+          doc.text('Adsoh · Business Intelligence Report · Confidential', M, PH-7)
           doc.text(`${p} / ${totalPg}`, W-M, PH-7, { align:'right' })
         }
 

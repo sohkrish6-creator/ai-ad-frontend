@@ -266,7 +266,7 @@ function MarketingBrain() {
       for (let p = 1; p <= totalPg; p++) {
         doc.setPage(p)
         doc.setFontSize(7); doc.setTextColor(...C.muted); doc.setFont('helvetica', 'normal')
-        doc.text('Sohscape · Media Buying Plan · Confidential', M, PH - 8)
+        doc.text('Adsoh · Media Buying Plan · Confidential', M, PH - 8)
         doc.text(`${p} / ${totalPg}`, W - M, PH - 8, { align: 'right' })
       }
       const fname = `Media-Buying-Plan-${(url || 'report').replace(/[^a-zA-Z0-9]/g, '-').slice(0, 30)}-${new Date().toISOString().split('T')[0]}.pdf`
@@ -378,7 +378,7 @@ function MarketingBrain() {
         tt(badge, W / 2, 142, { sz: 8, col: C.gold, align: 'center' })
       }
 
-      tt('Powered by Sohscape AI  ·  Confidential', W / 2, PH - 22, { sz: 8, col: C.muted, align: 'center' })
+      tt('Powered by Adsoh  ·  Confidential', W / 2, PH - 22, { sz: 8, col: C.muted, align: 'center' })
 
       // ── SECTION PAGES ──────────────────────────────────────────────────
       addPage()
@@ -461,7 +461,7 @@ function MarketingBrain() {
       for (let p = 1; p <= totalPg; p++) {
         doc.setPage(p)
         doc.setFontSize(7); doc.setTextColor(...C.muted); doc.setFont('helvetica', 'normal')
-        doc.text('Sohscape · Marketing Intelligence Report · Confidential', M, PH - 8)
+        doc.text('Adsoh · Marketing Intelligence Report · Confidential', M, PH - 8)
         doc.text(`${p} / ${totalPg}`, W - M, PH - 8, { align: 'right' })
       }
 
@@ -494,7 +494,7 @@ function MarketingBrain() {
           </div>
         ))}
       </div>
-      <p style={{ color: '#BBB', fontSize: '12px', margin: '16px 0 0', textAlign: 'center' }}>2–3 minutes · BI scan + Growth OS V3 generating</p>
+      <p style={{ color: '#BBB', fontSize: '12px', margin: '16px 0 0', textAlign: 'center' }}>2–3 minutes · BI scan + Adsoh generating</p>
     </div>
   )
 
@@ -728,7 +728,7 @@ function MarketingBrain() {
     <div style={page}>
       <style>{`@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }`}</style>
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Marketing Brain</h1>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 32px' }}>Ek baar daalo — BI scan + Growth OS V3 report (11 sections), sab ek saath</p>
+      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 32px' }}>Ek baar daalo — BI scan + Adsoh report (11 sections), sab ek saath</p>
 
       <div style={{ maxWidth: '560px', width: '100%' }}>
         <div style={{ ...card, padding: '28px' }}>
