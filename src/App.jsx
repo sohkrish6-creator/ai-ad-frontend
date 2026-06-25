@@ -9,6 +9,7 @@ import AdCreative from './AdCreative'
 import AudienceFinder from './AudienceFinder'
 import Intelligence from './Intelligence'
 import YouTube from './YouTube'
+import OpportunityEngine from './OpportunityEngine'
 import Nav from './Nav'
 
 function Layout() {
@@ -40,6 +41,7 @@ function Layout() {
           <Route path="/ad-intel" element={<AdIntel />} />
           <Route path="/leads" element={<Leads />} />
           <Route path="/youtube" element={<YouTube />} />
+          <Route path="/opportunity" element={<OpportunityEngine />} />
         </Routes>
       </div>
     </div>
