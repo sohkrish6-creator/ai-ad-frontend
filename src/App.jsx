@@ -10,6 +10,7 @@ import AudienceFinder from './AudienceFinder'
 import Intelligence from './Intelligence'
 import YouTube from './YouTube'
 import OpportunityEngine from './OpportunityEngine'
+import OfferIntelligence from './OfferIntelligence'
 import Nav from './Nav'
 
 function Layout() {
@@ -42,6 +43,7 @@ function Layout() {
           <Route path="/leads" element={<Leads />} />
           <Route path="/youtube" element={<YouTube />} />
           <Route path="/opportunity" element={<OpportunityEngine />} />
+          <Route path="/offer" element={<OfferIntelligence />} />
         </Routes>
       </div>
     </div>
