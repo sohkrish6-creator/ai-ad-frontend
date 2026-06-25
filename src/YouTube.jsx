@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Copy, Check, Youtube, ExternalLink } from 'lucide-react'
+import { Copy, Check, Video, ExternalLink } from 'lucide-react'
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 const GOLD    = '#D4AF37'
@@ -143,7 +143,7 @@ export default function YouTube() {
               cursor: loading ? 'not-allowed' : 'pointer',
             }}
           >
-            <Youtube size={16} />
+            <Video size={16} />
             {loading ? 'Fetching YouTube data...' : 'Generate YouTube Intelligence'}
           </button>
         </div>
@@ -172,7 +172,7 @@ export default function YouTube() {
 
           {/* Section header */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '8px 0 20px' }}>
-            <Youtube size={18} color="#FF0000" />
+            <Video size={18} color="#FF0000" />
             <h2 style={{ fontSize: '17px', fontWeight: '600', margin: 0, letterSpacing: '-0.3px' }}>
               YouTube Intelligence — {result.query}
             </h2>

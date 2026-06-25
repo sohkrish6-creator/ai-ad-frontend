@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, Dna, Brain, Globe, Search,
-  Radio, Palette, Target, Users, Menu, X, Youtube,
+  Radio, Palette, Target, Users, Menu, X, PlaySquare,
 } from 'lucide-react'
 
 const GOLD = '#D4AF37'
@@ -17,7 +17,7 @@ const links = [
   { path: '/ad-creative',  label: 'Ad Creative',     Icon: Palette         },
   { path: '/audience',     label: 'Audience Finder', Icon: Target          },
   { path: '/leads',        label: 'Leads',           Icon: Users           },
-  { path: '/youtube',      label: 'YouTube Intel',   Icon: Youtube         },
+  { path: '/youtube',      label: 'YouTube Intel',   Icon: PlaySquare      },
 ]
 
 function Nav() {
