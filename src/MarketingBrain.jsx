@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 
 const LS_KEY_BRAIN = 'adsoh_brain_result'
-import { Copy, Check, ExternalLink, Download, TrendingUp, Rocket } from 'lucide-react'
+import { Copy, Check, ExternalLink, Download, TrendingUp, Rocket, X } from 'lucide-react'
 
 const FONT = '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif'
 const GOLD = '#D4AF37'
@@ -119,6 +119,11 @@ function MarketingBrain() {
   const [launchError, setLaunchError] = useState(null)
   const [launchTab, setLaunchTab] = useState('meta')
   const [fromCache, setFromCache] = useState(false)
+  const [showGAdsModal, setShowGAdsModal]   = useState(false)
+  const [gAdsForm, setGAdsForm]             = useState({ campaign_name: '', budget_daily: '', start_date: '', end_date: '' })
+  const [gAdsLoading, setGAdsLoading]       = useState(false)
+  const [gAdsResult, setGAdsResult]         = useState(null)
+  const [gAdsError, setGAdsError]           = useState('')
 
   useEffect(() => {
     try { const s = localStorage.getItem(LS_KEY_BRAIN); if (s) { setResult(JSON.parse(s)); setFromCache(true) } } catch {}
@@ -201,6 +206,50 @@ function MarketingBrain() {
       else setLaunchError('Campaign Launch Kit generate nahi hua. Dobara try karo.')
     } catch { setLaunchError('Backend se connect nahi ho paya.') }
     setLaunchLoading(false)
+  }
+
+  function openGAdsModal() {
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1)
+    const defaultStart = tomorrow.toISOString().split('T')[0]
+    const cleanUrl = (result?.url || '').replace(/https?:\/\//, '').replace(/\/$/, '').split('/')[0]
+    const defaultName = cleanUrl
+      ? `${cleanUrl} — Google Search`
+      : resolvedIndustry ? `${resolvedIndustry} — ${targetCity}` : 'New Google Campaign'
+    setGAdsForm({
+      campaign_name: defaultName,
+      budget_daily:  budget ? String(Math.round(parseInt(budget) / 30)) : '1000',
+      start_date:    defaultStart,
+      end_date:      '',
+    })
+    setGAdsResult(null)
+    setGAdsError('')
+    setShowGAdsModal(true)
+  }
+
+  async function handleGAdsLaunch() {
+    if (!gAdsForm.campaign_name || !gAdsForm.budget_daily) {
+      setGAdsError('Campaign name and daily budget are required.')
+      return
+    }
+    setGAdsLoading(true); setGAdsError('')
+    try {
+      const res = await fetch(`${BACKEND}/google-ads/create-campaign`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          campaign_name: gAdsForm.campaign_name,
+          budget_daily:  parseFloat(gAdsForm.budget_daily),
+          campaign_type: 'SEARCH',
+          start_date:    gAdsForm.start_date.replace(/-/g, ''),
+          end_date:      gAdsForm.end_date ? gAdsForm.end_date.replace(/-/g, '') : '',
+          business_key:  result?.business_key || '',
+        }),
+      })
+      const data = await res.json()
+      if (data.success) { setGAdsResult(data); setGAdsError('') }
+      else setGAdsError(data.error || 'Campaign creation failed.')
+    } catch { setGAdsError('Backend se connect nahi ho paya.') }
+    setGAdsLoading(false)
   }
 
   function downloadTxt(text, filename) {
@@ -661,9 +710,14 @@ function MarketingBrain() {
               <h2 style={{ fontSize: '15px', fontWeight: '600', margin: '0 0 4px', color: '#171717' }}>Campaign Launch Kit</h2>
               <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>Ready-to-paste Meta Ads + Google Ads + Remarketing kit — audiences, copy, keywords, budgets</p>
             </div>
-            <button onClick={handleLaunchKit} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: GOLD, border: 'none', color: '#fff', padding: '10px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', flexShrink: 0 }}>
-              <Rocket size={14} /> Generate Campaign Launch Kit
-            </button>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <button onClick={handleLaunchKit} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: GOLD, border: 'none', color: '#fff', padding: '10px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', flexShrink: 0 }}>
+                <Rocket size={14} /> Generate Campaign Launch Kit
+              </button>
+              <button onClick={openGAdsModal} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: '#fff', border: '1.5px solid #34A853', color: '#34A853', padding: '10px 18px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', flexShrink: 0 }}>
+                <span style={{ fontSize: '13px', fontWeight: '700' }}>G</span> Push to Google Ads
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -732,15 +786,119 @@ function MarketingBrain() {
                 {active.content}
               </pre>
             </div>
+
+            {/* Launch on Google Ads */}
+            <div style={{ background: '#F0FDF4', border: '1.5px solid #BBF7D0', borderRadius: '8px', padding: '18px 20px', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#34A853', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '800', color: '#fff', flexShrink: 0 }}>G</span>
+                  <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: '#166534' }}>Launch on Google Ads</p>
+                </div>
+                <p style={{ margin: 0, fontSize: '12px', color: '#166534', opacity: 0.75 }}>Create a real SEARCH campaign in your Google Ads account — paused by default so you can review before going live</p>
+              </div>
+              <button onClick={openGAdsModal} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: '#16A34A', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', flexShrink: 0 }}>
+                <Rocket size={14} /> Create Google Campaign
+              </button>
+            </div>
           </>
         )
       })()}
     </div>
   )
 
+  const inpSt2 = { width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #E5E5E5', background: '#FAFAFA', color: '#171717', fontSize: '13px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
+  const lbl2   = { display: 'block', color: '#888', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '5px' }
+
   return (
     <div style={page}>
       <style>{`@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }`}</style>
+
+      {/* Google Ads Campaign Modal */}
+      {showGAdsModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ background: '#fff', borderRadius: '12px', width: '100%', maxWidth: '480px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)', overflow: 'hidden' }}>
+            {/* Modal header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 20px', borderBottom: '1px solid #F0F0F0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#34A853', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '800', color: '#fff' }}>G</span>
+                <p style={{ margin: 0, fontSize: '15px', fontWeight: '600', color: '#171717' }}>Create Google Campaign</p>
+              </div>
+              <button onClick={() => setShowGAdsModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#888', display: 'flex' }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal body */}
+            <div style={{ padding: '20px' }}>
+              {!gAdsResult ? (
+                <>
+                  <p style={{ margin: '0 0 16px', fontSize: '12px', color: '#888', background: '#F9FAFB', borderRadius: '6px', padding: '9px 12px', border: '1px solid #F0F0F0' }}>
+                    Campaign will be created in <strong>PAUSED</strong> status — review it in Google Ads before going live.
+                  </p>
+                  {gAdsError && (
+                    <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '6px', padding: '10px 13px', marginBottom: '14px', color: '#BE123C', fontSize: '12.5px' }}>{gAdsError}</div>
+                  )}
+
+                  <div style={{ marginBottom: '13px' }}>
+                    <label style={lbl2}>Campaign Name</label>
+                    <input type="text" value={gAdsForm.campaign_name} onChange={e => setGAdsForm(f => ({ ...f, campaign_name: e.target.value }))} style={inpSt2} placeholder="e.g. sohscape.com — Google Search" />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '13px' }}>
+                    <div>
+                      <label style={lbl2}>Daily Budget (₹)</label>
+                      <input type="number" value={gAdsForm.budget_daily} onChange={e => setGAdsForm(f => ({ ...f, budget_daily: e.target.value }))} style={inpSt2} placeholder="1000" min="100" />
+                    </div>
+                    <div>
+                      <label style={lbl2}>Campaign Type</label>
+                      <select value="SEARCH" disabled style={{ ...inpSt2, color: '#555' }}>
+                        <option value="SEARCH">Search</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '20px' }}>
+                    <div>
+                      <label style={lbl2}>Start Date</label>
+                      <input type="date" value={gAdsForm.start_date} onChange={e => setGAdsForm(f => ({ ...f, start_date: e.target.value }))} style={inpSt2} />
+                    </div>
+                    <div>
+                      <label style={lbl2}>End Date <span style={{ fontWeight: '400', textTransform: 'none', color: '#BBB' }}>(optional)</span></label>
+                      <input type="date" value={gAdsForm.end_date} onChange={e => setGAdsForm(f => ({ ...f, end_date: e.target.value }))} style={inpSt2} />
+                    </div>
+                  </div>
+
+                  <button onClick={handleGAdsLaunch} disabled={gAdsLoading} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', background: gAdsLoading ? '#E5E5E5' : '#16A34A', border: 'none', color: gAdsLoading ? '#999' : '#fff', padding: '12px', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: gAdsLoading ? 'not-allowed' : 'pointer' }}>
+                    <Rocket size={15} />
+                    {gAdsLoading ? 'Creating campaign...' : 'Launch Campaign 🚀'}
+                  </button>
+                </>
+              ) : (
+                /* Success state */
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#F0FDF4', border: '2px solid #BBF7D0', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+                    <span style={{ fontSize: '22px' }}>✅</span>
+                  </div>
+                  <p style={{ margin: '0 0 4px', fontSize: '16px', fontWeight: '700', color: '#166534' }}>Campaign Created!</p>
+                  <p style={{ margin: '0 0 16px', fontSize: '12px', color: '#888' }}>Status: PAUSED — enable it in Google Ads when ready</p>
+                  <div style={{ background: '#F9FAFB', borderRadius: '8px', padding: '14px', textAlign: 'left', marginBottom: '16px' }}>
+                    <p style={{ margin: '0 0 5px', fontSize: '12px', color: '#888' }}><strong style={{ color: '#171717' }}>Campaign:</strong> {gAdsResult.campaign_name}</p>
+                    <p style={{ margin: '0 0 5px', fontSize: '12px', color: '#888' }}><strong style={{ color: '#171717' }}>Campaign ID:</strong> {gAdsResult.campaign_id}</p>
+                    <p style={{ margin: '0 0 5px', fontSize: '12px', color: '#888' }}><strong style={{ color: '#171717' }}>Ad Group ID:</strong> {gAdsResult.ad_group_id}</p>
+                    <p style={{ margin: '0', fontSize: '12px', color: '#888' }}><strong style={{ color: '#171717' }}>Keywords from memory:</strong> {gAdsResult.keywords_added || 0}</p>
+                  </div>
+                  <a href={gAdsResult.google_ads_dashboard} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#34A853', color: '#fff', padding: '10px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', textDecoration: 'none', marginBottom: '10px' }}>
+                    <ExternalLink size={13} /> Open in Google Ads
+                  </a>
+                  <br />
+                  <button onClick={() => { setShowGAdsModal(false); setGAdsResult(null) }} style={{ background: 'none', border: 'none', color: '#888', fontSize: '12px', cursor: 'pointer', marginTop: '6px' }}>Close</button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Marketing Brain</h1>
       <p style={{ color: '#999', fontSize: '13px', margin: '0 0 32px' }}>Ek baar daalo — BI scan + Adsoh report (11 sections), sab ek saath</p>
 
