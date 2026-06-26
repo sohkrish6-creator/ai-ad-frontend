@@ -198,9 +198,9 @@ export default function OpportunityEngine() {
 
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
             <div>
-              <label style={lbl}>Industry</label>
+              <label style={lbl}>Target Industry <span style={{ color: '#F97316', fontWeight: '700' }}>*B2B</span></label>
               <select value={industry} onChange={e => setIndustry(e.target.value)} style={{ ...input, color: industry ? '#171717' : '#999' }}>
-                <option value="">— Select industry —</option>
+                <option value="">— Same as Marketing Brain B2B target —</option>
                 {INDUSTRIES.map(o => <option key={o} value={o}>{o}</option>)}
               </select>
             </div>
