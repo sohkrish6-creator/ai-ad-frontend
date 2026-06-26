@@ -12,6 +12,7 @@ import YouTube from './YouTube'
 import OpportunityEngine from './OpportunityEngine'
 import OfferIntelligence from './OfferIntelligence'
 import WebsiteAudit from './WebsiteAudit'
+import VisibilityIntelligence from './VisibilityIntelligence'
 import Nav from './Nav'
 
 function Layout() {
@@ -46,6 +47,7 @@ function Layout() {
           <Route path="/opportunity" element={<OpportunityEngine />} />
           <Route path="/offer" element={<OfferIntelligence />} />
           <Route path="/website-audit" element={<WebsiteAudit />} />
+          <Route path="/visibility" element={<VisibilityIntelligence />} />
         </Routes>
       </div>
     </div>
