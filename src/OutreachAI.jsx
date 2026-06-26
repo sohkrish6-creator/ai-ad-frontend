@@ -150,6 +150,7 @@ function buildFullKit(o) {
 export default function OutreachAI() {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
+  const [url, setUrl]                     = useState('')
   const [industry, setIndustry]           = useState('')
   const [industryOther, setIndustryOther] = useState('')
   const [city, setCity]                   = useState('Jaipur')
@@ -177,7 +178,7 @@ export default function OutreachAI() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          business_key:  resolvedIndustry,
+          url:           url.trim(),
           industry:      resolvedIndustry,
           city,
           target_name:   targetName,
@@ -361,6 +362,12 @@ export default function OutreachAI() {
       <div style={{ maxWidth: '640px', width: '100%' }}>
         <div style={{ ...card, padding: isMobile ? '20px 16px' : '26px', marginBottom: '10px' }}>
           {error && <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: '#BE123C', fontSize: '13px' }}>{error}</div>}
+
+          <div style={{ marginBottom: '14px' }}>
+            <label style={lbl}>Business Website URL <span style={{ color: '#BBB', fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
+            <input type="text" value={url} onChange={e => setUrl(e.target.value)} placeholder="e.g. sohscape.com" style={inp} />
+            <p style={{ margin: '5px 0 0', fontSize: '11px', color: '#999' }}>Same URL + Industry as Marketing Brain for memory to load.</p>
+          </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
             <div>
