@@ -64,7 +64,7 @@ export default function YouTube() {
 
   const [industry, setIndustry]   = useState('')
   const [industryOther, setIndustryOther] = useState('')
-  const [city, setCity]           = useState('')
+  const [city, setCity]           = useState('Jaipur')
   const [topic, setTopic]         = useState('')
   const [loading, setLoading]     = useState(false)
   const [error, setError]         = useState('')
@@ -123,7 +123,7 @@ export default function YouTube() {
             </div>
             <div>
               <label style={lbl}>Target City</label>
-              <input type="text" value={city} onChange={e => setCity(e.target.value)} placeholder="e.g. Jaipur (optional)" style={inputSt} />
+              <input type="text" value={city} onChange={e => setCity(e.target.value || 'Jaipur')} placeholder="e.g. Jaipur (optional)" style={inputSt} />
             </div>
           </div>
 

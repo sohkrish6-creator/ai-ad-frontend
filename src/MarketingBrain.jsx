@@ -760,7 +760,7 @@ function MarketingBrain() {
             </div>
             <div>
               <label style={lbl}>Target City</label>
-              <input type="text" value={targetCity} onChange={e => setTargetCity(e.target.value)} placeholder="e.g. Jaipur" style={inputSt} />
+              <input type="text" value={targetCity} onChange={e => setTargetCity(e.target.value || 'Jaipur')} placeholder="e.g. Jaipur" style={inputSt} />
             </div>
           </div>
 

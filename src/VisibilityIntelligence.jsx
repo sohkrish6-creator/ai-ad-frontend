@@ -234,7 +234,7 @@ export default function VisibilityIntelligence() {
             </div>
             <div>
               <label style={lbl}>City</label>
-              <input type="text" value={city} onChange={e => setCity(e.target.value)} placeholder="e.g. Jaipur" style={inp} />
+              <input type="text" value={city} onChange={e => setCity(e.target.value || 'Jaipur')} placeholder="e.g. Jaipur" style={inp} />
             </div>
           </div>
 

@@ -386,7 +386,7 @@ export default function OutreachAI() {
             </div>
             <div>
               <label style={lbl}>City</label>
-              <input type="text" value={city} onChange={e => setCity(e.target.value)} placeholder="Jaipur" style={inp} />
+              <input type="text" value={city} onChange={e => setCity(e.target.value || 'Jaipur')} placeholder="Jaipur" style={inp} />
             </div>
           </div>
 
