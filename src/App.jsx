@@ -16,6 +16,7 @@ import VisibilityIntelligence from './VisibilityIntelligence'
 import OutreachAI from './OutreachAI'
 import KPIEngine from './KPIEngine'
 import PerformanceIntelligence from './PerformanceIntelligence'
+import AIOptimizer from './AIOptimizer'
 import Nav from './Nav'
 
 function Layout() {
@@ -54,6 +55,7 @@ function Layout() {
           <Route path="/outreach" element={<OutreachAI />} />
           <Route path="/kpi-engine" element={<KPIEngine />} />
           <Route path="/performance" element={<PerformanceIntelligence />} />
+          <Route path="/ai-optimizer" element={<AIOptimizer />} />
         </Routes>
       </div>
     </div>
