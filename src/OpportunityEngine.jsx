@@ -74,7 +74,7 @@ export default function OpportunityEngine() {
   const [industry, setIndustry]           = useState('')
   const [industryOther, setIndustryOther] = useState('')
   const [businessKey, setBusinessKey]     = useState('')
-  const [city, setCity]                   = useState('')
+  const [city, setCity]                   = useState('Jaipur')
   const [budget, setBudget]               = useState('')
   const [loading, setLoading]             = useState(false)
   const [error, setError]                 = useState('')
@@ -207,6 +207,7 @@ export default function OpportunityEngine() {
             <div>
               <label style={lbl}>Target City</label>
               <input type="text" value={city} onChange={e => setCity(e.target.value)} placeholder="e.g. Jaipur" style={input} />
+              <p style={{ margin: '5px 0 0', fontSize: '11px', color: '#999' }}>Same city as Marketing Brain B2B target</p>
             </div>
           </div>
 
