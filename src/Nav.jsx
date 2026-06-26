@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, Dna, Brain, Globe, Search,
-  Radio, Palette, Target, Users, Menu, X, PlaySquare, TrendingUp, Gift, Monitor, Eye, MessageSquare, BarChart2, Activity, Zap,
+  Radio, Palette, Target, Users, Menu, X, PlaySquare, TrendingUp, Gift, Monitor, Eye, MessageSquare, BarChart2, Activity, Zap, Trophy,
 } from 'lucide-react'
 
 const GOLD = '#D4AF37'
@@ -26,6 +26,7 @@ const links = [
   { path: '/kpi-engine',    label: 'KPI Engine',     Icon: BarChart2       },
   { path: '/performance',   label: 'Performance',    Icon: Activity        },
   { path: '/ai-optimizer',  label: 'AI Optimizer',   Icon: Zap             },
+  { path: '/result-center', label: 'Result Center',  Icon: Trophy          },
 ]
 
 function Nav() {
