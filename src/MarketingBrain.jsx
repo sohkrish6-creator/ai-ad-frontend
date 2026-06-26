@@ -120,7 +120,7 @@ function MarketingBrain() {
   const [launchTab, setLaunchTab] = useState('meta')
   const [fromCache, setFromCache] = useState(false)
   const [showGAdsModal, setShowGAdsModal]   = useState(false)
-  const [gAdsForm, setGAdsForm]             = useState({ campaign_name: '', budget_daily: '', start_date: '', end_date: '' })
+  const [gAdsForm, setGAdsForm]             = useState({ campaign_name: '', budget_daily: '', start_date: '', end_date: '', campaign_type: 'SEARCH' })
   const [gAdsLoading, setGAdsLoading]       = useState(false)
   const [gAdsResult, setGAdsResult]         = useState(null)
   const [gAdsError, setGAdsError]           = useState('')
@@ -220,6 +220,7 @@ function MarketingBrain() {
       budget_daily:  budget ? String(Math.round(parseInt(budget) / 30)) : '1000',
       start_date:    defaultStart,
       end_date:      '',
+      campaign_type: 'SEARCH',
     })
     setGAdsResult(null)
     setGAdsError('')
@@ -239,7 +240,7 @@ function MarketingBrain() {
         body: JSON.stringify({
           campaign_name: gAdsForm.campaign_name,
           budget_daily:  parseFloat(gAdsForm.budget_daily),
-          campaign_type: 'SEARCH',
+          campaign_type: gAdsForm.campaign_type || 'SEARCH',
           start_date:    gAdsForm.start_date.replace(/-/g, ''),
           end_date:      gAdsForm.end_date ? gAdsForm.end_date.replace(/-/g, '') : '',
           business_key:  result?.business_key || '',
@@ -562,7 +563,7 @@ function MarketingBrain() {
 
       {/* Google Ads Campaign Modal */}
       {showGAdsModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+        <div onClick={() => setShowGAdsModal(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}><div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: '480px' }}>
           <div style={{ background: '#fff', borderRadius: '12px', width: '100%', maxWidth: '480px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)', overflow: 'hidden' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 20px', borderBottom: '1px solid #F0F0F0' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -593,8 +594,9 @@ function MarketingBrain() {
                     </div>
                     <div>
                       <label style={lbl2}>Campaign Type</label>
-                      <select value="SEARCH" disabled style={{ ...inpSt2, color: '#555' }}>
+                      <select value={gAdsForm.campaign_type} onChange={e => setGAdsForm(f => ({ ...f, campaign_type: e.target.value }))} style={inpSt2}>
                         <option value="SEARCH">Search</option>
+                        <option value="DISPLAY" disabled>Display (coming soon)</option>
                       </select>
                     </div>
                   </div>
@@ -635,7 +637,7 @@ function MarketingBrain() {
               )}
             </div>
           </div>
-        </div>
+        </div></div>
       )}
 
       {fromCache && (
@@ -794,7 +796,7 @@ function MarketingBrain() {
               <button onClick={handleLaunchKit} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: GOLD, border: 'none', color: '#fff', padding: '10px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', flexShrink: 0 }}>
                 <Rocket size={14} /> Generate Campaign Launch Kit
               </button>
-              <button onClick={openGAdsModal} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: '#fff', border: '1.5px solid #34A853', color: '#34A853', padding: '10px 18px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', flexShrink: 0 }}>
+              <button onClick={e => { e.stopPropagation(); openGAdsModal() }} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: '#fff', border: '1.5px solid #34A853', color: '#34A853', padding: '10px 18px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', flexShrink: 0 }}>
                 <span style={{ fontSize: '13px', fontWeight: '700' }}>G</span> Push to Google Ads
               </button>
             </div>
@@ -876,7 +878,7 @@ function MarketingBrain() {
                 </div>
                 <p style={{ margin: 0, fontSize: '12px', color: '#166534', opacity: 0.75 }}>Create a real SEARCH campaign in your Google Ads account — paused by default so you can review before going live</p>
               </div>
-              <button onClick={openGAdsModal} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: '#16A34A', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', flexShrink: 0 }}>
+              <button onClick={e => { e.stopPropagation(); openGAdsModal() }} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: '#16A34A', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', flexShrink: 0 }}>
                 <Rocket size={14} /> Create Google Campaign
               </button>
             </div>
