@@ -14,6 +14,7 @@ import OfferIntelligence from './OfferIntelligence'
 import WebsiteAudit from './WebsiteAudit'
 import VisibilityIntelligence from './VisibilityIntelligence'
 import OutreachAI from './OutreachAI'
+import KPIEngine from './KPIEngine'
 import Nav from './Nav'
 
 function Layout() {
@@ -50,6 +51,7 @@ function Layout() {
           <Route path="/website-audit" element={<WebsiteAudit />} />
           <Route path="/visibility" element={<VisibilityIntelligence />} />
           <Route path="/outreach" element={<OutreachAI />} />
+          <Route path="/kpi-engine" element={<KPIEngine />} />
         </Routes>
       </div>
     </div>
