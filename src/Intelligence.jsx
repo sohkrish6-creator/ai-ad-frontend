@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+
+const LS_KEY_BI = 'adsoh_bi_result'
 import { Copy, Check, Search, Dna, TrendingUp, Sword, Target, Zap, Download, ArrowLeft, AlertTriangle, ShieldCheck } from 'lucide-react'
 
 const FONT = '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif'
@@ -114,6 +116,11 @@ function Intelligence() {
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
   const [copied, setCopied] = useState({})
+  const [fromCache, setFromCache] = useState(false)
+
+  useEffect(() => {
+    try { const s = localStorage.getItem(LS_KEY_BI); if (s) { setResult(JSON.parse(s)); setFromCache(true) } } catch {}
+  }, [])
 
   const handleCopy = (key, value) => {
     const text = typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)
@@ -139,7 +146,7 @@ function Intelligence() {
       })
       const data = await res.json()
       if (data.scan_failed) setError(data.message)
-      else setResult(data)
+      else { setResult(data); localStorage.setItem(LS_KEY_BI, JSON.stringify(data)); setFromCache(false) }
     } catch {
       setError('Backend se connect nahi ho paya. Try again.')
     } finally {
@@ -524,11 +531,18 @@ function Intelligence() {
             <button onClick={downloadPDF} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#D4AF3712', border: '1px solid #D4AF3730', color: '#D4AF37', padding: '6px 14px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer', fontWeight: '600' }}>
               <Download size={12} /> PDF
             </button>
-            <button onClick={() => setResult(null)} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'transparent', border: '1px solid #EAEAEA', color: '#888', padding: '6px 14px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
+            <button onClick={() => { localStorage.removeItem(LS_KEY_BI); setResult(null); setFromCache(false) }} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'transparent', border: '1px solid #EAEAEA', color: '#888', padding: '6px 14px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
               <ArrowLeft size={12} /> New
             </button>
           </div>
         </div>
+
+        {fromCache && (
+          <div style={{ background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '7px', padding: '9px 16px', margin: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>Showing previous result · Generate new report to refresh</p>
+            <button onClick={() => { localStorage.removeItem(LS_KEY_BI); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
+          </div>
+        )}
 
         <div style={{ maxWidth: '860px', margin: '0 auto', padding: isMobile ? '20px 16px' : '28px 20px' }}>
 

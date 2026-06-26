@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+
+const LS_KEY_BRAIN = 'adsoh_brain_result'
 import { Copy, Check, ExternalLink, Download, TrendingUp, Rocket } from 'lucide-react'
 
 const FONT = '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif'
@@ -116,6 +118,11 @@ function MarketingBrain() {
   const [launchLoading, setLaunchLoading] = useState(false)
   const [launchError, setLaunchError] = useState(null)
   const [launchTab, setLaunchTab] = useState('meta')
+  const [fromCache, setFromCache] = useState(false)
+
+  useEffect(() => {
+    try { const s = localStorage.getItem(LS_KEY_BRAIN); if (s) { setResult(JSON.parse(s)); setFromCache(true) } } catch {}
+  }, [])
 
   const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 
@@ -132,7 +139,7 @@ function MarketingBrain() {
       })
       const data = await res.json()
       if (data.scan_failed) setError(data.message)
-      else setResult(data)
+      else { setResult(data); localStorage.setItem(LS_KEY_BRAIN, JSON.stringify(data)); setFromCache(false) }
     } catch { setError('Backend se connect nahi ho paya.') }
     setLoading(false)
   }
@@ -502,6 +509,13 @@ function MarketingBrain() {
     <div style={page}>
       <style>{`@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }`}</style>
 
+      {fromCache && (
+        <div style={{ background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '7px', padding: '9px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>Showing previous result · Generate new report to refresh</p>
+          <button onClick={() => { localStorage.removeItem(LS_KEY_BRAIN); setResult(null); setMediaPlan(null); setMediaError(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
+        </div>
+      )}
+
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
@@ -519,7 +533,7 @@ function MarketingBrain() {
           <button onClick={downloadPDF} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#D4AF3712', border: '1px solid #D4AF3730', color: GOLD, padding: '7px 14px', borderRadius: '7px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
             <Download size={12} /> PDF
           </button>
-          <button onClick={() => { setResult(null); setMediaPlan(null); setMediaError(null) }} style={{ background: 'transparent', border: '1px solid #E5E5E5', color: '#666', padding: '7px 16px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
+          <button onClick={() => { localStorage.removeItem(LS_KEY_BRAIN); setResult(null); setMediaPlan(null); setMediaError(null); setFromCache(false) }} style={{ background: 'transparent', border: '1px solid #E5E5E5', color: '#666', padding: '7px 16px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
             ← New Report
           </button>
         </div>

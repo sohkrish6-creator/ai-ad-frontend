@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+
+const LS_KEY_OFFER = 'adsoh_offer_result'
 import { Copy, Check, Gift, Zap, Tag, Star, ShieldCheck, MessageSquare, TrendingUp } from 'lucide-react'
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
@@ -82,6 +84,11 @@ export default function OfferIntelligence() {
   const [loading, setLoading]             = useState(false)
   const [error, setError]                 = useState('')
   const [result, setResult]               = useState(null)
+  const [fromCache, setFromCache]         = useState(false)
+
+  useEffect(() => {
+    try { const s = localStorage.getItem(LS_KEY_OFFER); if (s) { setResult(JSON.parse(s)); setFromCache(true) } } catch {}
+  }, [])
 
   const resolvedIndustry = industry === 'Other' ? industryOther : industry
 
@@ -102,7 +109,7 @@ export default function OfferIntelligence() {
         }),
       })
       const data = await res.json()
-      if (data.success) setResult(data)
+      if (data.success) { setResult(data); localStorage.setItem(LS_KEY_OFFER, JSON.stringify(data)); setFromCache(false) }
       else setError(data.message || data.error || 'Kuch toh gadbad hai, dobara try karo.')
     } catch {
       setError('Backend se connect nahi ho paya.')
@@ -248,6 +255,13 @@ export default function OfferIntelligence() {
       )}
 
       {/* Results */}
+      {fromCache && result && !loading && (
+        <div style={{ maxWidth: '760px', width: '100%', background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '7px', padding: '9px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>Showing previous result · Generate new report to refresh</p>
+          <button onClick={() => { localStorage.removeItem(LS_KEY_OFFER); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
+        </div>
+      )}
+
       {result && offer && (
         <div style={{ maxWidth: '820px' }}>
 
