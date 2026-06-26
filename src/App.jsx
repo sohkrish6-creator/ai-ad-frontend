@@ -13,6 +13,7 @@ import OpportunityEngine from './OpportunityEngine'
 import OfferIntelligence from './OfferIntelligence'
 import WebsiteAudit from './WebsiteAudit'
 import VisibilityIntelligence from './VisibilityIntelligence'
+import OutreachAI from './OutreachAI'
 import Nav from './Nav'
 
 function Layout() {
@@ -48,6 +49,7 @@ function Layout() {
           <Route path="/offer" element={<OfferIntelligence />} />
           <Route path="/website-audit" element={<WebsiteAudit />} />
           <Route path="/visibility" element={<VisibilityIntelligence />} />
+          <Route path="/outreach" element={<OutreachAI />} />
         </Routes>
       </div>
     </div>
