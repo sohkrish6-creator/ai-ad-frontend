@@ -837,10 +837,12 @@ function MarketingBrain() {
       {/* Campaign Launch Kit Results */}
       {launchKit && (() => {
         const tabs = [
-          { id: 'meta',        label: 'Meta Ads',    content: launchKit.meta_kit,        filename: 'meta-ads-launch-kit.txt' },
-          { id: 'google',      label: 'Google Ads',  content: launchKit.google_kit,       filename: 'google-ads-launch-kit.txt' },
-          { id: 'remarketing', label: 'Remarketing', content: launchKit.remarketing_kit,  filename: 'remarketing-kit.txt' },
-        ]
+          { id: 'meta',        label: 'Meta Ads',       content: launchKit.meta_kit,        filename: 'meta-ads-launch-kit.txt' },
+          { id: 'google',      label: 'Google Ads',     content: launchKit.google_kit,      filename: 'google-ads-launch-kit.txt' },
+          { id: 'remarketing', label: 'Remarketing',    content: launchKit.remarketing_kit, filename: 'remarketing-kit.txt' },
+          { id: 'tracking',    label: '📡 Tracking',    content: launchKit.tracking_kit,    filename: 'tracking-setup.txt' },
+          { id: 'lp',          label: '✅ Landing Page', content: launchKit.lp_checklist,   filename: 'landing-page-checklist.txt' },
+        ].filter(t => t.content)
         const active = tabs.find(t => t.id === launchTab) || tabs[0]
         return (
           <>
