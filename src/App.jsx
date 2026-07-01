@@ -19,6 +19,7 @@ import PerformanceIntelligence from './PerformanceIntelligence'
 import AIOptimizer from './AIOptimizer'
 import ResultCenter from './ResultCenter'
 import ProspectDiscovery from './ProspectDiscovery'
+import CricketAds from './CricketAds'
 import Nav from './Nav'
 
 function Layout() {
@@ -60,6 +61,7 @@ function Layout() {
           <Route path="/ai-optimizer" element={<AIOptimizer />} />
           <Route path="/result-center" element={<ResultCenter />} />
           <Route path="/prospects" element={<ProspectDiscovery />} />
+          <Route path="/cricket-ads" element={<CricketAds />} />
         </Routes>
       </div>
     </div>
