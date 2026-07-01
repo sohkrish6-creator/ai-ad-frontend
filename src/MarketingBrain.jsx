@@ -123,7 +123,7 @@ function MarketingBrain() {
   const [gAdsForm, setGAdsForm]             = useState({ campaign_name: '', budget_daily: '', start_date: '', end_date: '', campaign_type: 'SEARCH' })
   const [gAdsLoading, setGAdsLoading]       = useState(false)
   const [gAdsResult, setGAdsResult]         = useState(null)
-  const [gAdsError, setGAdsError]           = useState('')
+  const [gAdsError, setGAdsError]           = useState(null)   // null | string | [{error_code,message,field}]
 
   useEffect(() => {
     try { const s = localStorage.getItem(LS_KEY_BRAIN); if (s) { setResult(JSON.parse(s)); setFromCache(true) } } catch {}
@@ -223,7 +223,7 @@ function MarketingBrain() {
       campaign_type: 'SEARCH',
     })
     setGAdsResult(null)
-    setGAdsError('')
+    setGAdsError(null)
     setShowGAdsModal(true)
   }
 
@@ -232,7 +232,7 @@ function MarketingBrain() {
       setGAdsError('Campaign name and daily budget are required.')
       return
     }
-    setGAdsLoading(true); setGAdsError('')
+    setGAdsLoading(true); setGAdsError(null)
     try {
       const res = await fetch(`${BACKEND}/google-ads/create-campaign`, {
         method: 'POST',
@@ -247,9 +247,10 @@ function MarketingBrain() {
         }),
       })
       const data = await res.json()
-      if (data.success) { setGAdsResult(data); setGAdsError('') }
+      if (data.success) { setGAdsResult(data); setGAdsError(null) }
+      else if (data.errors && Array.isArray(data.errors)) setGAdsError(data.errors)
       else setGAdsError(data.error || 'Campaign creation failed.')
-    } catch { setGAdsError('Backend se connect nahi ho paya.') }
+    } catch (err) { setGAdsError(`Network error: ${err.message}`) }
     setGAdsLoading(false)
   }
 
@@ -581,7 +582,20 @@ function MarketingBrain() {
                     Campaign will be created in <strong>PAUSED</strong> status — review it in Google Ads before going live.
                   </p>
                   {gAdsError && (
-                    <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '6px', padding: '10px 13px', marginBottom: '14px', color: '#BE123C', fontSize: '12.5px' }}>{gAdsError}</div>
+                    <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '6px', padding: '10px 13px', marginBottom: '14px', color: '#BE123C', fontSize: '12.5px' }}>
+                      {Array.isArray(gAdsError) ? (
+                        <>
+                          <p style={{ margin: '0 0 8px', fontWeight: '600' }}>Google Ads API Error{gAdsError.length > 1 ? 's' : ''}:</p>
+                          {gAdsError.map((e, i) => (
+                            <div key={i} style={{ background: '#FFF5F5', borderRadius: '4px', padding: '7px 9px', marginBottom: i < gAdsError.length - 1 ? '6px' : 0 }}>
+                              <p style={{ margin: '0 0 2px', fontWeight: '600', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#9B1C1C' }}>{e.error_code || 'UNKNOWN_CODE'}</p>
+                              <p style={{ margin: '0 0 2px', fontSize: '12.5px', color: '#BE123C' }}>{e.message}</p>
+                              {e.field && <p style={{ margin: 0, fontSize: '11px', color: '#9B1C1C', opacity: 0.8 }}>Field: {e.field}</p>}
+                            </div>
+                          ))}
+                        </>
+                      ) : gAdsError}
+                    </div>
                   )}
                   <div style={{ marginBottom: '13px' }}>
                     <label style={lbl2}>Campaign Name</label>
