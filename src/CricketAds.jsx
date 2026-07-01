@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Copy, Check, ChevronDown, ChevronUp } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Copy, Check, ChevronDown, ChevronUp, Trash2, Plus, ExternalLink } from 'lucide-react'
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 
@@ -20,7 +20,7 @@ const C = {
 }
 
 const s = {
-  page:    { minHeight: '100vh', background: C.bg, color: C.text, fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif', padding: '0' },
+  page:    { minHeight: '100vh', background: C.bg, color: C.text, fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif' },
   wrap:    { maxWidth: '860px', margin: '0 auto', padding: '36px 20px 60px' },
   card:    { background: C.card, border: `1px solid ${C.border}`, borderRadius: '12px', padding: '24px', marginBottom: '20px' },
   label:   { display: 'block', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', color: C.muted, marginBottom: '6px' },
@@ -40,7 +40,7 @@ function CopyBtn({ text }) {
   )
 }
 
-function ScoreRing({ value, label, color }) {
+function ScoreRing({ value, label }) {
   const col = value >= 70 ? C.green : value >= 40 ? C.gold : C.red
   return (
     <div style={{ textAlign: 'center' }}>
@@ -59,17 +59,16 @@ function IntentBadge({ intent }) {
 }
 
 function PriorityBadge({ priority }) {
-  const colors = { high: C.green, medium: C.gold, low: C.muted }
-  const col = colors[priority] || C.muted
+  const col = { high: C.green, medium: C.gold, low: C.muted }[priority] || C.muted
   return <span style={{ color: col, fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', border: `1px solid ${col}50`, borderRadius: '4px', padding: '2px 8px' }}>{priority}</span>
 }
 
-function Collapsible({ title, children, defaultOpen = false }) {
+function Collapsible({ title, children, defaultOpen = false, badge = null }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
     <div style={{ border: `1px solid ${C.border}`, borderRadius: '8px', overflow: 'hidden', marginBottom: '10px' }}>
       <button onClick={() => setOpen(o => !o)} style={{ width: '100%', background: C.surface, border: 'none', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', color: C.text, fontSize: '13px', fontWeight: '600' }}>
-        {title}
+        <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>{title}{badge}</span>
         {open ? <ChevronUp size={15} color={C.muted} /> : <ChevronDown size={15} color={C.muted} />}
       </button>
       {open && <div style={{ padding: '16px', background: C.card }}>{children}</div>}
@@ -77,21 +76,93 @@ function Collapsible({ title, children, defaultOpen = false }) {
   )
 }
 
+// ── API Error display (GoogleAdsException array or plain string) ─────────────
+function ApiError({ err }) {
+  if (!err) return null
+  if (Array.isArray(err)) return (
+    <div style={{ background: '#1F0A0A', border: `1px solid ${C.red}40`, borderRadius: '7px', padding: '12px 14px', marginTop: '12px' }}>
+      <p style={{ margin: '0 0 8px', fontSize: '12px', fontWeight: '700', color: C.red, textTransform: 'uppercase' }}>Google Ads API Error{err.length > 1 ? 's' : ''}</p>
+      {err.map((e, i) => (
+        <div key={i} style={{ background: '#2A0A0A', borderRadius: '5px', padding: '7px 10px', marginBottom: i < err.length - 1 ? '6px' : 0 }}>
+          <p style={{ margin: '0 0 2px', fontSize: '11px', fontWeight: '700', color: '#F87171', textTransform: 'uppercase' }}>{e.error_code || 'ERROR'}</p>
+          <p style={{ margin: '0 0 2px', fontSize: '13px', color: '#FCA5A5' }}>{e.message}</p>
+          {e.field && <p style={{ margin: 0, fontSize: '11px', color: '#F87171', opacity: 0.7 }}>Field: {e.field}</p>}
+        </div>
+      ))}
+    </div>
+  )
+  return <div style={{ background: '#1F0A0A', border: `1px solid ${C.red}40`, borderRadius: '7px', padding: '10px 14px', marginTop: '12px', color: C.red, fontSize: '13px' }}>{String(err)}</div>
+}
+
 export default function CricketAds() {
-  const [url, setUrl]           = useState('')
-  const [waLink, setWaLink]     = useState('')
-  const [city, setCity]         = useState('India')
-  const [loading, setLoading]   = useState(false)
-  const [error, setError]       = useState('')
-  const [data, setData]         = useState(null)
+  // ── Analysis state ─────────────────────────────────────────────────────────
+  const [url, setUrl]         = useState('')
+  const [waLink, setWaLink]   = useState('')
+  const [city, setCity]       = useState('India')
+  const [loading, setLoading] = useState(false)
+  const [error, setError]     = useState('')
+  const [data, setData]       = useState(null)
+
+  // ── Account manager state ──────────────────────────────────────────────────
+  const [accounts, setAccounts]       = useState([])
+  const [acctName, setAcctName]       = useState('')
+  const [acctCid, setAcctCid]         = useState('')
+  const [acctAdding, setAcctAdding]   = useState(false)
+  const [acctStatus, setAcctStatus]   = useState(null)  // null | {ok, msg}
+  const [deletingCid, setDeletingCid] = useState(null)
+
+  // ── Push-to-Google state ───────────────────────────────────────────────────
+  const [selectedCid, setSelectedCid] = useState('')
+  const [pushLoading, setPushLoading] = useState(false)
+  const [pushResult, setPushResult]   = useState(null)
+  const [pushError, setPushError]     = useState(null)
+
+  useEffect(() => { loadAccounts() }, [])
+
+  async function loadAccounts() {
+    try {
+      const res = await fetch(`${BACKEND}/cricket-ads/accounts/list`)
+      const json = await res.json()
+      if (json.success) { setAccounts(json.accounts || []); if (!selectedCid && json.accounts?.length) setSelectedCid(json.accounts[0].customer_id) }
+    } catch { /* silent */ }
+  }
+
+  async function handleAddAccount() {
+    if (!acctName.trim() || !acctCid.trim()) { setAcctStatus({ ok: false, msg: 'Account Name and Customer ID are required.' }); return }
+    setAcctAdding(true); setAcctStatus(null)
+    try {
+      const res  = await fetch(`${BACKEND}/cricket-ads/accounts/add`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ account_name: acctName.trim(), customer_id: acctCid.trim() }),
+      })
+      const json = await res.json()
+      if (json.success) {
+        setAcctStatus({ ok: true, msg: `✅ Queryable — ${json.account?.name || acctCid} saved.` })
+        setAcctName(''); setAcctCid('')
+        await loadAccounts()
+      } else {
+        setAcctStatus({ ok: false, msg: json.error || 'Account not reachable.' })
+      }
+    } catch (e) { setAcctStatus({ ok: false, msg: `Network error: ${e.message}` }) }
+    setAcctAdding(false)
+  }
+
+  async function handleDeleteAccount(cid) {
+    setDeletingCid(cid)
+    try {
+      await fetch(`${BACKEND}/cricket-ads/accounts/${cid}`, { method: 'DELETE' })
+      await loadAccounts()
+      if (selectedCid === cid) setSelectedCid('')
+    } catch { /* silent */ }
+    setDeletingCid(null)
+  }
 
   async function analyze() {
     if (!url.trim()) { setError('Website URL is required.'); return }
-    setLoading(true); setError(''); setData(null)
+    setLoading(true); setError(''); setData(null); setPushResult(null); setPushError(null)
     try {
       const res  = await fetch(`${BACKEND}/cricket-ads-intelligence`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: url.trim(), whatsapp_link: waLink.trim(), city: city.trim() || 'India' }),
       })
       const json = await res.json()
@@ -101,33 +172,116 @@ export default function CricketAds() {
     setLoading(false)
   }
 
-  const d = data || {}
-  const cc = d.compliance_check || {}
-  const ls = d.launch_score    || {}
-  const ca = d.creative_assets || {}
-  const cs = d.campaign_structure || {}
-  const lp = d.landing_page_audit || {}
+  async function handlePush() {
+    if (!selectedCid) { setPushError('Select an ad account first.'); return }
+    if (!data) return
+    setPushLoading(true); setPushResult(null); setPushError(null)
+    const cs = data.campaign_structure || {}
+    const ca = data.creative_assets   || {}
+    const budgetNum = parseFloat((cs.budget_daily || '').toString().replace(/[^\d.]/g, '')) || 500
+    try {
+      const res  = await fetch(`${BACKEND}/cricket-ads/push-to-google`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_id:    selectedCid,
+          campaign_name:  cs.campaign_name || 'Cricket Community Campaign',
+          budget_daily:   budgetNum,
+          headlines:      ca.headlines_15       || [],
+          long_headlines: ca.long_headlines_5   || [],
+          descriptions:   ca.descriptions_5     || [],
+          whatsapp_link:  waLink.trim(),
+        }),
+      })
+      const json = await res.json()
+      if (json.success) setPushResult(json)
+      else if (json.errors) setPushError(json.errors)
+      else setPushError(json.error || 'Campaign creation failed.')
+    } catch (e) { setPushError(`Network error: ${e.message}`) }
+    setPushLoading(false)
+  }
+
+  const d  = data || {}
+  const cc = d.compliance_check    || {}
+  const ls = d.launch_score        || {}
+  const ca = d.creative_assets     || {}
+  const cs = d.campaign_structure  || {}
+  const lp = d.landing_page_audit  || {}
+
+  const acctBadge = accounts.length > 0
+    ? <span style={{ background: C.accentDk + '40', color: C.accent, fontSize: '10px', fontWeight: '700', padding: '2px 7px', borderRadius: '4px', border: `1px solid ${C.accent}40` }}>{accounts.length}</span>
+    : null
 
   return (
     <div style={s.page}>
       <style>{`
-        input::placeholder { color: #334155; }
-        input:focus { border-color: #3B82F6 !important; }
+        input::placeholder,select::placeholder { color: #334155; }
+        input:focus,select:focus { border-color: #3B82F6 !important; }
+        select option { background: #111827; color: #F1F5F9; }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
         .spin { animation: pulse 1.5s infinite; }
       `}</style>
 
       <div style={s.wrap}>
         {/* Header */}
-        <div style={{ marginBottom: '32px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+        <div style={{ marginBottom: '28px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px' }}>
             <span style={{ fontSize: '28px' }}>🏏</span>
             <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '800', letterSpacing: '-0.5px' }}>Cricket Community Ads</h1>
           </div>
           <p style={{ margin: 0, color: C.muted, fontSize: '14px' }}>Google Display campaign intelligence for cricket WhatsApp communities</p>
         </div>
 
-        {/* Input form */}
+        {/* ── Ad Accounts Manager (collapsible) ─────────────────────────────── */}
+        <div style={s.card}>
+          <Collapsible title="🎯 Ad Accounts" badge={acctBadge}>
+            {/* Add account form */}
+            <div style={{ marginBottom: '16px', padding: '14px', background: C.surface, borderRadius: '8px', border: `1px solid ${C.border}` }}>
+              <p style={{ margin: '0 0 12px', fontSize: '12px', fontWeight: '600', color: C.muted, textTransform: 'uppercase' }}>Add Ad Account</p>
+              <div style={s.row}>
+                <div>
+                  <label style={s.label}>Account Name</label>
+                  <input style={s.input} value={acctName} onChange={e => setAcctName(e.target.value)} placeholder="e.g. Sohscape Cricket" />
+                </div>
+                <div>
+                  <label style={s.label}>Customer ID (no dashes)</label>
+                  <input style={s.input} value={acctCid} onChange={e => setAcctCid(e.target.value)} placeholder="e.g. 2715637188" />
+                </div>
+              </div>
+              <button
+                onClick={handleAddAccount} disabled={acctAdding}
+                style={{ marginTop: '10px', background: acctAdding ? C.accentDk : C.accent, color: '#fff', border: 'none', borderRadius: '7px', padding: '9px 20px', fontSize: '13px', fontWeight: '600', cursor: acctAdding ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <Plus size={13} />
+                {acctAdding ? 'Testing connection…' : 'Test & Save'}
+              </button>
+              {acctStatus && (
+                <p style={{ margin: '8px 0 0', fontSize: '13px', color: acctStatus.ok ? C.green : C.red }}>{acctStatus.msg}</p>
+              )}
+            </div>
+
+            {/* Saved accounts list */}
+            {accounts.length === 0
+              ? <p style={{ color: C.muted, fontSize: '13px', margin: 0 }}>No accounts saved yet. Add one above.</p>
+              : accounts.map(acct => (
+                <div key={acct.customer_id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: C.surface, borderRadius: '7px', marginBottom: '8px', border: `1px solid ${C.border}` }}>
+                  <div>
+                    <p style={{ margin: '0 0 2px', fontSize: '13px', fontWeight: '600' }}>{acct.account_name}</p>
+                    <p style={{ margin: 0, fontSize: '11px', color: C.muted, fontFamily: 'monospace' }}>{acct.customer_id}</p>
+                  </div>
+                  <button
+                    onClick={() => handleDeleteAccount(acct.customer_id)}
+                    disabled={deletingCid === acct.customer_id}
+                    style={{ background: 'none', border: `1px solid ${C.border}`, borderRadius: '6px', padding: '5px 8px', cursor: 'pointer', color: C.red, display: 'flex', alignItems: 'center' }}
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              ))
+            }
+          </Collapsible>
+        </div>
+
+        {/* ── Analysis Input Form ───────────────────────────────────────────── */}
         <div style={s.card}>
           <p style={s.secHead}>Campaign Setup</p>
           <div style={{ marginBottom: '14px' }}>
@@ -145,12 +299,12 @@ export default function CricketAds() {
             </div>
           </div>
           {error && <div style={{ background: '#1F0A0A', border: `1px solid ${C.red}40`, borderRadius: '7px', padding: '10px 14px', marginTop: '14px', color: C.red, fontSize: '13px' }}>{error}</div>}
-          <button style={{ ...s.btn, background: loading ? '#1D4ED8' : C.accent, opacity: loading ? 0.8 : 1 }} onClick={analyze} disabled={loading}>
-            {loading ? <span className="spin">Analyzing… (crawling + live cricket data + AI…)</span> : '🏏 Analyze & Build Campaign'}
+          <button style={{ ...s.btn, background: loading ? C.accentDk : C.accent, opacity: loading ? 0.8 : 1 }} onClick={analyze} disabled={loading}>
+            {loading ? <span className="spin">Analyzing… (crawl + live cricket data + AI…)</span> : '🏏 Analyze & Build Campaign'}
           </button>
         </div>
 
-        {/* Results */}
+        {/* ── Results ──────────────────────────────────────────────────────── */}
         {data && (
           <>
             {/* 1 — Compliance Check */}
@@ -163,7 +317,7 @@ export default function CricketAds() {
                   </p>
                   <p style={{ margin: 0, fontSize: '12px', color: C.muted }}>
                     Risk Level: <strong style={{ color: cc.risk_level === 'low' ? C.green : cc.risk_level === 'medium' ? C.gold : C.red }}>{(cc.risk_level || '').toUpperCase()}</strong>
-                    {cc.flags_found?.length > 0 && ` · ${cc.flags_found.length} flag(s) found`}
+                    {cc.flags_found?.length > 0 && ` · ${cc.flags_found.length} flag(s)`}
                   </p>
                 </div>
               </div>
@@ -206,9 +360,9 @@ export default function CricketAds() {
                       <span style={{ fontSize: '12px', color: C.muted }}>Score: <strong style={{ color: C.text }}>{seg.priority_score}</strong></span>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '20px', marginBottom: '8px', flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '12px', color: C.muted }}>Est. CPC: <strong style={{ color: C.green }}>{seg.estimated_cpc}</strong></span>
-                    <span style={{ fontSize: '12px', color: C.muted }}>Est. CTR: <strong style={{ color: C.text }}>{seg.estimated_ctr}</strong></span>
+                  <div style={{ display: 'flex', gap: '20px', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '12px', color: C.muted }}>CPC: <strong style={{ color: C.green }}>{seg.estimated_cpc}</strong></span>
+                    <span style={{ fontSize: '12px', color: C.muted }}>CTR: <strong style={{ color: C.text }}>{seg.estimated_ctr}</strong></span>
                   </div>
                   <p style={{ margin: 0, fontSize: '13px', color: C.muted, lineHeight: '1.5' }}>{seg.reason}</p>
                 </div>
@@ -224,7 +378,7 @@ export default function CricketAds() {
                   <div style={{ flex: 1 }}>
                     <p style={{ margin: '0 0 3px', fontSize: '14px', fontWeight: '600' }}>{p.placement}</p>
                     <p style={{ margin: '0 0 3px', fontSize: '13px', color: C.muted }}>{p.why}</p>
-                    <p style={{ margin: 0, fontSize: '12px', color: C.accent }}>Est. reach: {p.estimated_reach}</p>
+                    <p style={{ margin: 0, fontSize: '12px', color: C.accent }}>Reach: {p.estimated_reach}</p>
                   </div>
                 </div>
               ))}
@@ -245,7 +399,7 @@ export default function CricketAds() {
                 ].filter(([, v]) => v).map(([k, v]) => (
                   <div key={k} style={{ background: C.surface, borderRadius: '7px', padding: '10px 14px' }}>
                     <p style={{ margin: '0 0 3px', fontSize: '11px', color: C.muted, fontWeight: '600', textTransform: 'uppercase' }}>{k}</p>
-                    <p style={{ margin: 0, fontSize: '13px', fontWeight: '600', color: C.text }}>{v}</p>
+                    <p style={{ margin: 0, fontSize: '13px', fontWeight: '600' }}>{v}</p>
                   </div>
                 ))}
               </div>
@@ -254,8 +408,7 @@ export default function CricketAds() {
             {/* 6 — Creative Assets */}
             <div style={s.card}>
               <p style={s.secHead}>Creative Assets</p>
-
-              <Collapsible title={`📝 Headlines (15) — max 30 chars each`} defaultOpen>
+              <Collapsible title="📝 Headlines (15) — max 30 chars" defaultOpen>
                 <div style={{ display: 'grid', gap: '8px' }}>
                   {(ca.headlines_15 || []).map((h, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: C.surface, borderRadius: '6px', padding: '9px 12px', gap: '10px' }}>
@@ -268,8 +421,7 @@ export default function CricketAds() {
                   ))}
                 </div>
               </Collapsible>
-
-              <Collapsible title={`📋 Long Headlines (5) — max 90 chars`}>
+              <Collapsible title="📋 Long Headlines (5) — max 90 chars">
                 <div style={{ display: 'grid', gap: '8px' }}>
                   {(ca.long_headlines_5 || []).map((h, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: C.surface, borderRadius: '6px', padding: '9px 12px', gap: '10px' }}>
@@ -282,21 +434,19 @@ export default function CricketAds() {
                   ))}
                 </div>
               </Collapsible>
-
-              <Collapsible title={`💬 Descriptions (5) — max 90 chars`}>
+              <Collapsible title="💬 Descriptions (5) — max 90 chars">
                 <div style={{ display: 'grid', gap: '8px' }}>
-                  {(ca.descriptions_5 || []).map((d, i) => (
+                  {(ca.descriptions_5 || []).map((desc, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', background: C.surface, borderRadius: '6px', padding: '9px 12px', gap: '10px' }}>
-                      <span style={{ fontSize: '13px', flex: 1, lineHeight: '1.5' }}>{d}</span>
+                      <span style={{ fontSize: '13px', flex: 1, lineHeight: '1.5' }}>{desc}</span>
                       <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
-                        <span style={{ fontSize: '10px', color: d.length > 90 ? C.red : C.muted }}>{d.length}/90</span>
-                        <CopyBtn text={d} />
+                        <span style={{ fontSize: '10px', color: desc.length > 90 ? C.red : C.muted }}>{desc.length}/90</span>
+                        <CopyBtn text={desc} />
                       </div>
                     </div>
                   ))}
                 </div>
               </Collapsible>
-
               {ca.image_suggestions?.length > 0 && (
                 <div style={{ marginTop: '14px' }}>
                   <p style={{ fontSize: '12px', color: C.muted, fontWeight: '600', textTransform: 'uppercase', marginBottom: '8px' }}>Image Suggestions</p>
@@ -305,7 +455,6 @@ export default function CricketAds() {
                   ))}
                 </div>
               )}
-
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '14px', padding: '10px 14px', background: C.accentDk + '20', borderRadius: '7px', border: `1px solid ${C.accent}30` }}>
                 <span style={{ fontSize: '12px', color: C.muted, fontWeight: '600' }}>CTA:</span>
                 <span style={{ fontSize: '14px', fontWeight: '700', color: C.accent }}>{ca.cta}</span>
@@ -322,26 +471,22 @@ export default function CricketAds() {
               </div>
               {lp.issues?.length > 0 && (
                 <div style={{ marginBottom: '14px' }}>
-                  <p style={{ fontSize: '12px', color: C.red, fontWeight: '600', textTransform: 'uppercase', marginBottom: '8px' }}>Issues Found</p>
-                  {lp.issues.map((iss, i) => (
-                    <p key={i} style={{ margin: '0 0 5px', fontSize: '13px', color: '#FCA5A5' }}>⚠ {iss}</p>
-                  ))}
+                  <p style={{ fontSize: '12px', color: C.red, fontWeight: '600', textTransform: 'uppercase', marginBottom: '8px' }}>Issues</p>
+                  {lp.issues.map((iss, i) => <p key={i} style={{ margin: '0 0 5px', fontSize: '13px', color: '#FCA5A5' }}>⚠ {iss}</p>)}
                 </div>
               )}
               {lp.fixes?.length > 0 && (
                 <div>
-                  <p style={{ fontSize: '12px', color: C.green, fontWeight: '600', textTransform: 'uppercase', marginBottom: '8px' }}>Recommended Fixes</p>
-                  {lp.fixes.map((fix, i) => (
-                    <p key={i} style={{ margin: '0 0 5px', fontSize: '13px', color: '#6EE7B7' }}>→ {fix}</p>
-                  ))}
+                  <p style={{ fontSize: '12px', color: C.green, fontWeight: '600', textTransform: 'uppercase', marginBottom: '8px' }}>Fixes</p>
+                  {lp.fixes.map((fix, i) => <p key={i} style={{ margin: '0 0 5px', fontSize: '13px', color: '#6EE7B7' }}>→ {fix}</p>)}
                 </div>
               )}
               {(!lp.issues?.length && !lp.fixes?.length) && (
-                <p style={{ color: C.green, fontSize: '14px' }}>✅ Landing page looks good — no major issues found.</p>
+                <p style={{ color: C.green, fontSize: '14px' }}>✅ Landing page looks good.</p>
               )}
             </div>
 
-            {/* Business Summary footer */}
+            {/* Business Summary */}
             {d.business_summary && (
               <div style={{ ...s.card, background: C.surface }}>
                 <p style={s.secHead}>Business Summary</p>
@@ -355,6 +500,66 @@ export default function CricketAds() {
                 </div>
               </div>
             )}
+
+            {/* ── Launch Campaign ───────────────────────────────────────────── */}
+            <div style={{ ...s.card, border: `1px solid ${C.green}30`, background: '#052e1610' }}>
+              <p style={{ ...s.secHead, color: C.green, borderColor: `${C.green}30` }}>🚀 Launch Campaign on Google Ads</p>
+
+              {accounts.length === 0 ? (
+                <p style={{ color: C.muted, fontSize: '13px' }}>Add an ad account above to enable campaign launch.</p>
+              ) : (
+                <>
+                  <div style={{ marginBottom: '14px' }}>
+                    <label style={s.label}>Select Ad Account</label>
+                    <select
+                      value={selectedCid}
+                      onChange={e => setSelectedCid(e.target.value)}
+                      style={{ ...s.input, appearance: 'none' }}
+                    >
+                      <option value="">— Select account —</option>
+                      {accounts.map(a => (
+                        <option key={a.customer_id} value={a.customer_id}>
+                          {a.account_name} ({a.customer_id})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div style={{ background: C.surface, borderRadius: '8px', padding: '12px 14px', marginBottom: '14px', fontSize: '12px', color: C.muted, lineHeight: '1.7' }}>
+                    <strong style={{ color: C.text }}>What will be created:</strong><br />
+                    Campaign: <strong style={{ color: C.text }}>{cs.campaign_name || 'Cricket Community Campaign'}</strong><br />
+                    Type: Display · Status: <strong style={{ color: C.gold }}>PAUSED</strong> (safe to review before going live)<br />
+                    Budget: <strong style={{ color: C.text }}>{cs.budget_daily || '₹500'}/day</strong><br />
+                    <span style={{ color: C.yellow }}>⚠ Images must be added in Google Ads dashboard — text assets will be ready.</span>
+                  </div>
+
+                  <button
+                    onClick={handlePush} disabled={pushLoading || !selectedCid}
+                    style={{ background: pushLoading ? '#166534' : C.green, color: '#fff', border: 'none', borderRadius: '8px', padding: '12px 24px', fontSize: '14px', fontWeight: '700', cursor: pushLoading || !selectedCid ? 'not-allowed' : 'pointer', opacity: !selectedCid ? 0.6 : 1, display: 'flex', alignItems: 'center', gap: '8px' }}
+                  >
+                    {pushLoading ? <span className="spin">Creating campaign…</span> : '🏏 Launch Campaign'}
+                  </button>
+
+                  {/* Success */}
+                  {pushResult && (
+                    <div style={{ marginTop: '14px', background: '#052e16', border: `1px solid ${C.green}40`, borderRadius: '8px', padding: '16px' }}>
+                      <p style={{ margin: '0 0 10px', fontSize: '16px', fontWeight: '700', color: C.green }}>✅ Campaign Created!</p>
+                      <p style={{ margin: '0 0 4px', fontSize: '12px', color: C.muted }}>Campaign ID: <strong style={{ color: C.text, fontFamily: 'monospace' }}>{pushResult.campaign_id}</strong></p>
+                      <p style={{ margin: '0 0 4px', fontSize: '12px', color: C.muted }}>Ad Group ID: <strong style={{ color: C.text, fontFamily: 'monospace' }}>{pushResult.ad_group_id}</strong></p>
+                      <p style={{ margin: '0 0 12px', fontSize: '12px', color: C.muted }}>Status: <strong style={{ color: C.gold }}>PAUSED</strong> — add image assets then enable</p>
+                      {pushResult.note && <p style={{ margin: '0 0 12px', fontSize: '12px', color: C.yellow }}>ℹ {pushResult.note}</p>}
+                      <a href={pushResult.google_ads_dashboard} target="_blank" rel="noopener noreferrer"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#16A34A', color: '#fff', padding: '9px 18px', borderRadius: '7px', fontSize: '13px', fontWeight: '600', textDecoration: 'none' }}>
+                        <ExternalLink size={13} /> Open in Google Ads
+                      </a>
+                    </div>
+                  )}
+
+                  {/* Error */}
+                  <ApiError err={pushError} />
+                </>
+              )}
+            </div>
           </>
         )}
       </div>
