@@ -23,6 +23,7 @@ import CricketAds from './CricketAds'
 import GoogleAdsConnect from './GoogleAdsConnect'
 import GoogleAdsDashboard from './GoogleAdsDashboard'
 import MetaAdsTest from './MetaAdsTest'
+import SmartAnalysis from './SmartAnalysis'
 import Nav from './Nav'
 
 function Layout() {
@@ -68,6 +69,7 @@ function Layout() {
           <Route path="/google-ads" element={<GoogleAdsConnect />} />
           <Route path="/google-ads/dashboard" element={<GoogleAdsDashboard />} />
           <Route path="/meta-test" element={<MetaAdsTest />} />
+          <Route path="/smart-analysis" element={<SmartAnalysis />} />
         </Routes>
       </div>
     </div>
