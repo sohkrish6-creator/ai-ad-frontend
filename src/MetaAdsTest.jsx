@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { CheckCircle, AlertCircle, RefreshCw, ExternalLink } from 'lucide-react'
+import { CheckCircle, AlertCircle, AlertTriangle, RefreshCw, ExternalLink } from 'lucide-react'
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 const GOLD = '#D4AF37'
@@ -17,6 +17,7 @@ export default function MetaAdsTest() {
 
   const [campaignName, setCampaignName] = useState('Test Campaign')
   const [dailyBudget, setDailyBudget] = useState('300')
+  const [creativeId, setCreativeId] = useState('')
   const [creating, setCreating] = useState(false)
   const [createResult, setCreateResult] = useState(null)
 
@@ -30,6 +31,7 @@ export default function MetaAdsTest() {
         body: JSON.stringify({
           campaign_name: campaignName,
           daily_budget:  parseFloat(dailyBudget),
+          creative_id:   creativeId.trim(),
         }),
       })
       const text = await res.text()
@@ -161,7 +163,9 @@ export default function MetaAdsTest() {
             Create Test Campaign
           </p>
           <p style={{ fontSize: '12px', color: '#999', margin: '0 0 14px' }}>
-            Creates a real Campaign + Ad Set + Ad in this account, PAUSED by default. Nothing goes live until you enable it in Ads Manager.
+            Creates a real Campaign + Ad Set in this account, PAUSED by default. Nothing goes live until you enable it in Ads Manager.
+            Our app is in Development Mode, so Meta blocks it from creating a brand-new ad creative — leave Post ID blank to stop after
+            the Ad Set and finish the ad manually, or paste an existing Post ID (from a creative you made in Ads Manager) to complete the Ad automatically.
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '14px' }}>
@@ -182,6 +186,17 @@ export default function MetaAdsTest() {
                 style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', borderRadius: '6px', border: '1px solid #E5E5E5', fontSize: '13px' }}
               />
             </div>
+            <div>
+              <label style={{ fontSize: '11px', color: '#999', display: 'block', marginBottom: '4px' }}>
+                Existing Post ID (optional — completes the Ad automatically)
+              </label>
+              <input
+                value={creativeId}
+                onChange={(e) => setCreativeId(e.target.value)}
+                placeholder="e.g. 1140954839109425_1234567890"
+                style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', borderRadius: '6px', border: '1px solid #E5E5E5', fontSize: '13px' }}
+              />
+            </div>
           </div>
 
           <button
@@ -196,7 +211,29 @@ export default function MetaAdsTest() {
           </button>
 
           {createResult && (
-            createResult.success ? (
+            createResult.success && createResult.action_needed ? (
+              <div style={{ marginTop: '16px', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '6px', padding: '12px 14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <AlertTriangle size={14} color="#B45309" />
+                  <p style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: '#92400E' }}>Action Needed</p>
+                </div>
+                <p style={{ margin: '0 0 8px', fontSize: '13px', color: '#92400E' }}>{createResult.message}</p>
+                <div style={{ fontSize: '12px', color: '#92400E', lineHeight: '1.8' }}>
+                  <div><strong>Campaign ID:</strong> {createResult.campaign_id}</div>
+                  <div><strong>Ad Set ID:</strong> {createResult.adset_id}</div>
+                </div>
+                <a
+                  href={createResult.meta_ads_manager_link}
+                  target="_blank" rel="noreferrer"
+                  style={{
+                    marginTop: '10px', display: 'inline-flex', alignItems: 'center', gap: '6px',
+                    fontSize: '12px', fontWeight: '700', color: '#171717', textDecoration: 'none',
+                  }}
+                >
+                  Open in Meta Ads Manager <ExternalLink size={12} />
+                </a>
+              </div>
+            ) : createResult.success ? (
               <div style={{ marginTop: '16px', background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '6px', padding: '12px 14px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                   <CheckCircle size={14} color="#16A34A" />
