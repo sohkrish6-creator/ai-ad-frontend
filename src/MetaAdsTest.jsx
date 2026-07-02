@@ -19,8 +19,25 @@ export default function MetaAdsTest() {
     setLoading(true)
     try {
       const res = await fetch(`${BACKEND}/meta-ads/test-connection`)
-      const json = await res.json()
-      setResult(json)
+      const text = await res.text()
+      let json
+      try {
+        json = JSON.parse(text)
+      } catch {
+        // Backend returned something that isn't JSON at all (e.g. a raw
+        // 500/502 HTML page) — surface the raw response instead of hiding
+        // it behind "Unknown error".
+        setResult({ connected: false, error: `Non-JSON response (HTTP ${res.status})`, raw_body: text.slice(0, 2000) })
+        setLoading(false)
+        return
+      }
+      // Backend always sends "connected" now, but guard anyway: a shape we
+      // don't recognize should still show something, not silently vanish.
+      if (typeof json.connected !== 'boolean') {
+        setResult({ connected: false, error: `Unexpected response shape (HTTP ${res.status})`, raw_body: json })
+      } else {
+        setResult(json)
+      }
     } catch (e) {
       setResult({ connected: false, error: `Network error: ${e.message}` })
     }
@@ -72,11 +89,33 @@ export default function MetaAdsTest() {
               <p style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: '#BE123C' }}>Not Connected</p>
             </div>
             <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '6px', padding: '10px 14px' }}>
-              <p style={{ margin: 0, fontSize: '13px', color: '#BE123C', wordBreak: 'break-word' }}>{result?.error || 'Unknown error.'}</p>
-              {result?.error_code != null && (
+              <p style={{ margin: 0, fontSize: '13px', color: '#BE123C', wordBreak: 'break-word' }}>
+                {result?.error || 'Unknown error — see raw response below.'}
+              </p>
+              {(result?.error_code != null || result?.error_subcode != null || result?.error_type) && (
                 <p style={{ margin: '6px 0 0', fontSize: '12px', color: '#BE123C' }}>
-                  code: {result.error_code}{result.error_subcode != null ? ` · subcode: ${result.error_subcode}` : ''}
+                  {result.error_type ? `type: ${result.error_type}` : ''}
+                  {result.error_code != null ? ` · code: ${result.error_code}` : ''}
+                  {result.error_subcode != null ? ` · subcode: ${result.error_subcode}` : ''}
                 </p>
+              )}
+              {result?.error_user_title && (
+                <p style={{ margin: '6px 0 0', fontSize: '12px', color: '#BE123C' }}><strong>{result.error_user_title}</strong></p>
+              )}
+              {result?.error_user_msg && (
+                <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#BE123C' }}>{result.error_user_msg}</p>
+              )}
+              {result?.fbtrace_id && (
+                <p style={{ margin: '6px 0 0', fontSize: '11px', color: '#999' }}>fbtrace_id: {result.fbtrace_id}</p>
+              )}
+              {result?.raw_body != null && (
+                <pre style={{
+                  margin: '10px 0 0', fontSize: '11px', color: '#666', background: '#FAFAFA',
+                  border: '1px solid #EAEAEA', borderRadius: '5px', padding: '8px 10px',
+                  overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                }}>
+                  {typeof result.raw_body === 'string' ? result.raw_body : JSON.stringify(result.raw_body, null, 2)}
+                </pre>
               )}
             </div>
           </div>
