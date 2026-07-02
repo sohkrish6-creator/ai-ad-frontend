@@ -244,6 +244,9 @@ function MarketingBrain() {
           start_date:    gAdsForm.start_date.replace(/-/g, ''),
           end_date:      gAdsForm.end_date ? gAdsForm.end_date.replace(/-/g, '') : '',
           business_key:  result?.business_key || '',
+          url:           url || result?.url || '',
+          industry:      resolvedIndustry || businessType,
+          city:          targetCity,
         }),
       })
       const data = await res.json()
