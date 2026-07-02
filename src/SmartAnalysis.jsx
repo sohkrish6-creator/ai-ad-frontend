@@ -20,6 +20,12 @@ const INDUSTRIES = [
   'Construction & Builders', 'Media & Entertainment', 'Other',
 ]
 
+const BUSINESS_MODEL_COLORS = {
+  B2B: { bg: '#EFF6FF', fg: '#1D4ED8', border: '#BFDBFE' },
+  B2C: { bg: '#FDF4FF', fg: '#A21CAF', border: '#F5D0FE' },
+  D2C: { bg: '#F0FDFA', fg: '#0F766E', border: '#99F6E4' },
+}
+
 // snake_case module key (as returned by the Decision Layer) -> display label + route + result-shape info
 const MODULE_META = {
   opportunity_engine:      { label: 'Opportunity Engine',      resultKey: 'opportunity', dataKey: 'opportunity', route: '/opportunity' },
@@ -144,9 +150,9 @@ export default function SmartAnalysis() {
             <input type="url" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://aapkibusiness.com" style={inputSt} />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '8px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '4px' }}>
             <div>
-              <label style={lbl}>Industry <span style={{ fontWeight: '400', textTransform: 'none', color: '#CCC' }}>(optional — B2B)</span></label>
+              <label style={lbl}>Industry <span style={{ fontWeight: '400', textTransform: 'none', color: '#CCC' }}>(optional)</span></label>
               <select value={industry} onChange={e => setIndustry(e.target.value)} style={{ ...inputSt, color: industry ? '#171717' : '#999' }}>
                 <option value="">— Select (optional) —</option>
                 {INDUSTRIES.map(o => <option key={o} value={o}>{o}</option>)}
@@ -157,6 +163,9 @@ export default function SmartAnalysis() {
               <input type="text" value={city} onChange={e => setCity(e.target.value)} placeholder="Jaipur" style={inputSt} />
             </div>
           </div>
+          <p style={{ fontSize: '11px', color: '#BBB', margin: '0 0 20px', lineHeight: '1.5' }}>
+            Leave blank for B2C/D2C businesses selling directly to consumers, fill in for B2B businesses targeting other businesses.
+          </p>
 
           {industry === 'Other' && (
             <div style={{ marginBottom: '16px' }}>
@@ -197,7 +206,20 @@ export default function SmartAnalysis() {
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
             <div>
-              <h2 style={{ fontSize: '16px', fontWeight: '600', margin: '0 0 4px', color: '#171717' }}>{result.brain_result?.url || url}</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px', flexWrap: 'wrap' }}>
+                <h2 style={{ fontSize: '16px', fontWeight: '600', margin: 0, color: '#171717' }}>{result.brain_result?.url || url}</h2>
+                {result.business_model && (
+                  <span style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 12px', borderRadius: '20px',
+                    fontSize: '11px', fontWeight: '700', letterSpacing: '0.03em',
+                    background: BUSINESS_MODEL_COLORS[result.business_model]?.bg || '#F5F5F5',
+                    color: BUSINESS_MODEL_COLORS[result.business_model]?.fg || '#666',
+                    border: `1px solid ${BUSINESS_MODEL_COLORS[result.business_model]?.border || '#E5E5E5'}`,
+                  }}>
+                    {result.business_model} Detected
+                  </span>
+                )}
+              </div>
               <p style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#999', fontSize: '12px', margin: 0 }}>
                 <Clock size={12} /> Completed in {result.total_time_seconds}s
               </p>
