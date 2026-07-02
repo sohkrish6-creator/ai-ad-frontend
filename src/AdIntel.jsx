@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
+const LS_KEY_ADINTEL = 'adsoh_adintel_result'
 const GOLD = '#D4AF37'
 const card = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
 const inputSt = { width: '100%', padding: '10px 13px', borderRadius: '7px', border: '1px solid #E5E5E5', background: '#FAFAFA', color: '#171717', fontSize: '14px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
@@ -27,6 +28,11 @@ function AdIntel() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
+  const [fromCache, setFromCache] = useState(false)
+
+  useEffect(() => {
+    try { const s = localStorage.getItem(LS_KEY_ADINTEL); if (s) { setResult(JSON.parse(s)); setFromCache(true) } } catch {}
+  }, [])
 
   const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 
@@ -39,7 +45,8 @@ function AdIntel() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ business_name: businessName, business_type: businessType, website, country: 'IN' })
       })
-      setResult(await res.json())
+      const data = await res.json()
+      setResult(data); localStorage.setItem(LS_KEY_ADINTEL, JSON.stringify(data)); setFromCache(false)
     } catch { setError('Backend se connect nahi ho paya.') }
     setLoading(false)
   }
@@ -60,12 +67,18 @@ function AdIntel() {
 
   if (result) return (
     <div style={page}>
+      {fromCache && (
+        <div style={{ background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '7px', padding: '9px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>Showing previous result · Generate new report to refresh</p>
+          <button onClick={() => { localStorage.removeItem(LS_KEY_ADINTEL); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
+        </div>
+      )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Ad Intelligence</h1>
           <p style={{ color: '#999', fontSize: '13px', margin: 0 }}>{result.business_name}</p>
         </div>
-        <button onClick={() => setResult(null)} style={{ background: 'transparent', border: '1px solid #E5E5E5', color: '#666', padding: '7px 16px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
+        <button onClick={() => { localStorage.removeItem(LS_KEY_ADINTEL); setResult(null); setFromCache(false) }} style={{ background: 'transparent', border: '1px solid #E5E5E5', color: '#666', padding: '7px 16px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
           ← New Search
         </button>
       </div>

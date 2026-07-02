@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react'
 
-const LS_KEY_BRAIN = 'adsoh_brain_result'
+const LS_KEY_BRAIN      = 'adsoh_brain_result'
+const LS_KEY_CAMPAIGN_KIT = 'adsoh_campaign_kit_result'
+const LS_KEY_MEDIA_PLAN   = 'adsoh_media_plan_result'
+const LS_KEY_GADS_PUSH    = 'adsoh_gads_push_result'
+const LS_KEY_MADS_PUSH    = 'adsoh_mads_push_result'
 import { Copy, Check, ExternalLink, Download, TrendingUp, Rocket, X, AlertTriangle } from 'lucide-react'
 
 const FONT = '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif'
@@ -133,6 +137,10 @@ function MarketingBrain() {
 
   useEffect(() => {
     try { const s = localStorage.getItem(LS_KEY_BRAIN); if (s) { setResult(JSON.parse(s)); setFromCache(true) } } catch {}
+    try { const s = localStorage.getItem(LS_KEY_CAMPAIGN_KIT); if (s) setLaunchKit(JSON.parse(s)) } catch {}
+    try { const s = localStorage.getItem(LS_KEY_MEDIA_PLAN); if (s) setMediaPlan(JSON.parse(s)) } catch {}
+    try { const s = localStorage.getItem(LS_KEY_GADS_PUSH); if (s) setGAdsResult(JSON.parse(s)) } catch {}
+    try { const s = localStorage.getItem(LS_KEY_MADS_PUSH); if (s) setMAdsResult(JSON.parse(s)) } catch {}
   }, [])
 
   const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
@@ -184,7 +192,7 @@ function MarketingBrain() {
         })
       })
       const data = await res.json()
-      if (data.success) setMediaPlan(data.media_plan)
+      if (data.success) { setMediaPlan(data.media_plan); localStorage.setItem(LS_KEY_MEDIA_PLAN, JSON.stringify(data.media_plan)) }
       else setMediaError('Media buying plan generate nahi hua. Dobara try karo.')
     } catch { setMediaError('Backend se connect nahi ho paya.') }
     setMediaLoading(false)
@@ -208,7 +216,7 @@ function MarketingBrain() {
         })
       })
       const data = await res.json()
-      if (data.success) setLaunchKit(data)
+      if (data.success) { setLaunchKit(data); localStorage.setItem(LS_KEY_CAMPAIGN_KIT, JSON.stringify(data)) }
       else setLaunchError('Campaign Launch Kit generate nahi hua. Dobara try karo.')
     } catch { setLaunchError('Backend se connect nahi ho paya.') }
     setLaunchLoading(false)
@@ -228,8 +236,9 @@ function MarketingBrain() {
       end_date:      '',
       campaign_type: 'SEARCH',
     })
-    setGAdsResult(null)
-    setGAdsError(null)
+    // Deliberately NOT resetting gAdsResult/gAdsError here — if a campaign
+    // was already pushed this session, reopening should show that result
+    // (persisted), not a blank form. Cleared only via "New Report".
     setShowGAdsModal(true)
   }
 
@@ -256,7 +265,7 @@ function MarketingBrain() {
         }),
       })
       const data = await res.json()
-      if (data.success) { setGAdsResult(data); setGAdsError(null) }
+      if (data.success) { setGAdsResult(data); setGAdsError(null); localStorage.setItem(LS_KEY_GADS_PUSH, JSON.stringify(data)) }
       else if (data.errors && Array.isArray(data.errors)) setGAdsError(data.errors)
       else setGAdsError(data.error || 'Campaign creation failed.')
     } catch (err) { setGAdsError(`Network error: ${err.message}`) }
@@ -273,8 +282,9 @@ function MarketingBrain() {
       budget_daily:  budget ? String(Math.round(parseInt(budget) / 30)) : '300',
       creative_id:   '',
     })
-    setMAdsResult(null)
-    setMAdsError(null)
+    // Deliberately NOT resetting mAdsResult/mAdsError here — if a campaign
+    // was already pushed this session, reopening should show that result
+    // (persisted), not a blank form. Cleared only via "New Report".
     setShowMAdsModal(true)
   }
 
@@ -299,10 +309,23 @@ function MarketingBrain() {
         }),
       })
       const data = await res.json()
-      if (data.success) { setMAdsResult(data); setMAdsError(null) }
+      if (data.success) { setMAdsResult(data); setMAdsError(null); localStorage.setItem(LS_KEY_MADS_PUSH, JSON.stringify(data)) }
       else setMAdsError(data)
     } catch (err) { setMAdsError({ error: `Network error: ${err.message}` }) }
     setMAdsLoading(false)
+  }
+
+  function clearBrainReport() {
+    localStorage.removeItem(LS_KEY_BRAIN)
+    localStorage.removeItem(LS_KEY_CAMPAIGN_KIT)
+    localStorage.removeItem(LS_KEY_MEDIA_PLAN)
+    localStorage.removeItem(LS_KEY_GADS_PUSH)
+    localStorage.removeItem(LS_KEY_MADS_PUSH)
+    setResult(null); setFromCache(false)
+    setMediaPlan(null); setMediaError(null)
+    setLaunchKit(null); setLaunchError(null)
+    setGAdsResult(null); setGAdsError(null)
+    setMAdsResult(null); setMAdsError(null)
   }
 
   function downloadTxt(text, filename) {
@@ -697,7 +720,7 @@ function MarketingBrain() {
                     <ExternalLink size={13} /> Open in Google Ads
                   </a>
                   <br />
-                  <button onClick={() => { setShowGAdsModal(false); setGAdsResult(null) }} style={{ background: 'none', border: 'none', color: '#888', fontSize: '12px', cursor: 'pointer', marginTop: '6px' }}>Close</button>
+                  <button onClick={() => { setShowGAdsModal(false) }} style={{ background: 'none', border: 'none', color: '#888', fontSize: '12px', cursor: 'pointer', marginTop: '6px' }}>Close</button>
                 </div>
               )}
             </div>
@@ -779,7 +802,7 @@ function MarketingBrain() {
                     <ExternalLink size={13} /> Open in Meta Ads Manager
                   </a>
                   <br />
-                  <button onClick={() => { setShowMAdsModal(false); setMAdsResult(null) }} style={{ background: 'none', border: 'none', color: '#888', fontSize: '12px', cursor: 'pointer', marginTop: '6px' }}>Close</button>
+                  <button onClick={() => { setShowMAdsModal(false) }} style={{ background: 'none', border: 'none', color: '#888', fontSize: '12px', cursor: 'pointer', marginTop: '6px' }}>Close</button>
                 </div>
               ) : (
                 <div style={{ textAlign: 'center' }}>
@@ -797,7 +820,7 @@ function MarketingBrain() {
                     <ExternalLink size={13} /> Open in Meta Ads Manager
                   </a>
                   <br />
-                  <button onClick={() => { setShowMAdsModal(false); setMAdsResult(null) }} style={{ background: 'none', border: 'none', color: '#888', fontSize: '12px', cursor: 'pointer', marginTop: '6px' }}>Close</button>
+                  <button onClick={() => { setShowMAdsModal(false) }} style={{ background: 'none', border: 'none', color: '#888', fontSize: '12px', cursor: 'pointer', marginTop: '6px' }}>Close</button>
                 </div>
               )}
             </div>
@@ -808,7 +831,7 @@ function MarketingBrain() {
       {fromCache && (
         <div style={{ background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '7px', padding: '9px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>Showing previous result · Generate new report to refresh</p>
-          <button onClick={() => { localStorage.removeItem(LS_KEY_BRAIN); setResult(null); setMediaPlan(null); setMediaError(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
+          <button onClick={clearBrainReport} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
         </div>
       )}
 
@@ -829,7 +852,7 @@ function MarketingBrain() {
           <button onClick={downloadPDF} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#D4AF3712', border: '1px solid #D4AF3730', color: GOLD, padding: '7px 14px', borderRadius: '7px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
             <Download size={12} /> PDF
           </button>
-          <button onClick={() => { localStorage.removeItem(LS_KEY_BRAIN); setResult(null); setMediaPlan(null); setMediaError(null); setFromCache(false) }} style={{ background: 'transparent', border: '1px solid #E5E5E5', color: '#666', padding: '7px 16px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
+          <button onClick={clearBrainReport} style={{ background: 'transparent', border: '1px solid #E5E5E5', color: '#666', padding: '7px 16px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
             ← New Report
           </button>
         </div>
@@ -1005,7 +1028,7 @@ function MarketingBrain() {
                 <h2 style={{ fontSize: '18px', fontWeight: '600', margin: '0 0 3px', color: GOLD, letterSpacing: '-0.3px' }}>Campaign Launch Kit</h2>
                 <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>Ready to paste into Meta Ads Manager and Google Ads</p>
               </div>
-              <button onClick={() => { setLaunchKit(null); setLaunchError(null) }} style={{ background: 'transparent', border: '1px solid #E5E5E5', color: '#666', padding: '7px 14px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
+              <button onClick={() => { localStorage.removeItem(LS_KEY_CAMPAIGN_KIT); setLaunchKit(null); setLaunchError(null) }} style={{ background: 'transparent', border: '1px solid #E5E5E5', color: '#666', padding: '7px 14px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
                 Regenerate
               </button>
             </div>

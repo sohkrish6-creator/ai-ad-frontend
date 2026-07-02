@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
+const LS_KEY_AUDIENCE = 'adsoh_audience_result'
 const API = 'https://ai-ad-backend-zhpj.onrender.com'
 const GOLD = '#D4AF37'
 const card = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
@@ -35,6 +36,11 @@ export default function AudienceFinder() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [copied, setCopied] = useState(false)
+  const [fromCache, setFromCache] = useState(false)
+
+  useEffect(() => {
+    try { const s = localStorage.getItem(LS_KEY_AUDIENCE); if (s) { setResult(JSON.parse(s)); setFromCache(true) } } catch {}
+  }, [])
 
   const resolvedIndustry = targetIndustry === 'Other' ? targetIndustryOther : targetIndustry
 
@@ -47,7 +53,7 @@ export default function AudienceFinder() {
     try {
       const res = await fetch(`${API}/audience-finder`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...form, target_industry: resolvedIndustry, target_city: targetCity }) })
       const data = await res.json()
-      if (data.success) setResult(data.audience)
+      if (data.success) { setResult(data.audience); localStorage.setItem(LS_KEY_AUDIENCE, JSON.stringify(data.audience)); setFromCache(false) }
       else setError(data.message || 'Kuch toh gadbad hai, dobara try karo.')
     } catch { setError('Backend se connect nahi ho paya.') }
     setLoading(false)
@@ -144,6 +150,13 @@ export default function AudienceFinder() {
             {loading ? 'Audience dhundh raha hoon...' : resolvedIndustry ? `Find ${resolvedIndustry} Business Owners` : 'Find My Audience'}
           </button>
         </div>
+
+        {result && fromCache && (
+          <div style={{ background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '7px', padding: '9px 16px', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>Showing previous result · Generate new report to refresh</p>
+            <button onClick={() => { localStorage.removeItem(LS_KEY_AUDIENCE); setResult(''); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
+          </div>
+        )}
 
         {result && (
           <div style={{ ...card, padding: '24px' }}>
