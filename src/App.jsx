@@ -20,6 +20,8 @@ import AIOptimizer from './AIOptimizer'
 import ResultCenter from './ResultCenter'
 import ProspectDiscovery from './ProspectDiscovery'
 import CricketAds from './CricketAds'
+import GoogleAdsConnect from './GoogleAdsConnect'
+import GoogleAdsDashboard from './GoogleAdsDashboard'
 import Nav from './Nav'
 
 function Layout() {
@@ -62,6 +64,8 @@ function Layout() {
           <Route path="/result-center" element={<ResultCenter />} />
           <Route path="/prospects" element={<ProspectDiscovery />} />
           <Route path="/cricket-ads" element={<CricketAds />} />
+          <Route path="/google-ads" element={<GoogleAdsConnect />} />
+          <Route path="/google-ads/dashboard" element={<GoogleAdsDashboard />} />
         </Routes>
       </div>
     </div>

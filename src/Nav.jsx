@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, Dna, Brain, Globe, Search,
-  Radio, Palette, Target, Users, Menu, X, PlaySquare, TrendingUp, Gift, Monitor, Eye, MessageSquare, BarChart2, Activity, Zap, Trophy, Crosshair, Antenna,
+  Radio, Palette, Target, Users, Menu, X, PlaySquare, TrendingUp, Gift, Monitor, Eye, MessageSquare, BarChart2, Activity, Zap, Trophy, Crosshair, Antenna, Link2,
 } from 'lucide-react'
 
 const GOLD = '#D4AF37'
@@ -29,6 +29,7 @@ const links = [
   { path: '/result-center', label: 'Result Center',  Icon: Trophy          },
   { path: '/prospects',     label: 'Prospects',      Icon: Crosshair       },
   { path: '/cricket-ads',  label: 'Cricket Ads',    Icon: Antenna         },
+  { path: '/google-ads',  label: 'Google Ads Import', Icon: Link2         },
 ]
 
 function Nav() {
