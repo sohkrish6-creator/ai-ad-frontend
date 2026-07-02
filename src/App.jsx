@@ -22,6 +22,7 @@ import ProspectDiscovery from './ProspectDiscovery'
 import CricketAds from './CricketAds'
 import GoogleAdsConnect from './GoogleAdsConnect'
 import GoogleAdsDashboard from './GoogleAdsDashboard'
+import MetaAdsTest from './MetaAdsTest'
 import Nav from './Nav'
 
 function Layout() {
@@ -66,6 +67,7 @@ function Layout() {
           <Route path="/cricket-ads" element={<CricketAds />} />
           <Route path="/google-ads" element={<GoogleAdsConnect />} />
           <Route path="/google-ads/dashboard" element={<GoogleAdsDashboard />} />
+          <Route path="/meta-test" element={<MetaAdsTest />} />
         </Routes>
       </div>
     </div>
