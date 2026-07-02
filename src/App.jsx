@@ -25,6 +25,8 @@ import GoogleAdsDashboard from './GoogleAdsDashboard'
 import MetaAdsTest from './MetaAdsTest'
 import SmartAnalysis from './SmartAnalysis'
 import Nav from './Nav'
+import { ToastProvider } from './ToastContext'
+import CommandPalette from './CommandPalette'
 
 function Layout() {
   const location = useLocation()
@@ -34,6 +36,7 @@ function Layout() {
   return (
     <div>
       {showNav && <Nav />}
+      <CommandPalette />
       <div style={{
         marginLeft: showNav && !isMobile ? '220px' : '0',
         paddingTop: showNav && isMobile ? '48px' : '0',
@@ -78,9 +81,11 @@ function Layout() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Layout />
-    </BrowserRouter>
+    <ToastProvider>
+      <BrowserRouter>
+        <Layout />
+      </BrowserRouter>
+    </ToastProvider>
   )
 }
 

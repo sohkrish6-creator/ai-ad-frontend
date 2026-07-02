@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react'
 import { BarChart2, Copy, Check, Zap } from 'lucide-react'
+import { useToast } from './ToastContext'
+import { useLoadingSteps } from './useLoadingSteps'
 
 const BACKEND  = 'https://ai-ad-backend-zhpj.onrender.com'
 const GOLD     = '#D4AF37'
 const LS_KEY   = 'adsoh_kpi_result'
+const KPI_LOADING_STEPS = ['Gathering benchmarks...', 'Calculating predictions...', 'Building budget breakdown...']
 
 const card = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
 const lbl  = { display: 'block', color: '#999', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '7px' }
@@ -23,9 +26,10 @@ const GOALS = ['Lead Generation', 'Sales', 'Brand Awareness', 'App Installs', 'E
 
 function CopyBtn({ text }) {
   const [copied, setCopied] = useState(false)
+  const toast = useToast()
   return (
     <button
-      onClick={() => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
+      onClick={() => { navigator.clipboard.writeText(text); setCopied(true); toast.success('Copied!'); setTimeout(() => setCopied(false), 2000) }}
       style={{
         display: 'flex', alignItems: 'center', gap: '5px',
         background: copied ? '#16A34A' : '#F5F5F5', border: '1px solid ' + (copied ? '#16A34A' : '#E5E5E5'),
@@ -116,6 +120,7 @@ function buildCopyText(r) {
 
 export default function KPIEngine() {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  const toast = useToast()
 
   const [url, setUrl]                     = useState('')
   const [industry, setIndustry]           = useState('')
@@ -124,6 +129,7 @@ export default function KPIEngine() {
   const [budget, setBudget]               = useState('')
   const [goal, setGoal]                   = useState('Lead Generation')
   const [loading, setLoading]             = useState(false)
+  const loadingStep = useLoadingSteps(KPI_LOADING_STEPS, loading)
   const [error, setError]                 = useState('')
   const [result, setResult]               = useState(null)
   const [fromCache, setFromCache]         = useState(false)
@@ -157,9 +163,9 @@ export default function KPIEngine() {
         }),
       })
       const data = await res.json()
-      if (data.success) { setResult(data); localStorage.setItem(LS_KEY, JSON.stringify(data)); setFromCache(false) }
-      else setError(data.message || data.error || 'Generation failed. Dobara try karo.')
-    } catch { setError('Backend se connect nahi ho paya.') }
+      if (data.success) { setResult(data); localStorage.setItem(LS_KEY, JSON.stringify(data)); setFromCache(false); toast.success('Done!') }
+      else { const msg = data.message || data.error || 'Generation failed. Dobara try karo.'; setError(msg); toast.error(msg) }
+    } catch { setError('Backend se connect nahi ho paya.'); toast.error('Backend se connect nahi ho paya.') }
     setLoading(false)
   }
 
@@ -227,7 +233,7 @@ export default function KPIEngine() {
             cursor: loading ? 'not-allowed' : 'pointer',
           }}>
             <BarChart2 size={15} />
-            {loading ? 'Predicting KPIs...' : 'Generate KPI Predictions'}
+            {loading ? loadingStep : 'Generate KPI Predictions'}
           </button>
         </div>
       </div>

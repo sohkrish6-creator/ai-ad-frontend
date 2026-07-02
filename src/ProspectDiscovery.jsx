@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Crosshair, Copy, Check, ExternalLink, Phone, MapPin, TrendingUp, Flame, Thermometer, Snowflake } from 'lucide-react'
+import { useToast } from './ToastContext'
+import { useLoadingSteps } from './useLoadingSteps'
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 const GOLD    = '#D4AF37'
 const LS_KEY  = 'adsoh_prospect_result'
+const PROSPECT_LOADING_STEPS = ['Scanning Google Maps...', 'Enriching business details...', 'Scoring prospects...']
 
 const card = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
 const lbl  = { display: 'block', color: '#999', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '7px' }
@@ -25,9 +28,10 @@ function Shimmer({ h = '14px', w = '100%' }) {
 
 function CopyBtn({ text, label = 'Copy' }) {
   const [copied, setCopied] = useState(false)
+  const toast = useToast()
   return (
     <button
-      onClick={() => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
+      onClick={() => { navigator.clipboard.writeText(text); setCopied(true); toast.success('Copied!'); setTimeout(() => setCopied(false), 2000) }}
       style={{ display: 'flex', alignItems: 'center', gap: '4px', background: copied ? '#16A34A' : '#F5F5F5', border: '1px solid ' + (copied ? '#16A34A' : '#E5E5E5'), color: copied ? '#fff' : '#666', padding: '4px 10px', borderRadius: '5px', fontSize: '11px', fontWeight: '600', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}
     >
       {copied ? <Check size={10} /> : <Copy size={10} />}
@@ -168,12 +172,14 @@ function ProspectCard({ p, isMobile }) {
 
 export default function ProspectDiscovery() {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  const toast = useToast()
 
   const [industry, setIndustry]           = useState('')
   const [industryOther, setIndustryOther] = useState('')
   const [city, setCity]                   = useState('Jaipur')
   const [maxProspects, setMaxProspects]   = useState(15)
   const [loading, setLoading]             = useState(false)
+  const loadingStep = useLoadingSteps(PROSPECT_LOADING_STEPS, loading)
   const [error, setError]                 = useState('')
   const [result, setResult]               = useState(null)
   const [fromCache, setFromCache]         = useState(false)
@@ -208,10 +214,12 @@ export default function ProspectDiscovery() {
         setFromCache(false)
         const firstTab = data.data?.hot_prospects?.length ? 'hot' : data.data?.warm_prospects?.length ? 'warm' : 'cold'
         setActiveTab(firstTab)
+        toast.success('Done!')
       } else {
-        setError(data.message || data.error || 'Discovery failed.')
+        const msg = data.message || data.error || 'Discovery failed.'
+        setError(msg); toast.error(msg)
       }
-    } catch { setError('Backend se connect nahi ho paya.') }
+    } catch { setError('Backend se connect nahi ho paya.'); toast.error('Backend se connect nahi ho paya.') }
     setLoading(false)
   }
 
@@ -280,7 +288,7 @@ export default function ProspectDiscovery() {
             cursor: loading ? 'not-allowed' : 'pointer',
           }}>
             <Crosshair size={15} />
-            {loading ? 'Scanning Google Maps...' : 'Find Prospects'}
+            {loading ? loadingStep : 'Find Prospects'}
           </button>
         </div>
       </div>

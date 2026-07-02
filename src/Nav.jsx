@@ -69,7 +69,15 @@ function Nav() {
           }}>
             <span style={{ color: GOLD, marginRight: '5px' }}>✦</span>Adsoh
           </span>
-          <div style={{ width: '32px' }} />
+          <kbd
+            onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
+            style={{
+              fontSize: '10px', color: '#999', border: '1px solid #E5E5E5', borderRadius: '4px',
+              padding: '3px 6px', fontWeight: '600', cursor: 'pointer', background: '#FAFAFA',
+            }}
+          >
+            ⌘K
+          </kbd>
         </div>
 
         {/* Overlay */}
@@ -164,10 +172,20 @@ function Nav() {
         display: 'flex', flexDirection: 'column',
         fontFamily: '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif',
       }}>
-        <div style={{ padding: '4px 10px 28px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 10px 28px' }}>
           <span style={{ fontSize: '14px', fontWeight: '600', letterSpacing: '-0.3px', color: '#171717' }}>
             <span style={{ color: GOLD, marginRight: '6px' }}>✦</span>Adsoh
           </span>
+          <kbd
+            onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
+            title="Open command palette"
+            style={{
+              fontSize: '10px', color: '#999', border: '1px solid #E5E5E5', borderRadius: '4px',
+              padding: '3px 6px', fontWeight: '600', cursor: 'pointer', background: '#FAFAFA',
+            }}
+          >
+            ⌘K
+          </kbd>
         </div>
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1px' }}>

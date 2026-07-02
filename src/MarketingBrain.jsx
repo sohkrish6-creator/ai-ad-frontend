@@ -6,6 +6,10 @@ const LS_KEY_MEDIA_PLAN   = 'adsoh_media_plan_result'
 const LS_KEY_GADS_PUSH    = 'adsoh_gads_push_result'
 const LS_KEY_MADS_PUSH    = 'adsoh_mads_push_result'
 import { Copy, Check, ExternalLink, Download, TrendingUp, Rocket, X, AlertTriangle } from 'lucide-react'
+import { useToast } from './ToastContext'
+import { useLoadingSteps } from './useLoadingSteps'
+
+const BRAIN_LOADING_STEPS = ['Reading website...', 'Researching market...', 'Analyzing competitors...', 'Building strategy...', 'Almost done...']
 
 const FONT = '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif'
 const GOLD = '#D4AF37'
@@ -101,6 +105,7 @@ function renderBlock(text) {
 
 function MarketingBrain() {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  const toast = useToast()
   const [url, setUrl] = useState('')
   const [businessType, setBusinessType] = useState('')
   const [budget, setBudget] = useState('')
@@ -112,6 +117,7 @@ function MarketingBrain() {
   const [targetIndustryOther, setTargetIndustryOther] = useState('')
   const [targetCity, setTargetCity] = useState('Jaipur')
   const [loading, setLoading] = useState(false)
+  const loadingStep = useLoadingSteps(BRAIN_LOADING_STEPS, loading)
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
   const [copied, setCopied] = useState({})
@@ -157,15 +163,16 @@ function MarketingBrain() {
         body: JSON.stringify({ url, business_type: businessType, budget: parseInt(budget), goal, competitor_name: compName, competitor_website: compWebsite, language, target_industry: resolvedIndustry, target_city: targetCity })
       })
       const data = await res.json()
-      if (data.scan_failed) setError(data.message)
-      else { setResult(data); localStorage.setItem(LS_KEY_BRAIN, JSON.stringify(data)); setFromCache(false) }
-    } catch { setError('Backend se connect nahi ho paya.') }
+      if (data.scan_failed) { setError(data.message); toast.error(data.message) }
+      else { setResult(data); localStorage.setItem(LS_KEY_BRAIN, JSON.stringify(data)); setFromCache(false); toast.success('Done!') }
+    } catch { setError('Backend se connect nahi ho paya.'); toast.error('Backend se connect nahi ho paya.') }
     setLoading(false)
   }
 
   const handleCopy = (key, text) => {
     navigator.clipboard.writeText(text)
     setCopied(p => ({ ...p, [key]: true }))
+    toast.success('Copied!')
     setTimeout(() => setCopied(p => ({ ...p, [key]: false })), 2000)
   }
 
@@ -192,9 +199,9 @@ function MarketingBrain() {
         })
       })
       const data = await res.json()
-      if (data.success) { setMediaPlan(data.media_plan); localStorage.setItem(LS_KEY_MEDIA_PLAN, JSON.stringify(data.media_plan)) }
-      else setMediaError('Media buying plan generate nahi hua. Dobara try karo.')
-    } catch { setMediaError('Backend se connect nahi ho paya.') }
+      if (data.success) { setMediaPlan(data.media_plan); localStorage.setItem(LS_KEY_MEDIA_PLAN, JSON.stringify(data.media_plan)); toast.success('Done!') }
+      else { setMediaError('Media buying plan generate nahi hua. Dobara try karo.'); toast.error('Media buying plan generate nahi hua.') }
+    } catch { setMediaError('Backend se connect nahi ho paya.'); toast.error('Backend se connect nahi ho paya.') }
     setMediaLoading(false)
   }
 
@@ -216,9 +223,9 @@ function MarketingBrain() {
         })
       })
       const data = await res.json()
-      if (data.success) { setLaunchKit(data); localStorage.setItem(LS_KEY_CAMPAIGN_KIT, JSON.stringify(data)) }
-      else setLaunchError('Campaign Launch Kit generate nahi hua. Dobara try karo.')
-    } catch { setLaunchError('Backend se connect nahi ho paya.') }
+      if (data.success) { setLaunchKit(data); localStorage.setItem(LS_KEY_CAMPAIGN_KIT, JSON.stringify(data)); toast.success('Done!') }
+      else { setLaunchError('Campaign Launch Kit generate nahi hua. Dobara try karo.'); toast.error('Campaign Launch Kit generate nahi hua.') }
+    } catch { setLaunchError('Backend se connect nahi ho paya.'); toast.error('Backend se connect nahi ho paya.') }
     setLaunchLoading(false)
   }
 
@@ -265,10 +272,10 @@ function MarketingBrain() {
         }),
       })
       const data = await res.json()
-      if (data.success) { setGAdsResult(data); setGAdsError(null); localStorage.setItem(LS_KEY_GADS_PUSH, JSON.stringify(data)) }
-      else if (data.errors && Array.isArray(data.errors)) setGAdsError(data.errors)
-      else setGAdsError(data.error || 'Campaign creation failed.')
-    } catch (err) { setGAdsError(`Network error: ${err.message}`) }
+      if (data.success) { setGAdsResult(data); setGAdsError(null); localStorage.setItem(LS_KEY_GADS_PUSH, JSON.stringify(data)); toast.success('Done!') }
+      else if (data.errors && Array.isArray(data.errors)) { setGAdsError(data.errors); toast.error(data.errors[0]?.message || 'Campaign creation failed.') }
+      else { setGAdsError(data.error || 'Campaign creation failed.'); toast.error(data.error || 'Campaign creation failed.') }
+    } catch (err) { setGAdsError(`Network error: ${err.message}`); toast.error(`Network error: ${err.message}`) }
     setGAdsLoading(false)
   }
 
@@ -309,9 +316,9 @@ function MarketingBrain() {
         }),
       })
       const data = await res.json()
-      if (data.success) { setMAdsResult(data); setMAdsError(null); localStorage.setItem(LS_KEY_MADS_PUSH, JSON.stringify(data)) }
-      else setMAdsError(data)
-    } catch (err) { setMAdsError({ error: `Network error: ${err.message}` }) }
+      if (data.success) { setMAdsResult(data); setMAdsError(null); localStorage.setItem(LS_KEY_MADS_PUSH, JSON.stringify(data)); toast.success('Done!') }
+      else { setMAdsError(data); toast.error(data.error || 'Campaign creation failed.') }
+    } catch (err) { setMAdsError({ error: `Network error: ${err.message}` }); toast.error(`Network error: ${err.message}`) }
     setMAdsLoading(false)
   }
 
@@ -613,7 +620,7 @@ function MarketingBrain() {
     <div style={page}>
       <style>{`@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }`}</style>
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Marketing Brain</h1>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 24px' }}>BI scan + 4 engines running in parallel...</p>
+      <p style={{ color: GOLD, fontSize: '13px', fontWeight: '600', margin: '0 0 24px' }}>{loadingStep}</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {['Business Intelligence Scan', 'Business & Market Analysis', 'Audience & Outreach', 'Marketing Plan & Ad Assets', 'Media Buying Plan'].map((label, i) => (
           <div key={label} style={{ ...card, padding: '18px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>

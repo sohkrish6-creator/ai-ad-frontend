@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Sparkles, CheckCircle, AlertCircle, ChevronDown, ChevronUp, ArrowRight, Clock } from 'lucide-react'
+import { useToast } from './ToastContext'
 
 const LS_KEY_SMART = 'adsoh_smart_analysis_result'
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
@@ -65,6 +66,7 @@ function getContent(result, key, fallback) {
 
 export default function SmartAnalysis() {
   const navigate = useNavigate()
+  const toast = useToast()
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
   const [url, setUrl] = useState('')
@@ -112,11 +114,14 @@ export default function SmartAnalysis() {
         setResult(data)
         localStorage.setItem(LS_KEY_SMART, JSON.stringify(data))
         setFromCache(false)
+        toast.success('Done!')
       } else {
-        setError(data.error || 'Smart Analysis failed. Dobara try karo.')
+        const msg = data.error || 'Smart Analysis failed. Dobara try karo.'
+        setError(msg); toast.error(msg)
       }
     } catch (e) {
       setError(`Backend se connect nahi ho paya: ${e.message}`)
+      toast.error(`Backend se connect nahi ho paya: ${e.message}`)
     }
     stageTimers.current.forEach(clearTimeout)
     setLoading(false)
@@ -189,7 +194,7 @@ export default function SmartAnalysis() {
         <div style={{ ...card, padding: '40px', textAlign: 'center', maxWidth: '600px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '10px' }}>
             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: GOLD, animation: 'pulse 1s ease-in-out infinite alternate' }} />
-            <p style={{ color: '#171717', fontSize: '15px', margin: 0, fontWeight: '600' }}>{LOADING_STAGES[loadingStage]}</p>
+            <p style={{ color: GOLD, fontSize: '15px', margin: 0, fontWeight: '600' }}>{LOADING_STAGES[loadingStage]}</p>
           </div>
           <p style={{ color: '#999', fontSize: '12px', margin: 0 }}>This can take 1-2 minutes for the full pipeline</p>
         </div>

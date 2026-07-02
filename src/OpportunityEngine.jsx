@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react'
 
 const LS_KEY_OPP = 'adsoh_opportunity_result'
 import { Copy, Check, Target, TrendingUp, Zap, Users, Tag, MapPin, ChartBar } from 'lucide-react'
+import { useToast } from './ToastContext'
+import { useLoadingSteps } from './useLoadingSteps'
+
+const OPP_LOADING_STEPS = ['Loading business memory...', 'Finding best audience...', 'Calculating opportunity score...']
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 const GOLD    = '#D4AF37'
@@ -22,9 +26,10 @@ const INDUSTRIES = [
 
 function CopyBtn({ text }) {
   const [copied, setCopied] = useState(false)
+  const toast = useToast()
   return (
     <button
-      onClick={() => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
+      onClick={() => { navigator.clipboard.writeText(text); setCopied(true); toast.success('Copied!'); setTimeout(() => setCopied(false), 2000) }}
       style={{
         display: 'flex', alignItems: 'center', gap: '4px',
         background: copied ? '#16A34A' : '#F5F5F5',
@@ -72,6 +77,7 @@ function SectionCard({ icon: Icon, iconColor = '#171717', label, children, goldB
 
 export default function OpportunityEngine() {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  const toast = useToast()
 
   const [industry, setIndustry]           = useState('')
   const [industryOther, setIndustryOther] = useState('')
@@ -79,6 +85,7 @@ export default function OpportunityEngine() {
   const [city, setCity]                   = useState('Jaipur')
   const [budget, setBudget]               = useState('')
   const [loading, setLoading]             = useState(false)
+  const loadingStep = useLoadingSteps(OPP_LOADING_STEPS, loading)
   const [error, setError]                 = useState('')
   const [result, setResult]               = useState(null)
   const [fromCache, setFromCache]         = useState(false)
@@ -108,12 +115,13 @@ export default function OpportunityEngine() {
       })
       const data = await res.json()
       if (data.success) {
-        setResult(data); localStorage.setItem(LS_KEY_OPP, JSON.stringify(data)); setFromCache(false)
+        setResult(data); localStorage.setItem(LS_KEY_OPP, JSON.stringify(data)); setFromCache(false); toast.success('Done!')
       } else {
-        setError(data.message || data.error || 'Kuch toh gadbad hai, dobara try karo.')
+        const msg = data.message || data.error || 'Kuch toh gadbad hai, dobara try karo.'
+        setError(msg); toast.error(msg)
       }
     } catch {
-      setError('Backend se connect nahi ho paya.')
+      setError('Backend se connect nahi ho paya.'); toast.error('Backend se connect nahi ho paya.')
     }
     setLoading(false)
   }
@@ -243,7 +251,7 @@ export default function OpportunityEngine() {
             }}
           >
             <Target size={16} />
-            {loading ? 'Analyzing memory data...' : 'Find Best Opportunities'}
+            {loading ? loadingStep : 'Find Best Opportunities'}
           </button>
         </div>
       </div>

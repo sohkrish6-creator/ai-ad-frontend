@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 
 const LS_KEY_OFFER = 'adsoh_offer_result'
 import { Copy, Check, Gift, Zap, Tag, Star, ShieldCheck, MessageSquare, TrendingUp } from 'lucide-react'
+import { useToast } from './ToastContext'
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 const GOLD    = '#D4AF37'
@@ -22,9 +23,10 @@ const INDUSTRIES = [
 
 function CopyBtn({ text, label = 'Copy' }) {
   const [copied, setCopied] = useState(false)
+  const toast = useToast()
   return (
     <button
-      onClick={() => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
+      onClick={() => { navigator.clipboard.writeText(text); setCopied(true); toast.success('Copied!'); setTimeout(() => setCopied(false), 2000) }}
       style={{
         display: 'flex', alignItems: 'center', gap: '4px',
         background: copied ? '#16A34A' : '#F5F5F5',
@@ -76,6 +78,7 @@ function MiniCard({ icon: Icon, label, title, body, badge, badgeColor }) {
 
 export default function OfferIntelligence() {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  const toast = useToast()
 
   const [industry, setIndustry]           = useState('')
   const [industryOther, setIndustryOther] = useState('')
@@ -109,10 +112,10 @@ export default function OfferIntelligence() {
         }),
       })
       const data = await res.json()
-      if (data.success) { setResult(data); localStorage.setItem(LS_KEY_OFFER, JSON.stringify(data)); setFromCache(false) }
-      else setError(data.message || data.error || 'Kuch toh gadbad hai, dobara try karo.')
+      if (data.success) { setResult(data); localStorage.setItem(LS_KEY_OFFER, JSON.stringify(data)); setFromCache(false); toast.success('Done!') }
+      else { const msg = data.message || data.error || 'Kuch toh gadbad hai, dobara try karo.'; setError(msg); toast.error(msg) }
     } catch {
-      setError('Backend se connect nahi ho paya.')
+      setError('Backend se connect nahi ho paya.'); toast.error('Backend se connect nahi ho paya.')
     }
     setLoading(false)
   }
