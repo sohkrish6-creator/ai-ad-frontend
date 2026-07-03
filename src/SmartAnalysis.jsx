@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Sparkles, CheckCircle, AlertCircle, ChevronDown, ChevronUp, ArrowRight, Clock } from 'lucide-react'
+import { Sparkles, CheckCircle, AlertCircle, ChevronDown, ChevronUp, ArrowRight, Clock, History, X } from 'lucide-react'
 import { useToast } from './ToastContext'
+import PushToAdsSection from './PushToAdsSection'
 
 const LS_KEY_SMART = 'adsoh_smart_analysis_result'
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
@@ -27,16 +28,19 @@ const BUSINESS_MODEL_COLORS = {
   D2C: { bg: '#F0FDFA', fg: '#0F766E', border: '#99F6E4' },
 }
 
-// snake_case module key (as returned by the Decision Layer) -> display label + route + result-shape info
+// snake_case module key (as returned by the Decision Layer) -> display label + route + result-shape info +
+// the EXACT localStorage key that module's own page already reads on mount (see main.py's
+// _RESULT_LS_KEY_BY_MODULE — kept in sync manually since frontend/backend are separate deploys).
 const MODULE_META = {
-  opportunity_engine:      { label: 'Opportunity Engine',      resultKey: 'opportunity', dataKey: 'opportunity', route: '/opportunity' },
-  offer_intelligence:      { label: 'Offer Intelligence',      resultKey: 'offer',       dataKey: 'offer',       route: '/offer' },
-  website_intelligence:    { label: 'Website Intelligence',    resultKey: 'website',     dataKey: 'audit',       route: '/website-audit' },
-  visibility_intelligence: { label: 'Visibility Intelligence', resultKey: 'visibility',  dataKey: 'visibility',  route: '/visibility' },
-  outreach_ai:             { label: 'Outreach AI',             resultKey: 'outreach',    dataKey: 'outreach',    route: '/outreach' },
-  kpi_engine:              { label: 'KPI Engine',              resultKey: 'kpi',         dataKey: 'kpi',         route: '/kpi-engine' },
-  prospect_discovery:      { label: 'Prospect Discovery',      resultKey: 'prospects',   dataKey: 'data',        route: '/prospects' },
+  opportunity_engine:      { label: 'Opportunity Engine',      resultKey: 'opportunity', dataKey: 'opportunity', route: '/opportunity',   lsKey: 'adsoh_opportunity_result' },
+  offer_intelligence:      { label: 'Offer Intelligence',      resultKey: 'offer',       dataKey: 'offer',       route: '/offer',         lsKey: 'adsoh_offer_result' },
+  website_intelligence:    { label: 'Website Intelligence',    resultKey: 'website',     dataKey: 'audit',       route: '/website-audit', lsKey: 'adsoh_website_result' },
+  visibility_intelligence: { label: 'Visibility Intelligence', resultKey: 'visibility',  dataKey: 'visibility',  route: '/visibility',    lsKey: 'adsoh_visibility_result' },
+  outreach_ai:             { label: 'Outreach AI',             resultKey: 'outreach',    dataKey: 'outreach',    route: '/outreach',      lsKey: 'adsoh_outreach_result' },
+  kpi_engine:              { label: 'KPI Engine',              resultKey: 'kpi',         dataKey: 'kpi',         route: '/kpi-engine',    lsKey: 'adsoh_kpi_result' },
+  prospect_discovery:      { label: 'Prospect Discovery',      resultKey: 'prospects',   dataKey: 'data',        route: '/prospects',     lsKey: 'adsoh_prospect_result' },
 }
+const ALL_MODULE_KEYS = Object.keys(MODULE_META)
 
 const LOADING_STAGES = [
   'Running Marketing Brain...',
@@ -83,10 +87,49 @@ export default function SmartAnalysis() {
   const [showSkipped, setShowSkipped] = useState(false)
   const stageTimers = useRef([])
 
+  // Plan/override screen — lets the user toggle which modules run before
+  // spending time on them, instead of always trusting the Decision Layer.
+  const [planning, setPlanning] = useState(false)
+  const [plan, setPlan] = useState(null)
+  const [selectedModules, setSelectedModules] = useState([])
+  const [executing, setExecuting] = useState(false)
+
+  // Recent Analyses (last 5, from smart_analysis_history)
+  const [history, setHistory] = useState([])
+  const [historyLoading, setHistoryLoading] = useState(true)
+
   useEffect(() => {
     try { const s = localStorage.getItem(LS_KEY_SMART); if (s) { setResult(JSON.parse(s)); setFromCache(true) } } catch {}
+    loadHistory()
     return () => stageTimers.current.forEach(clearTimeout)
   }, [])
+
+  async function loadHistory() {
+    setHistoryLoading(true)
+    try {
+      const res = await fetch(`${BACKEND}/smart-analysis/history?limit=5`)
+      const data = await res.json()
+      if (data.success) setHistory(data.history || [])
+    } catch { /* silent — history is a nice-to-have, not core */ }
+    setHistoryLoading(false)
+  }
+
+  async function handleViewHistory(id) {
+    try {
+      const res = await fetch(`${BACKEND}/smart-analysis/history/${id}`)
+      const data = await res.json()
+      if (data.success) {
+        setResult(data.result)
+        localStorage.setItem(LS_KEY_SMART, JSON.stringify(data.result))
+        setFromCache(true)
+        toast.success('Loaded from history')
+      } else {
+        toast.error(data.error || 'Could not load that analysis.')
+      }
+    } catch (e) {
+      toast.error(`Network error: ${e.message}`)
+    }
+  }
 
   const resolvedIndustry = industry === 'Other' ? industryOther : industry
 
@@ -115,6 +158,7 @@ export default function SmartAnalysis() {
         localStorage.setItem(LS_KEY_SMART, JSON.stringify(data))
         setFromCache(false)
         toast.success('Done!')
+        loadHistory()
       } else {
         const msg = data.error || 'Smart Analysis failed. Dobara try karo.'
         setError(msg); toast.error(msg)
@@ -125,6 +169,80 @@ export default function SmartAnalysis() {
     }
     stageTimers.current.forEach(clearTimeout)
     setLoading(false)
+  }
+
+  async function handleReviewModules() {
+    if (!url.trim()) { alert('Website URL bharo!'); return }
+    setPlanning(true); setError(null); setResult(null); setPlan(null)
+    try {
+      const res = await fetch(`${BACKEND}/smart-analysis/plan`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: url.trim(),
+          industry: resolvedIndustry,
+          city: city.trim() || 'Jaipur',
+          budget: budget ? parseFloat(budget) : 0,
+        }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setPlan(data)
+        setSelectedModules(data.decision.modules_run)
+      } else {
+        const msg = data.error || 'Could not plan the analysis. Dobara try karo.'
+        setError(msg); toast.error(msg)
+      }
+    } catch (e) {
+      setError(`Backend se connect nahi ho paya: ${e.message}`)
+      toast.error(`Backend se connect nahi ho paya: ${e.message}`)
+    }
+    setPlanning(false)
+  }
+
+  function toggleModule(key) {
+    setSelectedModules(sel => sel.includes(key) ? sel.filter(m => m !== key) : [...sel, key])
+  }
+
+  async function handleRunWithOverride() {
+    if (!plan) return
+    setExecuting(true); setError(null)
+    try {
+      const res = await fetch(`${BACKEND}/smart-analysis/execute`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: url.trim(),
+          industry: resolvedIndustry,
+          city: city.trim() || 'Jaipur',
+          budget: budget ? parseFloat(budget) : 0,
+          business_key: plan.business_key,
+          brain_result: plan.brain_result,
+          modules_to_run: selectedModules,
+          modules_skipped: ALL_MODULE_KEYS.filter(m => !selectedModules.includes(m)).map(m => ({
+            module: m,
+            reason: plan.decision.modules_skipped.find(s => s.module === m)?.reason || 'Excluded by user',
+          })),
+          business_model: plan.decision.business_model,
+        }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setResult(data)
+        localStorage.setItem(LS_KEY_SMART, JSON.stringify(data))
+        setFromCache(false)
+        setPlan(null)
+        toast.success('Done!')
+        loadHistory()
+      } else {
+        const msg = data.error || 'Execution failed. Dobara try karo.'
+        setError(msg); toast.error(msg)
+      }
+    } catch (e) {
+      setError(`Backend se connect nahi ho paya: ${e.message}`)
+      toast.error(`Backend se connect nahi ho paya: ${e.message}`)
+    }
+    setExecuting(false)
   }
 
   function clearResult() {
@@ -146,7 +264,37 @@ export default function SmartAnalysis() {
         Marketing Brain runs first, then AI decides which other modules are actually worth running — and runs only those, in parallel.
       </p>
 
-      {!result && !loading && (
+      {!result && !loading && !planning && !plan && history.length > 0 && (
+        <div style={{ ...card, padding: '16px 20px', marginBottom: '20px', maxWidth: '600px' }}>
+          <p style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', color: '#888', margin: '0 0 12px' }}>
+            <History size={12} /> Recent Analyses
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            {history.map(h => (
+              <div key={h.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #F5F5F5' }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '13px', color: '#171717', fontWeight: '500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{h.url}</span>
+                    {h.business_model && (
+                      <span style={{
+                        fontSize: '10px', fontWeight: '700', padding: '2px 8px', borderRadius: '10px', flexShrink: 0,
+                        background: BUSINESS_MODEL_COLORS[h.business_model]?.bg || '#F5F5F5',
+                        color: BUSINESS_MODEL_COLORS[h.business_model]?.fg || '#666',
+                      }}>
+                        {h.business_model}
+                      </span>
+                    )}
+                  </div>
+                  <p style={{ margin: '2px 0 0', fontSize: '11px', color: '#999' }}>{new Date(h.created_at).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
+                </div>
+                <button onClick={() => handleViewHistory(h.id)} style={{ background: 'none', border: 'none', color: GOLD, fontSize: '12px', fontWeight: '600', cursor: 'pointer', flexShrink: 0, marginLeft: '10px' }}>View</button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {!result && !loading && !planning && !plan && (
         <div style={{ ...card, padding: isMobile ? '20px 16px' : '28px', maxWidth: '600px' }}>
           {error && <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '18px', color: '#BE123C', fontSize: '13px' }}>{error}</div>}
 
@@ -184,9 +332,68 @@ export default function SmartAnalysis() {
             <input type="number" value={budget} onChange={e => setBudget(e.target.value)} placeholder="10000" style={inputSt} />
           </div>
 
-          <button onClick={handleRun} style={{ width: '100%', padding: '13px', borderRadius: '8px', border: 'none', background: GOLD, color: '#171717', fontSize: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-            <Sparkles size={15} /> Run Smart Analysis
-          </button>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <button onClick={handleRun} style={{ flex: 1, minWidth: '160px', padding: '13px', borderRadius: '8px', border: 'none', background: GOLD, color: '#171717', fontSize: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              <Sparkles size={15} /> Run Automatically
+            </button>
+            <button onClick={handleReviewModules} style={{ flex: 1, minWidth: '160px', padding: '13px', borderRadius: '8px', border: '1.5px solid #E5E5E5', background: '#fff', color: '#666', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
+              Review Modules First
+            </button>
+          </div>
+        </div>
+      )}
+
+      {planning && (
+        <div style={{ ...card, padding: '40px', textAlign: 'center', maxWidth: '600px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '10px' }}>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: GOLD, animation: 'pulse 1s ease-in-out infinite alternate' }} />
+            <p style={{ color: GOLD, fontSize: '15px', margin: 0, fontWeight: '600' }}>Running Marketing Brain...</p>
+          </div>
+          <p style={{ color: '#999', fontSize: '12px', margin: 0 }}>Deciding which modules are worth running next</p>
+        </div>
+      )}
+
+      {plan && (
+        <div style={{ ...card, padding: isMobile ? '20px 16px' : '28px', maxWidth: '600px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+            <p style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#171717' }}>AI recommends running:</p>
+            <span style={{
+              fontSize: '11px', fontWeight: '700', padding: '3px 10px', borderRadius: '20px',
+              background: BUSINESS_MODEL_COLORS[plan.decision.business_model]?.bg || '#F5F5F5',
+              color: BUSINESS_MODEL_COLORS[plan.decision.business_model]?.fg || '#666',
+            }}>
+              {plan.decision.business_model}
+            </span>
+          </div>
+          <p style={{ fontSize: '12px', color: '#999', margin: '0 0 16px' }}>Click a chip to toggle it on/off, then run with your chosen modules.</p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '24px' }}>
+            {ALL_MODULE_KEYS.map(m => {
+              const active = selectedModules.includes(m)
+              return (
+                <button
+                  key={m}
+                  onClick={() => toggleModule(m)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '5px', padding: '7px 14px', borderRadius: '20px',
+                    fontSize: '12px', fontWeight: '600', cursor: 'pointer',
+                    background: active ? '#16A34A12' : '#F5F5F5',
+                    border: `1px solid ${active ? '#16A34A40' : '#E5E5E5'}`,
+                    color: active ? '#166534' : '#999',
+                  }}
+                >
+                  {active ? <CheckCircle size={11} /> : <X size={11} />} {MODULE_META[m]?.label || m}
+                </button>
+              )
+            })}
+          </div>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <button onClick={handleRunWithOverride} disabled={executing || selectedModules.length === 0} style={{ flex: 1, minWidth: '160px', padding: '13px', borderRadius: '8px', border: 'none', background: executing ? '#E5E5E5' : GOLD, color: executing ? '#999' : '#171717', fontSize: '14px', fontWeight: '700', cursor: executing ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              <Sparkles size={15} /> {executing ? 'Running...' : 'Run With These Settings'}
+            </button>
+            <button onClick={() => setPlan(null)} disabled={executing} style={{ padding: '13px 20px', borderRadius: '8px', border: '1.5px solid #E5E5E5', background: '#fff', color: '#666', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
+              Cancel
+            </button>
+          </div>
         </div>
       )}
 
@@ -297,7 +504,16 @@ export default function SmartAnalysis() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: failed ? '4px' : '10px' }}>
                   <p style={{ fontSize: '13px', fontWeight: '600', color: '#171717', margin: 0 }}>{meta.label}</p>
                   {!failed && (
-                    <button onClick={() => navigate(meta.route)} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'none', border: 'none', color: GOLD, fontSize: '12px', fontWeight: '600', cursor: 'pointer', padding: 0 }}>
+                    <button
+                      onClick={() => {
+                        // Pre-load the exact same localStorage key that module's own
+                        // page reads on mount, so it shows this result immediately
+                        // instead of forcing a fresh (paid) regenerate.
+                        try { localStorage.setItem(meta.lsKey, JSON.stringify(moduleResult)) } catch {}
+                        navigate(meta.route)
+                      }}
+                      style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'none', border: 'none', color: GOLD, fontSize: '12px', fontWeight: '600', cursor: 'pointer', padding: 0 }}
+                    >
                       View Full Report <ArrowRight size={11} />
                     </button>
                   )}
@@ -321,6 +537,20 @@ export default function SmartAnalysis() {
               </div>
             )
           })}
+
+          {/* Push to Google/Meta Ads — same modal/logic as Marketing Brain */}
+          <div style={{ ...card, padding: '20px 22px', marginTop: '6px' }}>
+            <p style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', color: '#888', margin: '0 0 12px' }}>Launch a Campaign</p>
+            <PushToAdsSection
+              url={result.brain_result?.url || url}
+              industry={resolvedIndustry}
+              city={city}
+              budget={budget}
+              businessKey={
+                Object.values(result.results || {}).find(r => r && r.business_key)?.business_key || ''
+              }
+            />
+          </div>
         </div>
       )}
     </div>
