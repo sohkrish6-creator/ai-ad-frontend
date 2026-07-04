@@ -783,6 +783,19 @@ function MarketingBrain() {
               <button onClick={e => { e.stopPropagation(); pushAdsRef.current?.openGAds() }} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: '#16A34A', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', flexShrink: 0 }}>
                 <Rocket size={14} /> Create Google Campaign
               </button>
+              {/* PushToAdsSection only mounts in the pre-launch-kit CTA block above,
+                  which unmounts once launchKit exists — re-mount it here (buttons
+                  hidden, this banner is the trigger) so pushAdsRef.current stays live
+                  and this button's openGAds() call isn't a no-op. */}
+              <PushToAdsSection
+                ref={pushAdsRef}
+                hideButtons
+                url={url || result?.url || ''}
+                industry={resolvedIndustry || businessType}
+                city={targetCity}
+                budget={budget}
+                businessKey={result?.business_key || ''}
+              />
             </div>
           </>
         )
