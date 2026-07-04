@@ -68,22 +68,27 @@ function PriorityBadge({ priority }) {
   return <span style={{ color: col, fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', border: `1px solid ${col}50`, borderRadius: '4px', padding: '2px 8px' }}>{priority}</span>
 }
 
-// Structured recommendation: observation / evidence / confidence / expected_impact / risk / next_action
+// Structured recommendation: observation / why / evidence / confidence / expected_impact / risk / difficulty / priority / next_action
 function RecCard({ title, rec }) {
   if (!rec || !rec.observation) return null
   const confColor = (rec.confidence || 0) >= 70 ? C.green : (rec.confidence || 0) >= 40 ? C.gold : C.red
   return (
     <div style={{ border: `1px solid ${C.border}`, borderRadius: '8px', padding: '14px 16px', marginBottom: '10px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '6px' }}>
         <p style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: C.text }}>{title}</p>
-        <span style={{ fontSize: '11px', fontWeight: '700', color: confColor, border: `1px solid ${confColor}50`, borderRadius: '4px', padding: '2px 8px' }}>
-          {rec.confidence ?? 0}% confidence
-        </span>
+        <div style={{ display: 'flex', gap: '6px' }}>
+          {rec.priority && <PriorityBadge priority={rec.priority} />}
+          <span style={{ fontSize: '11px', fontWeight: '700', color: confColor, border: `1px solid ${confColor}50`, borderRadius: '4px', padding: '2px 8px' }}>
+            {rec.confidence ?? 0}% confidence
+          </span>
+        </div>
       </div>
       <p style={{ margin: '0 0 6px', fontSize: '13px', color: C.text, lineHeight: '1.5' }}><strong style={{ color: C.muted }}>Observation:</strong> {rec.observation}</p>
+      {rec.why && <p style={{ margin: '0 0 6px', fontSize: '12.5px', color: C.muted, lineHeight: '1.5' }}><strong>Why:</strong> {rec.why}</p>}
       <p style={{ margin: '0 0 6px', fontSize: '12.5px', color: C.muted, lineHeight: '1.5' }}><strong>Evidence:</strong> {rec.evidence}</p>
       <p style={{ margin: '0 0 6px', fontSize: '12.5px', color: C.green, lineHeight: '1.5' }}><strong>Expected impact:</strong> {rec.expected_impact}</p>
       <p style={{ margin: '0 0 6px', fontSize: '12.5px', color: C.gold, lineHeight: '1.5' }}><strong>Risk:</strong> {rec.risk}</p>
+      {rec.difficulty && <p style={{ margin: '0 0 6px', fontSize: '12.5px', color: C.muted, lineHeight: '1.5' }}><strong>Difficulty:</strong> {rec.difficulty}</p>}
       <p style={{ margin: 0, fontSize: '12.5px', color: C.accent, lineHeight: '1.5' }}><strong>Next action:</strong> {rec.next_action}</p>
     </div>
   )
@@ -132,6 +137,7 @@ export default function CricketAds() {
   const [error, setError]             = useState('')
   const [data, setData]               = useState(null)
   const [memoryReused, setMemoryReused] = useState(false)
+  const [warnings, setWarnings] = useState([])
 
   // ── Campaign Performance state ─────────────────────────────────────────────
   const [perfCid, setPerfCid]         = useState('')
@@ -202,7 +208,7 @@ export default function CricketAds() {
 
   async function analyze() {
     if (!url.trim()) { setError('Website URL is required.'); return }
-    setLoading(true); setError(''); setData(null); setPushResult(null); setPushError(null); setMemoryReused(false)
+    setLoading(true); setError(''); setData(null); setPushResult(null); setPushError(null); setMemoryReused(false); setWarnings([])
     try {
       const res  = await fetch(`${BACKEND}/cricket-ads-intelligence`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -213,7 +219,7 @@ export default function CricketAds() {
         }),
       })
       const json = await res.json()
-      if (json.success) { setData(json.data); setMemoryReused(!!json.memory_reused) }
+      if (json.success) { setData(json.data); setMemoryReused(!!json.memory_reused); setWarnings(json.warnings || []) }
       else setError(json.error || 'Analysis failed.')
     } catch (e) { setError(`Network error: ${e.message}`) }
     setLoading(false)
@@ -236,7 +242,7 @@ export default function CricketAds() {
           budget_daily:   budgetNum,
           headlines:      ca.headlines_15       || [],
           long_headlines: ca.long_headlines_5   || [],
-          descriptions:   ca.descriptions_5     || [],
+          descriptions:   ca.descriptions_10    || [],
           whatsapp_link:  waLink.trim(),
           business_type:  businessType,
           top_audience:   topSeg?.platform_match || topSeg?.name || '',
@@ -287,6 +293,11 @@ export default function CricketAds() {
   const sc = d.sports_calendar     || {}
   const csim = d.campaign_simulator || {}
   const cw = d.competitor_watch    || []
+  const pinv = d.placement_inventory || []
+  const yinv = d.youtube_inventory    || []
+  const mp   = d.media_plan           || {}
+  const dr   = d.design_recommendations || {}
+  const bs   = d.business_summary     || {}
 
   const acctBadge = accounts.length > 0
     ? <span style={{ background: C.accentDk + '40', color: C.accent, fontSize: '10px', fontWeight: '700', padding: '2px 7px', borderRadius: '4px', border: `1px solid ${C.accent}40` }}>{accounts.length}</span>
@@ -483,6 +494,12 @@ export default function CricketAds() {
               </div>
             )}
 
+            {warnings.length > 0 && (
+              <div style={{ background: '#2D1B00', border: `1px solid ${C.gold}40`, borderRadius: '7px', padding: '9px 14px', marginBottom: '12px' }}>
+                {warnings.map((w, i) => <p key={i} style={{ margin: i < warnings.length - 1 ? '0 0 4px' : 0, fontSize: '12px', color: C.gold }}>⚠ {w}</p>)}
+              </div>
+            )}
+
             {/* 1 — Compliance Check */}
             <div style={{ ...s.card, border: `1px solid ${cc.safe_to_advertise ? C.green : C.red}50`, background: cc.safe_to_advertise ? '#052e1615' : '#1F0A0A' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -630,9 +647,9 @@ export default function CricketAds() {
                   ))}
                 </div>
               </Collapsible>
-              <Collapsible title="💬 Descriptions (5) — max 90 chars">
+              <Collapsible title="💬 Descriptions (10) — max 90 chars">
                 <div style={{ display: 'grid', gap: '8px' }}>
-                  {(ca.descriptions_5 || []).map((desc, i) => (
+                  {(ca.descriptions_10 || []).map((desc, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', background: C.surface, borderRadius: '6px', padding: '9px 12px', gap: '10px' }}>
                       <span style={{ fontSize: '13px', flex: 1, lineHeight: '1.5' }}>{desc}</span>
                       <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
@@ -642,6 +659,20 @@ export default function CricketAds() {
                     </div>
                   ))}
                 </div>
+              </Collapsible>
+              <Collapsible title="⚡ CTA Variations (20)" badge={<span style={{ background: C.accentDk + '40', color: C.accent, fontSize: '10px', fontWeight: '700', padding: '2px 7px', borderRadius: '4px' }}>{(ca.ctas_20 || []).length}</span>}>
+                {Object.entries(
+                  (ca.ctas_20 || []).reduce((acc, c) => { (acc[c.angle] = acc[c.angle] || []).push(c.text); return acc }, {})
+                ).map(([angle, texts]) => (
+                  <div key={angle} style={{ marginBottom: '10px' }}>
+                    <p style={{ margin: '0 0 6px', fontSize: '11px', color: C.muted, fontWeight: '600', textTransform: 'uppercase' }}>{angle.replace(/_/g, ' ')}</p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                      {texts.map((t, i) => (
+                        <span key={i} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: '5px', padding: '5px 10px', fontSize: '12px' }}>{t}</span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </Collapsible>
               {ca.image_suggestions?.length > 0 && (
                 <div style={{ marginTop: '14px' }}>
@@ -680,6 +711,17 @@ export default function CricketAds() {
               {(!lp.issues?.length && !lp.fixes?.length) && (
                 <p style={{ color: C.green, fontSize: '14px' }}>✅ Landing page looks good.</p>
               )}
+              {(lp.above_fold_assessment || lp.whatsapp_cta_visibility || lp.color_contrast_readability || lp.button_placement || lp.mobile_safe_layout) && (
+                <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: `1px solid ${C.border}` }}>
+                  {[
+                    ['Above the fold', lp.above_fold_assessment], ['WhatsApp CTA visibility', lp.whatsapp_cta_visibility],
+                    ['Color/contrast/readability', lp.color_contrast_readability], ['Button placement', lp.button_placement],
+                    ['Mobile-safe layout', lp.mobile_safe_layout],
+                  ].filter(([, v]) => v).map(([k, v]) => (
+                    <p key={k} style={{ margin: '0 0 6px', fontSize: '12.5px', color: C.muted, lineHeight: '1.5' }}><strong style={{ color: C.text }}>{k}:</strong> {v}</p>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Sports Calendar */}
@@ -702,25 +744,157 @@ export default function CricketAds() {
               </Collapsible>
             </div>
 
-            {/* Campaign Simulator */}
+            {/* Campaign Simulator — formula chain */}
             <div style={s.card}>
               <Collapsible title="🔮 Campaign Simulator" defaultOpen>
-                <p style={{ margin: '0 0 12px', fontSize: '12px', color: C.muted }}>Budget used: <strong style={{ color: C.text }}>{csim.budget_used}</strong></p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
-                  {[
-                    ['Reach', csim.reach], ['Clicks', csim.clicks], ['CTR', csim.ctr],
-                    ['Joins / Installs', csim.joins_installs], ['Cost per Join/Install', csim.cost_per_join_install], ['Expected ROI', csim.expected_roi],
-                  ].filter(([, v]) => v).map(([k, v]) => (
-                    <div key={k} style={{ background: C.surface, borderRadius: '7px', padding: '10px 14px' }}>
-                      <p style={{ margin: '0 0 3px', fontSize: '11px', color: C.muted, fontWeight: '600', textTransform: 'uppercase' }}>{k}</p>
-                      <p style={{ margin: 0, fontSize: '14px', fontWeight: '700' }}>{v.range}</p>
-                      <p style={{ margin: '2px 0 0', fontSize: '10px', color: C.muted }}>{v.confidence}% confidence</p>
-                    </div>
-                  ))}
-                </div>
+                <p style={{ margin: '0 0 14px', fontSize: '12px', color: C.muted }}>Budget used: <strong style={{ color: C.text }}>{csim.budget_used}</strong></p>
+                {csim.formula_chain?.length > 0 ? (
+                  <div style={{ marginBottom: '12px' }}>
+                    {csim.formula_chain.map((step, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: i < csim.formula_chain.length - 1 ? '4px' : 0 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+                          <span style={{ width: '26px', height: '26px', borderRadius: '50%', background: C.accentDk, color: '#fff', fontSize: '11px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{i + 1}</span>
+                          {i < csim.formula_chain.length - 1 && <div style={{ width: '2px', flex: 1, minHeight: '16px', background: C.border, margin: '2px 0' }} />}
+                        </div>
+                        <div style={{ background: C.surface, borderRadius: '7px', padding: '9px 14px', flex: 1, marginBottom: '2px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
+                            <p style={{ margin: 0, fontSize: '12px', fontWeight: '700', color: C.text }}>{step.step}</p>
+                            <p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: C.accent }}>{step.value_range}</p>
+                          </div>
+                          <p style={{ margin: '3px 0 0', fontSize: '11px', color: C.muted, fontFamily: 'monospace' }}>{step.formula}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
+                    {[
+                      ['Reach', csim.reach], ['Clicks', csim.clicks], ['CTR', csim.ctr],
+                      ['Joins / Installs', csim.joins_installs], ['Cost per Join/Install', csim.cost_per_join_install], ['Expected ROI', csim.expected_roi],
+                    ].filter(([, v]) => v).map(([k, v]) => (
+                      <div key={k} style={{ background: C.surface, borderRadius: '7px', padding: '10px 14px' }}>
+                        <p style={{ margin: '0 0 3px', fontSize: '11px', color: C.muted, fontWeight: '600', textTransform: 'uppercase' }}>{k}</p>
+                        <p style={{ margin: 0, fontSize: '14px', fontWeight: '700' }}>{v.range}</p>
+                        <p style={{ margin: '2px 0 0', fontSize: '10px', color: C.muted }}>{v.confidence}% confidence</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <p style={{ margin: 0, fontSize: '11.5px', color: '#64748B', fontStyle: 'italic' }}>{csim.disclaimer || 'These are forecasts based on benchmarks, not guarantees.'}</p>
               </Collapsible>
             </div>
+
+            {/* Media Plan */}
+            {mp.channels?.length > 0 && (
+              <div style={s.card}>
+                <Collapsible title="💰 Media Plan" defaultOpen>
+                  <p style={{ margin: '0 0 12px', fontSize: '12px', color: C.muted }}>Total budget: <strong style={{ color: C.text }}>{mp.total_budget}</strong></p>
+                  <div style={{ display: 'flex', height: '28px', borderRadius: '6px', overflow: 'hidden', marginBottom: '14px' }}>
+                    {mp.channels.map((ch, i) => (
+                      <div key={i} title={`${ch.channel}: ${ch.amount}`} style={{ width: `${ch.pct}%`, background: [C.accent, C.green, C.gold, '#A78BFA', '#F472B6', '#38BDF8'][i % 6], minWidth: ch.pct > 0 ? '2px' : 0 }} />
+                    ))}
+                  </div>
+                  {mp.channels.map((ch, i) => (
+                    <div key={i} style={{ border: `1px solid ${C.border}`, borderRadius: '8px', padding: '12px 14px', marginBottom: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', flexWrap: 'wrap', gap: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ width: '10px', height: '10px', borderRadius: '3px', background: [C.accent, C.green, C.gold, '#A78BFA', '#F472B6', '#38BDF8'][i % 6], flexShrink: 0 }} />
+                          <p style={{ margin: 0, fontSize: '14px', fontWeight: '700' }}>{ch.channel}</p>
+                        </div>
+                        <p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: C.text }}>{ch.amount} <span style={{ fontSize: '11px', color: C.muted, fontWeight: '400' }}>({ch.pct}%)</span></p>
+                      </div>
+                      <div style={{ display: 'flex', gap: '16px', marginBottom: '6px', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '11.5px', color: C.muted }}>Reach: <strong style={{ color: C.text }}>{ch.expected_reach}</strong></span>
+                        <span style={{ fontSize: '11.5px', color: C.muted }}>Clicks: <strong style={{ color: C.text }}>{ch.expected_clicks}</strong></span>
+                        <span style={{ fontSize: '11.5px', color: C.muted }}>Joins: <strong style={{ color: C.green }}>{ch.expected_joins}</strong></span>
+                        <span style={{ fontSize: '11.5px', color: C.muted }}>CPA: <strong style={{ color: C.text }}>{ch.expected_cpa}</strong></span>
+                      </div>
+                      <p style={{ margin: 0, fontSize: '12px', color: C.muted, lineHeight: '1.5' }}>{ch.why}</p>
+                    </div>
+                  ))}
+                </Collapsible>
+              </div>
+            )}
+
+            {/* Placement Inventory */}
+            {pinv.length > 0 && (
+              <div style={s.card}>
+                <Collapsible title="📱 Placement Inventory" badge={<span style={{ background: C.accentDk + '40', color: C.accent, fontSize: '10px', fontWeight: '700', padding: '2px 7px', borderRadius: '4px' }}>{pinv.length}</span>}>
+                  {pinv.map((p, i) => (
+                    <div key={i} style={{ border: `1px solid ${C.border}`, borderRadius: '8px', padding: '12px 14px', marginBottom: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '6px' }}>
+                        <p style={{ margin: 0, fontSize: '14px', fontWeight: '700' }}>{p.platform}</p>
+                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                          <PriorityBadge priority={p.priority} />
+                          <span style={{ fontSize: '11px', color: C.muted }}>Suitability: <strong style={{ color: C.text }}>{p.suitability_score}</strong></span>
+                        </div>
+                      </div>
+                      <p style={{ margin: '0 0 6px', fontSize: '12px', color: C.muted }}>{p.audience_type}</p>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '8px' }}>
+                        {[['CPM', p.estimated_cpm], ['CPC', p.estimated_cpc], ['CTR', p.expected_ctr],
+                          ['Join Rate', p.expected_join_rate], ['Reach', p.estimated_reach], ['Competition', p.competition]].map(([k, v]) => (
+                          <div key={k} style={{ background: C.surface, borderRadius: '5px', padding: '6px 8px' }}>
+                            <p style={{ margin: '0 0 2px', fontSize: '9.5px', color: C.muted, textTransform: 'uppercase', fontWeight: '600' }}>{k}</p>
+                            <p style={{ margin: 0, fontSize: '12px', fontWeight: '700' }}>{v}</p>
+                          </div>
+                        ))}
+                      </div>
+                      <p style={{ margin: '0 0 4px', fontSize: '11.5px', color: C.muted }}>Device split: {p.device_split} · Traffic: {p.traffic_quality}</p>
+                      <p style={{ margin: '0 0 4px', fontSize: '11.5px', color: C.accent }}>Creative: {p.recommended_creative_type} — {(p.banner_sizes || []).join(', ')}</p>
+                    </div>
+                  ))}
+                </Collapsible>
+              </div>
+            )}
+
+            {/* YouTube Inventory */}
+            {yinv.length > 0 && (
+              <div style={s.card}>
+                <Collapsible title="▶️ YouTube Inventory" badge={<span style={{ background: C.accentDk + '40', color: C.accent, fontSize: '10px', fontWeight: '700', padding: '2px 7px', borderRadius: '4px' }}>{yinv.length}</span>}>
+                  {yinv.map((ch, i) => (
+                    <div key={i} style={{ border: `1px solid ${C.border}`, borderRadius: '8px', padding: '12px 14px', marginBottom: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', flexWrap: 'wrap', gap: '6px' }}>
+                        <p style={{ margin: 0, fontSize: '14px', fontWeight: '700' }}>{ch.channel}</p>
+                        <span style={{ fontSize: '11px', color: C.accent, fontWeight: '600', textTransform: 'uppercase' }}>{ch.ad_type_fit}</span>
+                      </div>
+                      <p style={{ margin: '0 0 6px', fontSize: '12px', color: C.muted }}>{ch.audience}</p>
+                      <div style={{ display: 'flex', gap: '16px', marginBottom: '6px', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '11.5px', color: C.muted }}>Reach: <strong style={{ color: C.text }}>{ch.estimated_reach}</strong></span>
+                        <span style={{ fontSize: '11.5px', color: C.muted }}>CPM: <strong style={{ color: C.text }}>{ch.expected_cpm}</strong></span>
+                        <span style={{ fontSize: '11.5px', color: C.muted }}>CTR: <strong style={{ color: C.text }}>{ch.expected_ctr}</strong></span>
+                      </div>
+                      <p style={{ margin: 0, fontSize: '12px', color: C.muted, lineHeight: '1.5' }}>{ch.creative_recommendation}</p>
+                    </div>
+                  ))}
+                </Collapsible>
+              </div>
+            )}
+
+            {/* Design Recommendations */}
+            {Object.keys(dr).length > 0 && (
+              <div style={s.card}>
+                <Collapsible title="🎨 Design Recommendations">
+                  {dr.color_palette?.length > 0 && (
+                    <div style={{ display: 'flex', gap: '10px', marginBottom: '14px', flexWrap: 'wrap' }}>
+                      {dr.color_palette.map((c, i) => (
+                        <div key={i} style={{ textAlign: 'center' }}>
+                          <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: c.hex, border: `1px solid ${C.border}`, marginBottom: '4px' }} />
+                          <p style={{ margin: 0, fontSize: '10px', color: C.muted }}>{c.name}</p>
+                          <p style={{ margin: 0, fontSize: '9.5px', color: '#64748B', fontFamily: 'monospace' }}>{c.hex}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {[
+                    ['Hero Image Concept', dr.hero_image_concept], ['Background', dr.background], ['Visual Hierarchy', dr.visual_hierarchy],
+                    ['Banner Layout', dr.banner_layout], ['Button Style', dr.button_style], ['Typography', dr.typography],
+                    ['Mobile Safe Area', dr.mobile_safe_area_notes],
+                  ].filter(([, v]) => v).map(([k, v]) => (
+                    <p key={k} style={{ margin: '0 0 8px', fontSize: '12.5px', color: C.muted, lineHeight: '1.5' }}><strong style={{ color: C.text }}>{k}:</strong> {v}</p>
+                  ))}
+                </Collapsible>
+              </div>
+            )}
 
             {/* Competitor Watch */}
             {cw.length > 0 && (
@@ -747,15 +921,28 @@ export default function CricketAds() {
             {/* Business Summary */}
             {d.business_summary && (
               <div style={{ ...s.card, background: C.surface }}>
-                <p style={s.secHead}>Business Summary</p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+                  <p style={{ ...s.secHead, marginBottom: 0, borderBottom: 'none', paddingBottom: 0 }}>Business Summary</p>
+                  {bs.business_dna_score != null && (
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ width: '44px', height: '44px', borderRadius: '50%', border: `3px solid ${bs.business_dna_score >= 70 ? C.green : bs.business_dna_score >= 40 ? C.gold : C.red}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontSize: '14px', fontWeight: '800' }}>{bs.business_dna_score}</span>
+                      </div>
+                      <p style={{ margin: '4px 0 0', fontSize: '10px', color: C.muted }}>DNA Score</p>
+                    </div>
+                  )}
+                </div>
                 <div style={s.row}>
-                  {[['Offer', d.business_summary.offer], ['Target User', d.business_summary.target_user], ['Primary Conversion', d.business_summary.primary_conversion]].map(([k, v]) => (
+                  {[['Offer', bs.offer], ['Target User', bs.target_user], ['Primary Conversion', bs.primary_conversion]].map(([k, v]) => (
                     <div key={k}>
                       <p style={{ margin: '0 0 3px', fontSize: '11px', color: C.muted, fontWeight: '600', textTransform: 'uppercase' }}>{k}</p>
                       <p style={{ margin: 0, fontSize: '13px', color: C.text }}>{v}</p>
                     </div>
                   ))}
                 </div>
+                {bs.business_dna_reasoning && (
+                  <p style={{ margin: '12px 0 0', fontSize: '12.5px', color: C.muted, lineHeight: '1.5' }}>{bs.business_dna_reasoning}</p>
+                )}
               </div>
             )}
 
