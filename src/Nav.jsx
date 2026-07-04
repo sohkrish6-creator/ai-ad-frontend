@@ -29,7 +29,7 @@ const links = [
   { path: '/ai-optimizer',  label: 'AI Optimizer',   Icon: Zap             },
   { path: '/result-center', label: 'Result Center',  Icon: Trophy          },
   { path: '/prospects',     label: 'Prospects',      Icon: Crosshair       },
-  { path: '/cricket-ads',  label: 'Cricket Ads',    Icon: Antenna         },
+  { path: '/cricket-ads',  label: 'Sports Growth',  Icon: Antenna         },
   { path: '/google-ads',  label: 'Google Ads Import', Icon: Link2         },
   { path: '/meta-test',   label: 'Meta Ads Test',     Icon: Share2        },
 ]

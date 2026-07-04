@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Copy, Check, ChevronDown, ChevronUp, Trash2, Plus, ExternalLink } from 'lucide-react'
+import { Copy, Check, ChevronDown, ChevronUp, Trash2, Plus, ExternalLink, TrendingUp } from 'lucide-react'
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+
+const BUSINESS_TYPES = [
+  'Cricket Community', 'Fantasy Sports Platform', 'Gaming Community', 'Esports Content',
+  'Sports News', 'Sports Coaching', 'Sports Merchandise', 'Tournament Platform',
+]
 
 const C = {
   bg:       '#0A0F1E',
@@ -63,6 +68,27 @@ function PriorityBadge({ priority }) {
   return <span style={{ color: col, fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', border: `1px solid ${col}50`, borderRadius: '4px', padding: '2px 8px' }}>{priority}</span>
 }
 
+// Structured recommendation: observation / evidence / confidence / expected_impact / risk / next_action
+function RecCard({ title, rec }) {
+  if (!rec || !rec.observation) return null
+  const confColor = (rec.confidence || 0) >= 70 ? C.green : (rec.confidence || 0) >= 40 ? C.gold : C.red
+  return (
+    <div style={{ border: `1px solid ${C.border}`, borderRadius: '8px', padding: '14px 16px', marginBottom: '10px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+        <p style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: C.text }}>{title}</p>
+        <span style={{ fontSize: '11px', fontWeight: '700', color: confColor, border: `1px solid ${confColor}50`, borderRadius: '4px', padding: '2px 8px' }}>
+          {rec.confidence ?? 0}% confidence
+        </span>
+      </div>
+      <p style={{ margin: '0 0 6px', fontSize: '13px', color: C.text, lineHeight: '1.5' }}><strong style={{ color: C.muted }}>Observation:</strong> {rec.observation}</p>
+      <p style={{ margin: '0 0 6px', fontSize: '12.5px', color: C.muted, lineHeight: '1.5' }}><strong>Evidence:</strong> {rec.evidence}</p>
+      <p style={{ margin: '0 0 6px', fontSize: '12.5px', color: C.green, lineHeight: '1.5' }}><strong>Expected impact:</strong> {rec.expected_impact}</p>
+      <p style={{ margin: '0 0 6px', fontSize: '12.5px', color: C.gold, lineHeight: '1.5' }}><strong>Risk:</strong> {rec.risk}</p>
+      <p style={{ margin: 0, fontSize: '12.5px', color: C.accent, lineHeight: '1.5' }}><strong>Next action:</strong> {rec.next_action}</p>
+    </div>
+  )
+}
+
 function Collapsible({ title, children, defaultOpen = false, badge = null }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
@@ -96,12 +122,25 @@ function ApiError({ err }) {
 
 export default function CricketAds() {
   // ── Analysis state ─────────────────────────────────────────────────────────
-  const [url, setUrl]         = useState('')
-  const [waLink, setWaLink]   = useState('')
-  const [city, setCity]       = useState('India')
-  const [loading, setLoading] = useState(false)
-  const [error, setError]     = useState('')
-  const [data, setData]       = useState(null)
+  const [url, setUrl]                 = useState('')
+  const [waLink, setWaLink]           = useState('')
+  const [city, setCity]               = useState('India')
+  const [industry, setIndustry]       = useState('')
+  const [businessType, setBusinessType] = useState('Cricket Community')
+  const [budget, setBudget]           = useState('')
+  const [loading, setLoading]         = useState(false)
+  const [error, setError]             = useState('')
+  const [data, setData]               = useState(null)
+  const [memoryReused, setMemoryReused] = useState(false)
+
+  // ── Campaign Performance state ─────────────────────────────────────────────
+  const [perfCid, setPerfCid]         = useState('')
+  const [perfLoading, setPerfLoading] = useState(false)
+  const [perfData, setPerfData]       = useState(null)
+  const [perfError, setPerfError]     = useState('')
+  const [optLoading, setOptLoading]   = useState(false)
+  const [optData, setOptData]         = useState(null)
+  const [optError, setOptError]       = useState('')
 
   // ── Account manager state ──────────────────────────────────────────────────
   const [accounts, setAccounts]       = useState([])
@@ -123,7 +162,11 @@ export default function CricketAds() {
     try {
       const res = await fetch(`${BACKEND}/cricket-ads/accounts/list`)
       const json = await res.json()
-      if (json.success) { setAccounts(json.accounts || []); if (!selectedCid && json.accounts?.length) setSelectedCid(json.accounts[0].customer_id) }
+      if (json.success) {
+        setAccounts(json.accounts || [])
+        if (!selectedCid && json.accounts?.length) setSelectedCid(json.accounts[0].customer_id)
+        if (!perfCid && json.accounts?.length) setPerfCid(json.accounts[0].customer_id)
+      }
     } catch { /* silent */ }
   }
 
@@ -159,14 +202,18 @@ export default function CricketAds() {
 
   async function analyze() {
     if (!url.trim()) { setError('Website URL is required.'); return }
-    setLoading(true); setError(''); setData(null); setPushResult(null); setPushError(null)
+    setLoading(true); setError(''); setData(null); setPushResult(null); setPushError(null); setMemoryReused(false)
     try {
       const res  = await fetch(`${BACKEND}/cricket-ads-intelligence`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: url.trim(), whatsapp_link: waLink.trim(), city: city.trim() || 'India' }),
+        body: JSON.stringify({
+          url: url.trim(), whatsapp_link: waLink.trim(), city: city.trim() || 'India',
+          industry: industry.trim(), business_type: businessType,
+          budget: parseFloat(budget) || 0,
+        }),
       })
       const json = await res.json()
-      if (json.success) setData(json.data)
+      if (json.success) { setData(json.data); setMemoryReused(!!json.memory_reused) }
       else setError(json.error || 'Analysis failed.')
     } catch (e) { setError(`Network error: ${e.message}`) }
     setLoading(false)
@@ -178,6 +225,7 @@ export default function CricketAds() {
     setPushLoading(true); setPushResult(null); setPushError(null)
     const cs = data.campaign_structure || {}
     const ca = data.creative_assets   || {}
+    const topSeg = [...(data.audience_segments || [])].sort((a, b) => (b.priority_score || 0) - (a.priority_score || 0))[0]
     const budgetNum = parseFloat((cs.budget_daily || '').toString().replace(/[^\d.]/g, '')) || 500
     try {
       const res  = await fetch(`${BACKEND}/cricket-ads/push-to-google`, {
@@ -190,6 +238,8 @@ export default function CricketAds() {
           long_headlines: ca.long_headlines_5   || [],
           descriptions:   ca.descriptions_5     || [],
           whatsapp_link:  waLink.trim(),
+          business_type:  businessType,
+          top_audience:   topSeg?.platform_match || topSeg?.name || '',
         }),
       })
       const json = await res.json()
@@ -200,12 +250,43 @@ export default function CricketAds() {
     setPushLoading(false)
   }
 
+  async function loadPerformance() {
+    if (!perfCid) { setPerfError('Select an ad account first.'); return }
+    setPerfLoading(true); setPerfError(''); setPerfData(null); setOptData(null); setOptError('')
+    try {
+      const res  = await fetch(`${BACKEND}/cricket-ads/performance?customer_id=${encodeURIComponent(perfCid)}&days=30`)
+      const json = await res.json()
+      if (json.success) setPerfData(json.performance)
+      else setPerfError(json.error || 'Could not load performance.')
+    } catch (e) { setPerfError(`Network error: ${e.message}`) }
+    setPerfLoading(false)
+  }
+
+  async function runOptimize() {
+    if (!perfCid) { setOptError('Select an ad account first.'); return }
+    setOptLoading(true); setOptError(''); setOptData(null)
+    try {
+      const res  = await fetch(`${BACKEND}/cricket-ads/optimize`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customer_id: perfCid }),
+      })
+      const json = await res.json()
+      if (json.success) setOptData(json.optimizer)
+      else setOptError(json.error || json.message || 'Optimization failed.')
+    } catch (e) { setOptError(`Network error: ${e.message}`) }
+    setOptLoading(false)
+  }
+
   const d  = data || {}
   const cc = d.compliance_check    || {}
   const ls = d.launch_score        || {}
   const ca = d.creative_assets     || {}
   const cs = d.campaign_structure  || {}
   const lp = d.landing_page_audit  || {}
+  const kr = d.key_recommendations || {}
+  const sc = d.sports_calendar     || {}
+  const csim = d.campaign_simulator || {}
+  const cw = d.competitor_watch    || []
 
   const acctBadge = accounts.length > 0
     ? <span style={{ background: C.accentDk + '40', color: C.accent, fontSize: '10px', fontWeight: '700', padding: '2px 7px', borderRadius: '4px', border: `1px solid ${C.accent}40` }}>{accounts.length}</span>
@@ -226,9 +307,9 @@ export default function CricketAds() {
         <div style={{ marginBottom: '28px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px' }}>
             <span style={{ fontSize: '28px' }}>🏏</span>
-            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '800', letterSpacing: '-0.5px' }}>Cricket Community Ads</h1>
+            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '800', letterSpacing: '-0.5px' }}>Sports Growth Engine</h1>
           </div>
-          <p style={{ margin: 0, color: C.muted, fontSize: '14px' }}>Google Display campaign intelligence for cricket WhatsApp communities</p>
+          <p style={{ margin: 0, color: C.muted, fontSize: '14px' }}>Google Display campaign intelligence for cricket, fantasy sports, gaming and esports communities</p>
         </div>
 
         {/* ── Ad Accounts Manager (collapsible) ─────────────────────────────── */}
@@ -281,6 +362,78 @@ export default function CricketAds() {
           </Collapsible>
         </div>
 
+        {/* ── Campaign Performance (existing accounts) ──────────────────────── */}
+        {accounts.length > 0 && (
+          <div style={s.card}>
+            <Collapsible title="📊 Campaign Performance">
+              <div style={{ marginBottom: '14px' }}>
+                <label style={s.label}>Ad Account</label>
+                <select value={perfCid} onChange={e => { setPerfCid(e.target.value); setPerfData(null); setOptData(null); setPerfError(''); setOptError('') }} style={{ ...s.input, appearance: 'none' }}>
+                  <option value="">— Select account —</option>
+                  {accounts.map(a => <option key={a.customer_id} value={a.customer_id}>{a.account_name} ({a.customer_id})</option>)}
+                </select>
+              </div>
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '14px' }}>
+                <button onClick={loadPerformance} disabled={perfLoading || !perfCid} style={{ flex: 1, background: perfLoading ? C.accentDk : C.accent, color: '#fff', border: 'none', borderRadius: '7px', padding: '10px', fontSize: '13px', fontWeight: '600', cursor: perfLoading || !perfCid ? 'not-allowed' : 'pointer', opacity: !perfCid ? 0.6 : 1 }}>
+                  {perfLoading ? 'Loading…' : 'Load Performance'}
+                </button>
+                <button onClick={runOptimize} disabled={optLoading || !perfCid} style={{ flex: 1, background: optLoading ? '#166534' : C.green, color: '#fff', border: 'none', borderRadius: '7px', padding: '10px', fontSize: '13px', fontWeight: '600', cursor: optLoading || !perfCid ? 'not-allowed' : 'pointer', opacity: !perfCid ? 0.6 : 1 }}>
+                  {optLoading ? 'Optimizing…' : 'Optimize'}
+                </button>
+              </div>
+
+              {perfError && <div style={{ background: '#1F0A0A', border: `1px solid ${C.red}40`, borderRadius: '7px', padding: '10px 14px', marginBottom: '12px', color: C.red, fontSize: '13px' }}>{perfError}</div>}
+
+              {perfData && (
+                <div style={{ marginBottom: '14px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '12px' }}>
+                    {[['CTR', perfData.actual_metrics?.ctr], ['CPC', perfData.actual_metrics?.cpc], ['Cost', perfData.actual_metrics?.cost],
+                      ['Conversions', perfData.actual_metrics?.conversions], ['CPA', perfData.actual_metrics?.cpa], ['ROAS', perfData.actual_metrics?.roas]].map(([k, v]) => (
+                      <div key={k} style={{ background: C.surface, borderRadius: '7px', padding: '9px 12px' }}>
+                        <p style={{ margin: '0 0 3px', fontSize: '10px', color: C.muted, fontWeight: '600', textTransform: 'uppercase' }}>{k}</p>
+                        <p style={{ margin: 0, fontSize: '13px', fontWeight: '700' }}>{v}</p>
+                      </div>
+                    ))}
+                  </div>
+                  {perfData.campaign_breakdown?.map((c, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: C.surface, borderRadius: '6px', marginBottom: '6px', flexWrap: 'wrap', gap: '6px' }}>
+                      <span style={{ fontSize: '12.5px', fontWeight: '600' }}>{c.campaign_name}</span>
+                      <span style={{ fontSize: '11px', color: C.muted }}>{c.status} · {c.impressions} impr · {c.clicks} clk · {c.cost} · CTR {c.ctr}</span>
+                    </div>
+                  ))}
+                  {perfData.biggest_problem && <p style={{ margin: '8px 0 0', fontSize: '12px', color: C.gold }}>⚠ {perfData.biggest_problem}</p>}
+                </div>
+              )}
+
+              {optError && <div style={{ background: '#1F0A0A', border: `1px solid ${C.red}40`, borderRadius: '7px', padding: '10px 14px', marginBottom: '12px', color: C.red, fontSize: '13px' }}>{optError}</div>}
+
+              {optData && (
+                <div style={{ background: C.surface, borderRadius: '8px', padding: '14px' }}>
+                  <p style={{ margin: '0 0 8px', fontSize: '14px', fontWeight: '700', color: C.accent }}>{optData.overall_verdict} · health {optData.health_change}</p>
+                  {optData.scale_recommendations?.length > 0 && (
+                    <div style={{ marginBottom: '10px' }}>
+                      <p style={{ margin: '0 0 4px', fontSize: '11px', color: C.green, fontWeight: '600', textTransform: 'uppercase' }}>Scale</p>
+                      {optData.scale_recommendations.map((r, i) => <p key={i} style={{ margin: '0 0 3px', fontSize: '12.5px', color: '#6EE7B7' }}>→ {r.what}: {r.why}</p>)}
+                    </div>
+                  )}
+                  {optData.pause_recommendations?.length > 0 && (
+                    <div style={{ marginBottom: '10px' }}>
+                      <p style={{ margin: '0 0 4px', fontSize: '11px', color: C.red, fontWeight: '600', textTransform: 'uppercase' }}>Pause</p>
+                      {optData.pause_recommendations.map((r, i) => <p key={i} style={{ margin: '0 0 3px', fontSize: '12.5px', color: '#FCA5A5' }}>→ {r.what}: {r.why}</p>)}
+                    </div>
+                  )}
+                  {optData.this_week_actions?.length > 0 && (
+                    <div>
+                      <p style={{ margin: '0 0 4px', fontSize: '11px', color: C.muted, fontWeight: '600', textTransform: 'uppercase' }}>This Week</p>
+                      {optData.this_week_actions.map((a, i) => <p key={i} style={{ margin: '0 0 3px', fontSize: '12.5px', color: C.text }}>{a.priority}. {a.action}</p>)}
+                    </div>
+                  )}
+                </div>
+              )}
+            </Collapsible>
+          </div>
+        )}
+
         {/* ── Analysis Input Form ───────────────────────────────────────────── */}
         <div style={s.card}>
           <p style={s.secHead}>Campaign Setup</p>
@@ -298,15 +451,38 @@ export default function CricketAds() {
               <input style={s.input} value={city} onChange={e => setCity(e.target.value)} placeholder="India" />
             </div>
           </div>
+          <div style={{ ...s.row, marginTop: '14px' }}>
+            <div>
+              <label style={s.label}>Business Type</label>
+              <select style={{ ...s.input, appearance: 'none' }} value={businessType} onChange={e => setBusinessType(e.target.value)}>
+                {BUSINESS_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={s.label}>Budget (₹/month) <span style={{ fontWeight: '400', textTransform: 'none', color: '#475569' }}>— optional, for simulator</span></label>
+              <input type="number" style={s.input} value={budget} onChange={e => setBudget(e.target.value)} placeholder="e.g. 15000" min="0" />
+            </div>
+          </div>
+          <div style={{ marginTop: '14px' }}>
+            <label style={s.label}>Industry <span style={{ fontWeight: '400', textTransform: 'none', color: '#475569' }}>— optional, reuses Marketing Brain data if this business was analyzed there</span></label>
+            <input style={s.input} value={industry} onChange={e => setIndustry(e.target.value)} placeholder="e.g. Sports" />
+          </div>
           {error && <div style={{ background: '#1F0A0A', border: `1px solid ${C.red}40`, borderRadius: '7px', padding: '10px 14px', marginTop: '14px', color: C.red, fontSize: '13px' }}>{error}</div>}
           <button style={{ ...s.btn, background: loading ? C.accentDk : C.accent, opacity: loading ? 0.8 : 1 }} onClick={analyze} disabled={loading}>
-            {loading ? <span className="spin">Analyzing… (crawl + live cricket data + AI…)</span> : '🏏 Analyze & Build Campaign'}
+            {loading ? <span className="spin">Analyzing… (crawl + live sports data + AI…)</span> : '🏏 Analyze & Build Campaign'}
           </button>
         </div>
 
         {/* ── Results ──────────────────────────────────────────────────────── */}
         {data && (
           <>
+            {memoryReused && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: `${C.accent}15`, border: `1px solid ${C.accent}40`, borderRadius: '7px', padding: '9px 14px', marginBottom: '12px' }}>
+                <TrendingUp size={14} color={C.accent} />
+                <p style={{ margin: 0, fontSize: '12px', color: C.accent }}>Reused Marketing Brain intelligence for this business — skipped redundant discovery.</p>
+              </div>
+            )}
+
             {/* 1 — Compliance Check */}
             <div style={{ ...s.card, border: `1px solid ${cc.safe_to_advertise ? C.green : C.red}50`, background: cc.safe_to_advertise ? '#052e1615' : '#1F0A0A' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -345,6 +521,16 @@ export default function CricketAds() {
               </div>
             </div>
 
+            {/* Key Recommendations */}
+            {(kr.top_audience || kr.top_placement || kr.timing) && (
+              <div style={s.card}>
+                <p style={s.secHead}>Key Recommendations</p>
+                <RecCard title="🎯 Top Audience" rec={kr.top_audience} />
+                <RecCard title="📍 Top Placement" rec={kr.top_placement} />
+                <RecCard title="⏱️ Timing" rec={kr.timing} />
+              </div>
+            )}
+
             {/* 3 — Audience Segments */}
             <div style={s.card}>
               <p style={s.secHead}>Audience Segments</p>
@@ -360,11 +546,21 @@ export default function CricketAds() {
                       <span style={{ fontSize: '12px', color: C.muted }}>Score: <strong style={{ color: C.text }}>{seg.priority_score}</strong></span>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '20px', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', gap: '20px', marginBottom: '8px', flexWrap: 'wrap' }}>
                     <span style={{ fontSize: '12px', color: C.muted }}>CPC: <strong style={{ color: C.green }}>{seg.estimated_cpc}</strong></span>
                     <span style={{ fontSize: '12px', color: C.muted }}>CTR: <strong style={{ color: C.text }}>{seg.estimated_ctr}</strong></span>
+                    {seg.intent_score != null && <span style={{ fontSize: '12px', color: C.muted }}>Intent Score: <strong style={{ color: C.text }}>{seg.intent_score}</strong></span>}
+                    {seg.competition && <span style={{ fontSize: '12px', color: C.muted }}>Competition: <strong style={{ color: C.text }}>{seg.competition}</strong></span>}
+                    {seg.expected_conversion && <span style={{ fontSize: '12px', color: C.muted }}>Conversion: <strong style={{ color: C.green }}>{seg.expected_conversion}</strong></span>}
+                    {seg.confidence != null && <span style={{ fontSize: '12px', color: C.muted }}>Confidence: <strong style={{ color: C.text }}>{seg.confidence}%</strong></span>}
                   </div>
-                  <p style={{ margin: 0, fontSize: '13px', color: C.muted, lineHeight: '1.5' }}>{seg.reason}</p>
+                  {seg.platform_match && (
+                    <p style={{ margin: '0 0 6px', fontSize: '12px', color: C.accent }}>
+                      <strong>Platform targeting:</strong> {seg.platform_match}
+                    </p>
+                  )}
+                  <p style={{ margin: '0 0 4px', fontSize: '13px', color: C.muted, lineHeight: '1.5' }}>{seg.reason}</p>
+                  {seg.evidence && <p style={{ margin: 0, fontSize: '11.5px', color: '#64748B', lineHeight: '1.5', fontStyle: 'italic' }}>Evidence: {seg.evidence}</p>}
                 </div>
               ))}
             </div>
@@ -485,6 +681,68 @@ export default function CricketAds() {
                 <p style={{ color: C.green, fontSize: '14px' }}>✅ Landing page looks good.</p>
               )}
             </div>
+
+            {/* Sports Calendar */}
+            <div style={s.card}>
+              <Collapsible title="📅 Sports Calendar" defaultOpen>
+                {sc.events?.length > 0 ? (
+                  sc.events.map((ev, i) => (
+                    <div key={i} style={{ border: `1px solid ${C.border}`, borderRadius: '8px', padding: '12px 14px', marginBottom: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', flexWrap: 'wrap', gap: '6px' }}>
+                        <p style={{ margin: 0, fontSize: '14px', fontWeight: '700' }}>{ev.name}</p>
+                        <span style={{ fontSize: '12px', color: C.accent, fontWeight: '600' }}>{ev.date}</span>
+                      </div>
+                      <p style={{ margin: '0 0 4px', fontSize: '12.5px', color: C.muted }}><strong>Timing window:</strong> {ev.timing_window}</p>
+                      <p style={{ margin: 0, fontSize: '12.5px', color: C.green }}><strong>Budget/creative:</strong> {ev.budget_creative_recommendation}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p style={{ color: C.muted, fontSize: '13px', margin: 0 }}>No live calendar data available for this window.</p>
+                )}
+              </Collapsible>
+            </div>
+
+            {/* Campaign Simulator */}
+            <div style={s.card}>
+              <Collapsible title="🔮 Campaign Simulator" defaultOpen>
+                <p style={{ margin: '0 0 12px', fontSize: '12px', color: C.muted }}>Budget used: <strong style={{ color: C.text }}>{csim.budget_used}</strong></p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
+                  {[
+                    ['Reach', csim.reach], ['Clicks', csim.clicks], ['CTR', csim.ctr],
+                    ['Joins / Installs', csim.joins_installs], ['Cost per Join/Install', csim.cost_per_join_install], ['Expected ROI', csim.expected_roi],
+                  ].filter(([, v]) => v).map(([k, v]) => (
+                    <div key={k} style={{ background: C.surface, borderRadius: '7px', padding: '10px 14px' }}>
+                      <p style={{ margin: '0 0 3px', fontSize: '11px', color: C.muted, fontWeight: '600', textTransform: 'uppercase' }}>{k}</p>
+                      <p style={{ margin: 0, fontSize: '14px', fontWeight: '700' }}>{v.range}</p>
+                      <p style={{ margin: '2px 0 0', fontSize: '10px', color: C.muted }}>{v.confidence}% confidence</p>
+                    </div>
+                  ))}
+                </div>
+                <p style={{ margin: 0, fontSize: '11.5px', color: '#64748B', fontStyle: 'italic' }}>{csim.disclaimer || 'These are forecasts based on benchmarks, not guarantees.'}</p>
+              </Collapsible>
+            </div>
+
+            {/* Competitor Watch */}
+            {cw.length > 0 && (
+              <div style={s.card}>
+                <Collapsible title="🔍 Competitor Watch">
+                  {cw.map((comp, i) => (
+                    <div key={i} style={{ border: `1px solid ${C.border}`, borderRadius: '8px', padding: '12px 14px', marginBottom: '8px' }}>
+                      <p style={{ margin: '0 0 6px', fontSize: '14px', fontWeight: '700' }}>{comp.name}</p>
+                      <p style={{ margin: '0 0 4px', fontSize: '12.5px', color: C.muted }}><strong>Creative style:</strong> {comp.creative_style}</p>
+                      <p style={{ margin: '0 0 4px', fontSize: '12.5px', color: C.muted }}><strong>Offers:</strong> {comp.offers}</p>
+                      <p style={{ margin: '0 0 8px', fontSize: '12.5px', color: C.muted }}><strong>Growth tactics:</strong> {comp.growth_tactics}</p>
+                      {comp.differentiation_recommendations?.length > 0 && (
+                        <div>
+                          <p style={{ margin: '0 0 4px', fontSize: '11px', color: C.green, fontWeight: '600', textTransform: 'uppercase' }}>How to differentiate</p>
+                          {comp.differentiation_recommendations.map((r, j) => <p key={j} style={{ margin: '0 0 3px', fontSize: '12.5px', color: '#6EE7B7' }}>→ {r}</p>)}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </Collapsible>
+              </div>
+            )}
 
             {/* Business Summary */}
             {d.business_summary && (
