@@ -225,6 +225,19 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
                     <p style={{ margin: '0 0 5px', fontSize: '12px', color: '#888' }}><strong style={{ color: '#171717' }}>Ad Group ID:</strong> {gAdsResult.ad_group_id}</p>
                     <p style={{ margin: '0', fontSize: '12px', color: '#888' }}><strong style={{ color: '#171717' }}>Keywords from memory:</strong> {gAdsResult.keywords_added || 0}</p>
                   </div>
+                  {!gAdsResult.ad_created && (
+                    <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '6px', padding: '10px 13px', marginBottom: '16px', textAlign: 'left' }}>
+                      <p style={{ margin: '0 0 4px', fontSize: '12.5px', fontWeight: '600', color: '#92400E' }}>⚠ Campaign created but ad could not be created</p>
+                      {Array.isArray(gAdsResult.ad_creation_error) ? (
+                        gAdsResult.ad_creation_error.map((e, i) => (
+                          <p key={i} style={{ margin: '0 0 2px', fontSize: '12px', color: '#92400E' }}>{e.message}{e.field ? ` (field: ${e.field})` : ''}</p>
+                        ))
+                      ) : (
+                        <p style={{ margin: 0, fontSize: '12px', color: '#92400E' }}>{gAdsResult.ad_creation_error || 'Unknown reason.'}</p>
+                      )}
+                      <p style={{ margin: '6px 0 0', fontSize: '11.5px', color: '#92400E', opacity: 0.85 }}>Add an ad manually in Google Ads, or fix the issue and regenerate the Campaign Launch Kit before pushing again.</p>
+                    </div>
+                  )}
                   <a href={gAdsResult.google_ads_dashboard} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#34A853', color: '#fff', padding: '10px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', textDecoration: 'none', marginBottom: '10px' }}>
                     <ExternalLink size={13} /> Open in Google Ads
                   </a>
