@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, Dna, Brain, Globe, Search,
-  Radio, Palette, Target, Users, Menu, X, PlaySquare, TrendingUp, Gift, Monitor, Eye, MessageSquare, BarChart2, Activity, Zap, Trophy, Crosshair, Antenna, Link2, Share2, Sparkles,
+  Radio, Palette, Target, Users, Menu, X, PlaySquare, TrendingUp, Gift, Monitor, Eye, MessageSquare, BarChart2, Activity, Zap, Trophy, Crosshair, Antenna, Link2, Share2, Sparkles, Radar,
 } from 'lucide-react'
 
 const GOLD = '#D4AF37'
@@ -12,6 +12,7 @@ const links = [
   { path: '/intelligence', label: 'BI Platform',     Icon: Dna             },
   { path: '/brain',        label: 'Marketing Brain', Icon: Brain           },
   { path: '/smart-analysis', label: 'Smart Analysis', Icon: Sparkles       },
+  { path: '/social-intelligence', label: 'Social Intel', Icon: Radar       },
   { path: '/analyze',      label: 'AI Analyzer',     Icon: Globe           },
   { path: '/competitor',   label: 'Competitor',      Icon: Search          },
   { path: '/ad-intel',     label: 'Ad Intel',        Icon: Radio           },

@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
-import { Crosshair, Copy, Check, ExternalLink, Phone, MapPin, TrendingUp, Flame, Thermometer, Snowflake } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Crosshair, Copy, Check, ExternalLink, Phone, MapPin, TrendingUp, Flame, Thermometer, Snowflake, Radar } from 'lucide-react'
 import { useToast } from './ToastContext'
 import { useLoadingSteps } from './useLoadingSteps'
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 const GOLD    = '#D4AF37'
 const LS_KEY  = 'adsoh_prospect_result'
+const SIE_PREFILL_LS_KEY = 'adsoh_social_intel_prefill'
 const PROSPECT_LOADING_STEPS = ['Scanning Google Maps...', 'Enriching business details...', 'Scoring prospects...']
 
 const card = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
@@ -76,7 +78,18 @@ function buildHotCopyText(hotProspects) {
   ).join('\n---\n\n')
 }
 
-function ProspectCard({ p, isMobile }) {
+function ProspectCard({ p, isMobile, industry, city }) {
+  const navigate = useNavigate()
+
+  function openSocialAudit() {
+    try {
+      localStorage.setItem(SIE_PREFILL_LS_KEY, JSON.stringify({
+        input_value: p.name, input_type: 'business_name', city: city || 'Jaipur', industry: industry || '',
+      }))
+    } catch {}
+    navigate('/social-intelligence')
+  }
+
   return (
     <div style={{ ...card, padding: isMobile ? '14px 12px' : '18px', marginBottom: '10px' }}>
       {/* Header row */}
@@ -165,6 +178,9 @@ function ProspectCard({ p, isMobile }) {
             <ExternalLink size={11} /> Website
           </a>
         )}
+        <button onClick={openSocialAudit} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: GOLD, textDecoration: 'none', background: '#FFFDF5', border: `1px solid ${GOLD}50`, padding: '4px 10px', borderRadius: '5px', cursor: 'pointer', fontFamily: 'inherit' }}>
+          <Radar size={11} /> Social Audit
+        </button>
       </div>
     </div>
   )
@@ -390,7 +406,7 @@ export default function ProspectDiscovery() {
               <p style={{ margin: 0, color: '#888', fontSize: '13px' }}>No {activeTab} prospects found in this scan.</p>
             </div>
           ) : (
-            tabData.map(p => <ProspectCard key={p.rank || p.name} p={p} isMobile={isMobile} />)
+            tabData.map(p => <ProspectCard key={p.rank || p.name} p={p} isMobile={isMobile} industry={resolvedIndustry} city={city} />)
           )}
 
         </div>
