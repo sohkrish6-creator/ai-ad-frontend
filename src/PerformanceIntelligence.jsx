@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Activity, Copy, Check, TrendingUp, TrendingDown, Minus, AlertCircle, Zap } from 'lucide-react'
+import CityInput, { getLastCity } from './CityInput'
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 const GOLD    = '#D4AF37'
@@ -121,7 +122,7 @@ export default function PerformanceIntelligence() {
   const [url, setUrl]                     = useState('')
   const [industry, setIndustry]           = useState('')
   const [industryOther, setIndustryOther] = useState('')
-  const [city, setCity]                   = useState('Jaipur')
+  const [city, setCity]                   = useState(getLastCity)
   const [dateRange, setDateRange]         = useState('30d')
   const [loading, setLoading]             = useState(false)
   const [error, setError]                 = useState('')
@@ -213,7 +214,7 @@ export default function PerformanceIntelligence() {
             </div>
             <div>
               <label style={lbl}>City</label>
-              <input type="text" value={city} onChange={e => setCity(e.target.value || 'Jaipur')} placeholder="Jaipur" style={inp} />
+              <CityInput value={city} onChange={setCity} style={inp} />
             </div>
           </div>
 

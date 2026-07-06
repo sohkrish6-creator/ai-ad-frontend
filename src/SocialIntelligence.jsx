@@ -3,6 +3,7 @@ import {
   Radar, ChevronDown, ChevronUp, Copy, Check, ExternalLink, Camera, MessageCircle,
   Briefcase, Play, Globe, Building2,
 } from 'lucide-react'
+import CityInput, { getLastCity } from './CityInput'
 import { useToast } from './ToastContext'
 import { useLoadingSteps } from './useLoadingSteps'
 
@@ -113,7 +114,7 @@ export default function SocialIntelligence() {
   const toast = useToast()
   const [inputValue, setInputValue] = useState('')
   const [inputType, setInputType]   = useState('website')
-  const [city, setCity]             = useState('Jaipur')
+  const [city, setCity]             = useState(getLastCity)
   const [industry, setIndustry]     = useState('')
   const [loading, setLoading]       = useState(false)
   const loadingStep = useLoadingSteps(SIE_LOADING_STEPS, loading)
@@ -146,7 +147,7 @@ export default function SocialIntelligence() {
     try {
       const res = await fetch(`${BACKEND}/social-intelligence`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ input_value: inputValue.trim(), input_type: inputType, city: city.trim() || 'Jaipur', industry: industry.trim() }),
+        body: JSON.stringify({ input_value: inputValue.trim(), input_type: inputType, city: city.trim(), industry: industry.trim() }),
       })
       const json = await res.json()
       if (json.success) {
@@ -216,7 +217,7 @@ export default function SocialIntelligence() {
           <div style={s.row}>
             <div>
               <label style={s.label}>City</label>
-              <input style={s.input} value={city} onChange={e => setCity(e.target.value)} placeholder="Jaipur" />
+              <CityInput value={city} onChange={setCity} style={s.input} />
             </div>
             <div>
               <label style={s.label}>Industry <span style={{ fontWeight: '400', textTransform: 'none', color: '#475569' }}>— optional</span></label>

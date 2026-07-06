@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import CityInput, { getLastCity } from './CityInput'
 
 const LS_KEY_YT = 'adsoh_youtube_result'
 import { Copy, Check, Video, ExternalLink } from 'lucide-react'
@@ -64,7 +65,7 @@ export default function YouTube() {
 
   const [industry, setIndustry]   = useState('')
   const [industryOther, setIndustryOther] = useState('')
-  const [city, setCity]           = useState('Jaipur')
+  const [city, setCity]           = useState(getLastCity)
   const [topic, setTopic]         = useState('')
   const [loading, setLoading]     = useState(false)
   const [error, setError]         = useState('')
@@ -123,7 +124,7 @@ export default function YouTube() {
             </div>
             <div>
               <label style={lbl}>Target City</label>
-              <input type="text" value={city} onChange={e => setCity(e.target.value || 'Jaipur')} placeholder="e.g. Jaipur (optional)" style={inputSt} />
+              <CityInput value={city} onChange={setCity} style={inputSt} />
             </div>
           </div>
 

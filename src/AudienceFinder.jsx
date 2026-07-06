@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import CityInput, { getLastCity } from './CityInput'
 
 const LS_KEY_AUDIENCE = 'adsoh_audience_result'
 const API = 'https://ai-ad-backend-zhpj.onrender.com'
@@ -31,7 +32,7 @@ export default function AudienceFinder() {
   const [form, setForm] = useState({ url: '', niche: '', business_type: '', offer: '', platform: 'Both', language: 'Hinglish' })
   const [targetIndustry, setTargetIndustry] = useState('')
   const [targetIndustryOther, setTargetIndustryOther] = useState('')
-  const [targetCity, setTargetCity] = useState('Jaipur')
+  const [targetCity, setTargetCity] = useState(getLastCity)
   const [result, setResult] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -83,7 +84,7 @@ export default function AudienceFinder() {
             </div>
             <div>
               <label style={lbl}>Target City</label>
-              <input type="text" value={targetCity} onChange={e => setTargetCity(e.target.value)} placeholder="e.g. Jaipur" style={inputSt} />
+              <CityInput value={targetCity} onChange={setTargetCity} style={inputSt} />
             </div>
           </div>
 

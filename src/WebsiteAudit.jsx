@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import CityInput, { getLastCity } from './CityInput'
 
 const LS_KEY_WEBSITE = 'adsoh_website_result'
 import { Monitor, Copy, Check, ChevronDown, ChevronUp, AlertCircle, CheckCircle, Zap } from 'lucide-react'
@@ -167,7 +168,7 @@ export default function WebsiteAudit() {
   const [url, setUrl]                     = useState('')
   const [industry, setIndustry]           = useState('')
   const [industryOther, setIndustryOther] = useState('')
-  const [city, setCity]                   = useState('Jaipur')
+  const [city, setCity]                   = useState(getLastCity)
   const [loading, setLoading]             = useState(false)
   const [error, setError]                 = useState('')
   const [result, setResult]               = useState(null)
@@ -284,7 +285,7 @@ export default function WebsiteAudit() {
             </div>
             <div>
               <label style={lbl}>Target City <span style={{ color: '#BBB', fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
-              <input type="text" value={city} onChange={e => setCity(e.target.value || 'Jaipur')} placeholder="e.g. Jaipur" style={inp} />
+              <CityInput value={city} onChange={setCity} style={inp} />
             </div>
           </div>
 

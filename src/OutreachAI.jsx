@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import CityInput, { getLastCity } from './CityInput'
 
 const LS_KEY_OUTREACH = 'adsoh_outreach_result'
 import { MessageSquare, Copy, Check, ChevronRight } from 'lucide-react'
@@ -155,7 +156,7 @@ export default function OutreachAI() {
   const [url, setUrl]                     = useState('')
   const [industry, setIndustry]           = useState('')
   const [industryOther, setIndustryOther] = useState('')
-  const [city, setCity]                   = useState('Jaipur')
+  const [city, setCity]                   = useState(getLastCity)
   const [targetName, setTargetName]       = useState('')
   const [goal, setGoal]                   = useState('get meeting')
   const [loading, setLoading]             = useState(false)
@@ -386,7 +387,7 @@ export default function OutreachAI() {
             </div>
             <div>
               <label style={lbl}>City</label>
-              <input type="text" value={city} onChange={e => setCity(e.target.value || 'Jaipur')} placeholder="Jaipur" style={inp} />
+              <CityInput value={city} onChange={setCity} style={inp} />
             </div>
           </div>
 

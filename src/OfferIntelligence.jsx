@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import CityInput, { getLastCity } from './CityInput'
 
 const LS_KEY_OFFER = 'adsoh_offer_result'
 import { Copy, Check, Gift, Zap, Tag, Star, ShieldCheck, MessageSquare, TrendingUp } from 'lucide-react'
@@ -83,7 +84,7 @@ export default function OfferIntelligence() {
   const [industry, setIndustry]           = useState('')
   const [industryOther, setIndustryOther] = useState('')
   const [businessKey, setBusinessKey]     = useState('')
-  const [city, setCity]                   = useState('Jaipur')
+  const [city, setCity]                   = useState(getLastCity)
   const [loading, setLoading]             = useState(false)
   const [error, setError]                 = useState('')
   const [result, setResult]               = useState(null)
@@ -210,7 +211,7 @@ export default function OfferIntelligence() {
             </div>
             <div>
               <label style={lbl}>Target City</label>
-              <input type="text" value={city} onChange={e => setCity(e.target.value || 'Jaipur')} placeholder="e.g. Jaipur" style={inp} />
+              <CityInput value={city} onChange={setCity} style={inp} />
               <p style={{ margin: '5px 0 0', fontSize: '11px', color: '#999' }}>Same city as Marketing Brain B2B target</p>
             </div>
           </div>

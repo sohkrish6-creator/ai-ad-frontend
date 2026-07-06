@@ -15,7 +15,7 @@ const lbl2   = { display: 'block', color: '#888', fontSize: '11px', fontWeight: 
 // via ref so a caller-specific button (e.g. a banner CTA) can trigger the
 // same modals without re-rendering another instance of this component.
 const PushToAdsSection = forwardRef(function PushToAdsSection(
-  { url = '', industry = '', city = 'Jaipur', budget = '', businessKey = '', hideButtons = false },
+  { url = '', industry = '', city = '', budget = '', businessKey = '', hideButtons = false },
   ref
 ) {
   const toast = useToast()
@@ -73,7 +73,7 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
           business_key:  businessKey || '',
           url:           url || '',
           industry:      industry || '',
-          city:          city || 'Jaipur',
+          city:          city || '',
         }),
       })
       const data = await res.json()
@@ -86,7 +86,7 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
 
   function openMAdsModal() {
     const cleanUrl = (url || '').replace(/https?:\/\//, '').replace(/\/$/, '').split('/')[0]
-    const defaultName = cleanUrl ? `${cleanUrl} — Meta Leads` : industry ? `${industry} — ${city}` : 'New Meta Campaign'
+    const defaultName = cleanUrl ? `${cleanUrl} — Meta Leads` : industry ? `${industry} — ${city || 'India'}` : 'New Meta Campaign'
     setMAdsForm({
       campaign_name: defaultName,
       budget_daily:  budget ? String(Math.round(parseInt(budget) / 30)) : '300',
@@ -113,7 +113,7 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
           business_key:  businessKey || '',
           url:           url || '',
           industry:      industry || '',
-          city:          city || 'Jaipur',
+          city:          city || '',
         }),
       })
       const data = await res.json()

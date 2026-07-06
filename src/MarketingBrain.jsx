@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import CityInput, { getLastCity } from './CityInput'
 
 const LS_KEY_BRAIN      = 'adsoh_brain_result'
 const LS_KEY_CAMPAIGN_KIT = 'adsoh_campaign_kit_result'
@@ -114,7 +115,7 @@ function MarketingBrain() {
   const [compWebsite, setCompWebsite] = useState('')
   const [targetIndustry, setTargetIndustry] = useState('')
   const [targetIndustryOther, setTargetIndustryOther] = useState('')
-  const [targetCity, setTargetCity] = useState('Jaipur')
+  const [targetCity, setTargetCity] = useState(getLastCity)
   const [loading, setLoading] = useState(false)
   const loadingStep = useLoadingSteps(BRAIN_LOADING_STEPS, loading)
   const [result, setResult] = useState(null)
@@ -826,7 +827,7 @@ function MarketingBrain() {
             </div>
             <div>
               <label style={lbl}>Target City</label>
-              <input type="text" value={targetCity} onChange={e => setTargetCity(e.target.value || 'Jaipur')} placeholder="e.g. Jaipur" style={inputSt} />
+              <CityInput value={targetCity} onChange={setTargetCity} style={inputSt} />
             </div>
           </div>
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Trophy, Copy, Check, ChevronDown, ChevronUp, TrendingUp, TrendingDown, Minus, Star, ArrowRight, Zap } from 'lucide-react'
+import CityInput, { getLastCity } from './CityInput'
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 const GOLD    = '#D4AF37'
@@ -116,7 +117,7 @@ export default function ResultCenter() {
   const [url, setUrl]                     = useState('')
   const [industry, setIndustry]           = useState('')
   const [industryOther, setIndustryOther] = useState('')
-  const [city, setCity]                   = useState('Jaipur')
+  const [city, setCity]                   = useState(getLastCity)
   const [loading, setLoading]             = useState(false)
   const [error, setError]                 = useState('')
   const [result, setResult]               = useState(null)
@@ -235,7 +236,7 @@ export default function ResultCenter() {
             </div>
             <div>
               <label style={lbl}>City</label>
-              <input type="text" value={city} onChange={e => setCity(e.target.value || 'Jaipur')} placeholder="Jaipur" style={inp} />
+              <CityInput value={city} onChange={setCity} style={inp} />
             </div>
           </div>
 

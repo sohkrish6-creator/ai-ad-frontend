@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import CityInput, { getLastCity } from './CityInput'
 
 const LS_KEY_VIS = 'adsoh_visibility_result'
 import { Eye, Copy, Check, ChevronDown, ChevronUp, Zap, Search, Bot, MapPin, FileText } from 'lucide-react'
@@ -166,7 +167,7 @@ export default function VisibilityIntelligence() {
   const [url, setUrl]                     = useState('')
   const [industry, setIndustry]           = useState('')
   const [industryOther, setIndustryOther] = useState('')
-  const [city, setCity]                   = useState('Jaipur')
+  const [city, setCity]                   = useState(getLastCity)
   const [loading, setLoading]             = useState(false)
   const [error, setError]                 = useState('')
   const [result, setResult]               = useState(null)
@@ -234,7 +235,7 @@ export default function VisibilityIntelligence() {
             </div>
             <div>
               <label style={lbl}>City</label>
-              <input type="text" value={city} onChange={e => setCity(e.target.value || 'Jaipur')} placeholder="e.g. Jaipur" style={inp} />
+              <CityInput value={city} onChange={setCity} style={inp} />
             </div>
           </div>
 

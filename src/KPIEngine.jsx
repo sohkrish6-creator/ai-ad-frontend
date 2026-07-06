@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { BarChart2, Copy, Check, Zap } from 'lucide-react'
 import { useToast } from './ToastContext'
+import CityInput, { getLastCity } from './CityInput'
 import { useLoadingSteps } from './useLoadingSteps'
 
 const BACKEND  = 'https://ai-ad-backend-zhpj.onrender.com'
@@ -125,7 +126,7 @@ export default function KPIEngine() {
   const [url, setUrl]                     = useState('')
   const [industry, setIndustry]           = useState('')
   const [industryOther, setIndustryOther] = useState('')
-  const [city, setCity]                   = useState('Jaipur')
+  const [city, setCity]                   = useState(getLastCity)
   const [budget, setBudget]               = useState('')
   const [goal, setGoal]                   = useState('Lead Generation')
   const [loading, setLoading]             = useState(false)
@@ -201,7 +202,7 @@ export default function KPIEngine() {
             </div>
             <div>
               <label style={lbl}>City</label>
-              <input type="text" value={city} onChange={e => setCity(e.target.value || 'Jaipur')} placeholder="Jaipur" style={inp} />
+              <CityInput value={city} onChange={setCity} style={inp} />
             </div>
           </div>
 

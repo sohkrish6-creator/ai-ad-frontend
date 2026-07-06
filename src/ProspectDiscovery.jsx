@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Crosshair, Copy, Check, ExternalLink, Phone, MapPin, TrendingUp, Flame, Thermometer, Snowflake, Radar } from 'lucide-react'
+import CityInput, { getLastCity } from './CityInput'
 import { useToast } from './ToastContext'
 import { useLoadingSteps } from './useLoadingSteps'
 
@@ -84,7 +85,7 @@ function ProspectCard({ p, isMobile, industry, city }) {
   function openSocialAudit() {
     try {
       localStorage.setItem(SIE_PREFILL_LS_KEY, JSON.stringify({
-        input_value: p.name, input_type: 'business_name', city: city || 'Jaipur', industry: industry || '',
+        input_value: p.name, input_type: 'business_name', city: city || '', industry: industry || '',
       }))
     } catch {}
     navigate('/social-intelligence')
@@ -192,7 +193,7 @@ export default function ProspectDiscovery() {
 
   const [industry, setIndustry]           = useState('')
   const [industryOther, setIndustryOther] = useState('')
-  const [city, setCity]                   = useState('Jaipur')
+  const [city, setCity]                   = useState(getLastCity)
   const [maxProspects, setMaxProspects]   = useState(15)
   const [loading, setLoading]             = useState(false)
   const loadingStep = useLoadingSteps(PROSPECT_LOADING_STEPS, loading)
@@ -285,7 +286,7 @@ export default function ProspectDiscovery() {
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
             <div>
               <label style={lbl}>City</label>
-              <input type="text" value={city} onChange={e => setCity(e.target.value || 'Jaipur')} placeholder="Jaipur" style={inp} />
+              <CityInput value={city} onChange={setCity} style={inp} />
             </div>
             <div>
               <label style={lbl}>Max Prospects</label>

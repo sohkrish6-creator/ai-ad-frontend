@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import CityInput, { getLastCity } from './CityInput'
 
 const LS_KEY_OPP = 'adsoh_opportunity_result'
 import { Copy, Check, Target, TrendingUp, Zap, Users, Tag, MapPin, ChartBar } from 'lucide-react'
@@ -82,7 +83,7 @@ export default function OpportunityEngine() {
   const [industry, setIndustry]           = useState('')
   const [industryOther, setIndustryOther] = useState('')
   const [businessKey, setBusinessKey]     = useState('')
-  const [city, setCity]                   = useState('Jaipur')
+  const [city, setCity]                   = useState(getLastCity)
   const [budget, setBudget]               = useState('')
   const [loading, setLoading]             = useState(false)
   const loadingStep = useLoadingSteps(OPP_LOADING_STEPS, loading)
@@ -221,7 +222,7 @@ export default function OpportunityEngine() {
             </div>
             <div>
               <label style={lbl}>Target City</label>
-              <input type="text" value={city} onChange={e => setCity(e.target.value || 'Jaipur')} placeholder="e.g. Jaipur" style={input} />
+              <CityInput value={city} onChange={setCity} style={input} />
               <p style={{ margin: '5px 0 0', fontSize: '11px', color: '#999' }}>Same city as Marketing Brain B2B target</p>
             </div>
           </div>

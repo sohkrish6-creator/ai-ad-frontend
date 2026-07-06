@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Sparkles, CheckCircle, AlertCircle, ChevronDown, ChevronUp, ArrowRight, Clock, History, X } from 'lucide-react'
 import { useToast } from './ToastContext'
 import PushToAdsSection from './PushToAdsSection'
+import CityInput, { getLastCity } from './CityInput'
 
 const LS_KEY_SMART = 'adsoh_smart_analysis_result'
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
@@ -76,7 +77,7 @@ export default function SmartAnalysis() {
   const [url, setUrl] = useState('')
   const [industry, setIndustry] = useState('')
   const [industryOther, setIndustryOther] = useState('')
-  const [city, setCity] = useState('Jaipur')
+  const [city, setCity] = useState(getLastCity)
   const [budget, setBudget] = useState('')
 
   const [loading, setLoading] = useState(false)
@@ -148,7 +149,7 @@ export default function SmartAnalysis() {
         body: JSON.stringify({
           url: url.trim(),
           industry: resolvedIndustry,
-          city: city.trim() || 'Jaipur',
+          city: city.trim(),
           budget: budget ? parseFloat(budget) : 0,
         }),
       })
@@ -181,7 +182,7 @@ export default function SmartAnalysis() {
         body: JSON.stringify({
           url: url.trim(),
           industry: resolvedIndustry,
-          city: city.trim() || 'Jaipur',
+          city: city.trim(),
           budget: budget ? parseFloat(budget) : 0,
         }),
       })
@@ -214,7 +215,7 @@ export default function SmartAnalysis() {
         body: JSON.stringify({
           url: url.trim(),
           industry: resolvedIndustry,
-          city: city.trim() || 'Jaipur',
+          city: city.trim(),
           budget: budget ? parseFloat(budget) : 0,
           business_key: plan.business_key,
           brain_result: plan.brain_result,
@@ -313,7 +314,7 @@ export default function SmartAnalysis() {
             </div>
             <div>
               <label style={lbl}>City</label>
-              <input type="text" value={city} onChange={e => setCity(e.target.value)} placeholder="Jaipur" style={inputSt} />
+              <CityInput value={city} onChange={setCity} style={inputSt} />
             </div>
           </div>
           <p style={{ fontSize: '11px', color: '#BBB', margin: '0 0 20px', lineHeight: '1.5' }}>
