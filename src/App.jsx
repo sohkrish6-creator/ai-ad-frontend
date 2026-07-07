@@ -25,6 +25,7 @@ import GoogleAdsDashboard from './GoogleAdsDashboard'
 import MetaAdsTest from './MetaAdsTest'
 import SmartAnalysis from './SmartAnalysis'
 import SocialIntelligence from './SocialIntelligence'
+import History from './History'
 import Nav from './Nav'
 import { ToastProvider } from './ToastContext'
 import CommandPalette from './CommandPalette'
@@ -75,6 +76,7 @@ function Layout() {
           <Route path="/meta-test" element={<MetaAdsTest />} />
           <Route path="/smart-analysis" element={<SmartAnalysis />} />
           <Route path="/social-intelligence" element={<SocialIntelligence />} />
+          <Route path="/history" element={<History />} />
         </Routes>
       </div>
     </div>

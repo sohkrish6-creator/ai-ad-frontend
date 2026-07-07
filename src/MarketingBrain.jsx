@@ -129,15 +129,33 @@ function MarketingBrain() {
   const [launchError, setLaunchError] = useState(null)
   const [launchTab, setLaunchTab] = useState('meta')
   const [fromCache, setFromCache] = useState(false)
+  const [lastGenerated, setLastGenerated] = useState(null)
   const pushAdsRef = useRef(null)
 
+  const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+
   useEffect(() => {
+    // Arriving from the History page with a business_key takes priority over
+    // whatever this browser's own localStorage happens to have cached.
+    const businessKey = new URLSearchParams(window.location.search).get('business_key')
+    if (businessKey) {
+      fetch(`${BACKEND}/report-snapshot?module=marketing_brain&business_key=${encodeURIComponent(businessKey)}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.success) {
+            setResult(data.response)
+            setFromCache(true)
+            setLastGenerated(data.created_at)
+            try { localStorage.setItem(LS_KEY_BRAIN, JSON.stringify(data.response)) } catch {}
+          }
+        })
+        .catch(() => {})
+      return
+    }
     try { const s = localStorage.getItem(LS_KEY_BRAIN); if (s) { setResult(JSON.parse(s)); setFromCache(true) } } catch {}
     try { const s = localStorage.getItem(LS_KEY_CAMPAIGN_KIT); if (s) setLaunchKit(JSON.parse(s)) } catch {}
     try { const s = localStorage.getItem(LS_KEY_MEDIA_PLAN); if (s) setMediaPlan(JSON.parse(s)) } catch {}
   }, [])
-
-  const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 
   const resolvedIndustry = targetIndustry === 'Other' ? targetIndustryOther : targetIndustry
 
@@ -152,7 +170,7 @@ function MarketingBrain() {
       })
       const data = await res.json()
       if (data.scan_failed) { setError(data.message); toast.error(data.message) }
-      else { setResult(data); localStorage.setItem(LS_KEY_BRAIN, JSON.stringify(data)); setFromCache(false); toast.success('Done!') }
+      else { setResult(data); localStorage.setItem(LS_KEY_BRAIN, JSON.stringify(data)); setFromCache(false); setLastGenerated(null); toast.success('Done!') }
     } catch { setError('Backend se connect nahi ho paya.'); toast.error('Backend se connect nahi ho paya.') }
     setLoading(false)
   }
@@ -222,7 +240,7 @@ function MarketingBrain() {
     localStorage.removeItem(LS_KEY_BRAIN)
     localStorage.removeItem(LS_KEY_CAMPAIGN_KIT)
     localStorage.removeItem(LS_KEY_MEDIA_PLAN)
-    setResult(null); setFromCache(false)
+    setResult(null); setFromCache(false); setLastGenerated(null)
     setMediaPlan(null); setMediaError(null)
     setLaunchKit(null); setLaunchError(null)
     pushAdsRef.current?.resetPersisted()
@@ -538,7 +556,11 @@ function MarketingBrain() {
 
       {fromCache && (
         <div style={{ background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '7px', padding: '9px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>Showing previous result · Generate new report to refresh</p>
+          <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>
+            {lastGenerated
+              ? `Last generated: ${new Date(lastGenerated.endsWith('Z') || lastGenerated.includes('+') ? lastGenerated : lastGenerated + 'Z').toLocaleString()} · Saved report`
+              : 'Showing previous result · Generate new report to refresh'}
+          </p>
           <button onClick={clearBrainReport} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
         </div>
       )}
