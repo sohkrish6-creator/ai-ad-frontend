@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, Dna, Brain, Globe, Search,
-  Radio, Palette, Target, Users, Menu, X, PlaySquare, TrendingUp, Gift, Monitor, Eye, MessageSquare, BarChart2, Activity, Zap, Trophy, Crosshair, Antenna, Link2, Share2, Sparkles, Radar, Clock, Wand2, Layers,
+  Radio, Palette, Target, Users, Menu, X, PlaySquare, TrendingUp, Gift, Monitor, Eye, MessageSquare, BarChart2, Activity, Zap, Trophy, Crosshair, Antenna, Link2, Share2, Sparkles, Radar, Clock, Wand2,
 } from 'lucide-react'
 
 const GOLD = '#D4AF37'
@@ -18,8 +18,7 @@ const links = [
   { path: '/competitor',   label: 'Competitor',      Icon: Search          },
   { path: '/ad-intel',     label: 'Ad Intel',        Icon: Radio           },
   { path: '/ad-creative',  label: 'Ad Creative',     Icon: Palette         },
-  { path: '/creative-director', label: 'Creative Director', Icon: Wand2    },
-  { path: '/ad-to-creative', label: 'Ad Creatives', Icon: Layers          },
+  { path: '/creative-studio', label: 'Creative Studio', Icon: Wand2       },
   { path: '/audience',     label: 'Audience Finder', Icon: Target          },
   { path: '/leads',        label: 'Leads',           Icon: Users           },
   { path: '/youtube',      label: 'YouTube Intel',   Icon: PlaySquare      },

@@ -26,8 +26,7 @@ import MetaAdsTest from './MetaAdsTest'
 import SmartAnalysis from './SmartAnalysis'
 import SocialIntelligence from './SocialIntelligence'
 import History from './History'
-import CreativeDirector from './CreativeDirector'
-import AdToCreative from './AdToCreative'
+import CreativeStudio from './CreativeStudio'
 import Nav from './Nav'
 import { ToastProvider } from './ToastContext'
 import CommandPalette from './CommandPalette'
@@ -79,8 +78,9 @@ function Layout() {
           <Route path="/smart-analysis" element={<SmartAnalysis />} />
           <Route path="/social-intelligence" element={<SocialIntelligence />} />
           <Route path="/history" element={<History />} />
-          <Route path="/creative-director" element={<CreativeDirector />} />
-          <Route path="/ad-to-creative" element={<AdToCreative />} />
+          <Route path="/creative-studio" element={<CreativeStudio />} />
+          <Route path="/creative-director" element={<Navigate to="/creative-studio" replace />} />
+          <Route path="/ad-to-creative" element={<Navigate to="/creative-studio" replace />} />
         </Routes>
       </div>
     </div>
