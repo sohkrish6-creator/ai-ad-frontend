@@ -4,6 +4,7 @@ import CityInput, { getLastCity } from './CityInput'
 const LS_KEY_OFFER = 'adsoh_offer_result'
 import { Copy, Check, Gift, Zap, Tag, Star, ShieldCheck, MessageSquare, TrendingUp } from 'lucide-react'
 import { useToast } from './ToastContext'
+import { TrustBadge, ValidationWarningBanner } from './TrustLayer'
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 const GOLD    = '#D4AF37'
@@ -268,6 +269,9 @@ export default function OfferIntelligence() {
 
       {result && offer && (
         <div style={{ maxWidth: '820px' }}>
+
+          <ValidationWarningBanner message={result.validation_warning} />
+          <TrustBadge verdict={result.trust_verdict} basedOn={result.based_on} />
 
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', margin: '8px 0 20px' }}>

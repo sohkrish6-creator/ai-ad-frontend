@@ -4,6 +4,7 @@ import { Sparkles, CheckCircle, AlertCircle, ChevronDown, ChevronUp, ArrowRight,
 import { useToast } from './ToastContext'
 import PushToAdsSection from './PushToAdsSection'
 import CityInput, { getLastCity } from './CityInput'
+import { TrustBadge, ValidationWarningBanner } from './TrustLayer'
 
 const LS_KEY_SMART = 'adsoh_smart_analysis_result'
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
@@ -416,6 +417,9 @@ export default function SmartAnalysis() {
               <button onClick={clearResult} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
             </div>
           )}
+
+          <ValidationWarningBanner message={result.validation_warning} />
+          <TrustBadge verdict={result.trust_verdict} basedOn={result.based_on} />
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
             <div>

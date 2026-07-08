@@ -3,6 +3,7 @@ import { BarChart2, Copy, Check, Zap } from 'lucide-react'
 import { useToast } from './ToastContext'
 import CityInput, { getLastCity } from './CityInput'
 import { useLoadingSteps } from './useLoadingSteps'
+import { TrustBadge, ValidationWarningBanner } from './TrustLayer'
 
 const BACKEND  = 'https://ai-ad-backend-zhpj.onrender.com'
 const GOLD     = '#D4AF37'
@@ -267,6 +268,9 @@ export default function KPIEngine() {
       {/* Results */}
       {result && (
         <div style={{ maxWidth: '860px', width: '100%' }}>
+
+          <ValidationWarningBanner message={result.validation_warning} />
+          <TrustBadge verdict={result.trust_verdict} basedOn={result.based_on} />
 
           {/* Report header */}
           <div style={{ ...card, padding: '14px 20px', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>

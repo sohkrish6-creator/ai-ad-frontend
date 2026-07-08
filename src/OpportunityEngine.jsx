@@ -5,6 +5,7 @@ const LS_KEY_OPP = 'adsoh_opportunity_result'
 import { Copy, Check, Target, TrendingUp, Zap, Users, Tag, MapPin, ChartBar } from 'lucide-react'
 import { useToast } from './ToastContext'
 import { useLoadingSteps } from './useLoadingSteps'
+import { TrustBadge, ValidationWarningBanner } from './TrustLayer'
 
 const OPP_LOADING_STEPS = ['Loading business memory...', 'Finding best audience...', 'Calculating opportunity score...']
 
@@ -284,6 +285,9 @@ export default function OpportunityEngine() {
 
       {result && opp && (
         <div style={{ maxWidth: '820px' }}>
+
+          <ValidationWarningBanner message={result.validation_warning} />
+          <TrustBadge verdict={result.trust_verdict} basedOn={result.based_on} />
 
           {/* Header row */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', margin: '8px 0 20px' }}>
