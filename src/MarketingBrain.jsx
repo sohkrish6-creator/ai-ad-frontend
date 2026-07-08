@@ -8,6 +8,7 @@ import { Copy, Check, ExternalLink, Download, TrendingUp, Rocket, X, AlertTriang
 import { useToast } from './ToastContext'
 import { useLoadingSteps } from './useLoadingSteps'
 import PushToAdsSection from './PushToAdsSection'
+import { TrustBadge, ValidationWarningBanner } from './TrustLayer'
 
 const BRAIN_LOADING_STEPS = ['Reading website...', 'Researching market...', 'Analyzing competitors...', 'Building strategy...', 'Almost done...']
 
@@ -564,6 +565,9 @@ function MarketingBrain() {
           <button onClick={clearBrainReport} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
         </div>
       )}
+
+      <ValidationWarningBanner message={result.validation_warning} />
+      <TrustBadge verdict={result.trust_verdict} basedOn={result.based_on} />
 
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px', flexWrap: 'wrap', gap: '12px' }}>

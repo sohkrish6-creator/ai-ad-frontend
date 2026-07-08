@@ -6,6 +6,7 @@ import {
 import { useToast } from './ToastContext'
 import { useLoadingSteps } from './useLoadingSteps'
 import CityInput, { getLastCity } from './CityInput'
+import { TrustBadge, ValidationWarningBanner, NeedsMarketingBrainNotice } from './TrustLayer'
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 const GOLD    = '#D4AF37'
@@ -391,6 +392,10 @@ export default function CreativeStudio() {
               <button onClick={clearReport} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline' }}>Clear</button>
             </div>
           )}
+
+          <ValidationWarningBanner message={c.validation_warning} />
+          <TrustBadge verdict={c.trust_verdict} basedOn={c.based_on} />
+          <NeedsMarketingBrainNotice show={c.needs_marketing_brain} message={c.needs_marketing_brain_message} />
 
           <div style={{ ...card, padding: '18px', marginBottom: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
