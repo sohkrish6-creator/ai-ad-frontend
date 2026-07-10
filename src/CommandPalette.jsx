@@ -26,6 +26,7 @@ export const COMMAND_PALETTE_PAGES = [
   { label: 'AI Optimizer',       path: '/ai-optimizer' },
   { label: 'Result Center',      path: '/result-center' },
   { label: 'Prospects',          path: '/prospects' },
+  { label: 'Command Center',     path: '/command-center' },
 ]
 
 export default function CommandPalette() {

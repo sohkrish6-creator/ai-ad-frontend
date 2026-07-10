@@ -27,6 +27,7 @@ import SmartAnalysis from './SmartAnalysis'
 import SocialIntelligence from './SocialIntelligence'
 import History from './History'
 import CreativeStudio from './CreativeStudio'
+import CommandCenter from './CommandCenter'
 import Nav from './Nav'
 import { ToastProvider } from './ToastContext'
 import CommandPalette from './CommandPalette'
@@ -79,6 +80,7 @@ function Layout() {
           <Route path="/social-intelligence" element={<SocialIntelligence />} />
           <Route path="/history" element={<History />} />
           <Route path="/creative-studio" element={<CreativeStudio />} />
+          <Route path="/command-center" element={<CommandCenter />} />
           <Route path="/creative-director" element={<Navigate to="/creative-studio" replace />} />
           <Route path="/ad-to-creative" element={<Navigate to="/creative-studio" replace />} />
         </Routes>

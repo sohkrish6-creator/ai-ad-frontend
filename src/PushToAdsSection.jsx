@@ -9,6 +9,67 @@ const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 const inpSt2 = { width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #E5E5E5', background: '#FAFAFA', color: '#171717', fontSize: '13px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
 const lbl2   = { display: 'block', color: '#888', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '5px' }
 
+// Extracted so other pages (e.g. Command Center) can show the exact same
+// "campaign created" card for a Google Ads result without duplicating this
+// markup — same shape as gads_create_campaign's JSON response.
+export function GoogleCampaignSuccessCard({ result, onClose }) {
+  if (!result) return null
+  return (
+    <div style={{ textAlign: 'center' }}>
+      <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#F0FDF4', border: '2px solid #BBF7D0', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+        <span style={{ fontSize: '22px' }}>✅</span>
+      </div>
+      <p style={{ margin: '0 0 4px', fontSize: '16px', fontWeight: '700', color: '#166534' }}>Campaign Created!</p>
+      <p style={{ margin: '0 0 16px', fontSize: '12px', color: '#888' }}>Status: PAUSED — enable it in Google Ads when ready</p>
+      <div style={{ background: '#F9FAFB', borderRadius: '8px', padding: '14px', textAlign: 'left', marginBottom: '16px' }}>
+        <p style={{ margin: '0 0 5px', fontSize: '12px', color: '#888' }}><strong style={{ color: '#171717' }}>Campaign:</strong> {result.campaign_name}</p>
+        <p style={{ margin: '0 0 5px', fontSize: '12px', color: '#888' }}><strong style={{ color: '#171717' }}>Campaign ID:</strong> {result.campaign_id}</p>
+        <p style={{ margin: '0 0 5px', fontSize: '12px', color: '#888' }}><strong style={{ color: '#171717' }}>Ad Group ID:</strong> {result.ad_group_id}</p>
+        <p style={{ margin: '0', fontSize: '12px', color: '#888' }}><strong style={{ color: '#171717' }}>Keywords from memory:</strong> {result.keywords_added || 0}</p>
+      </div>
+      {!result.ad_created && result.ad_creation_error && (
+        <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '6px', padding: '10px 13px', marginBottom: '16px', textAlign: 'left' }}>
+          <p style={{ margin: '0 0 4px', fontSize: '12.5px', fontWeight: '600', color: '#92400E' }}>⚠ Campaign created but ad could not be created</p>
+          {Array.isArray(result.ad_creation_error.policy_violations) ? (
+            result.ad_creation_error.policy_violations.map((v, i) => (
+              <div key={i} style={{ background: '#FFF5F5', borderRadius: '4px', padding: '7px 9px', marginBottom: i < result.ad_creation_error.policy_violations.length - 1 ? '6px' : 0 }}>
+                <p style={{ margin: '0 0 3px', fontSize: '12px', fontWeight: '700', color: '#991B1B' }}>Policy: {v.topic}</p>
+                {v.offending_text && v.offending_text.length > 0 && (
+                  <p style={{ margin: '0 0 3px', fontSize: '11.5px', color: '#92400E' }}>Flagged text: "{v.offending_text.join('", "')}"</p>
+                )}
+                <p style={{ margin: 0, fontSize: '11.5px', color: '#92400E' }}>{v.explanation}</p>
+              </div>
+            ))
+          ) : Array.isArray(result.ad_creation_error.details) ? (
+            result.ad_creation_error.details.map((m, i) => (
+              <p key={i} style={{ margin: '0 0 2px', fontSize: '12px', color: '#92400E' }}>{m}</p>
+            ))
+          ) : Array.isArray(result.ad_creation_error) ? (
+            result.ad_creation_error.map((e, i) => (
+              <p key={i} style={{ margin: '0 0 2px', fontSize: '12px', color: '#92400E' }}>{e.message}{e.field ? ` (field: ${e.field})` : ''}</p>
+            ))
+          ) : (
+            <p style={{ margin: 0, fontSize: '12px', color: '#92400E' }}>
+              {typeof result.ad_creation_error === 'string' ? result.ad_creation_error : (result.ad_creation_error.error || 'Unknown reason.')}
+            </p>
+          )}
+          <p style={{ margin: '6px 0 0', fontSize: '11.5px', color: '#92400E', opacity: 0.85 }}>Add an ad manually in Google Ads, or fix the flagged text and regenerate the Campaign Launch Kit before pushing again.</p>
+        </div>
+      )}
+      {result.ad_created && result.ad_creation_error && result.ad_creation_error.retried && (
+        <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '6px', padding: '10px 13px', marginBottom: '16px', textAlign: 'left' }}>
+          <p style={{ margin: '0 0 4px', fontSize: '12.5px', fontWeight: '600', color: '#1E40AF' }}>ℹ Ad created with some assets removed</p>
+          <p style={{ margin: 0, fontSize: '11.5px', color: '#1E40AF' }}>{result.ad_creation_error.note}</p>
+        </div>
+      )}
+      <a href={result.google_ads_dashboard} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#34A853', color: '#fff', padding: '10px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', textDecoration: 'none', marginBottom: '10px' }}>
+        <ExternalLink size={13} /> Open in Google Ads
+      </a>
+      {onClose && (<><br /><button onClick={onClose} style={{ background: 'none', border: 'none', color: '#888', fontSize: '12px', cursor: 'pointer', marginTop: '6px' }}>Close</button></>)}
+    </div>
+  )
+}
+
 // Shared Push-to-Google-Ads / Push-to-Meta-Ads modal + logic, used by both
 // MarketingBrain.jsx and SmartAnalysis.jsx so the flow (and its persisted
 // result) is identical everywhere it appears. Exposes openGAds()/openMAds()
@@ -213,59 +274,7 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
                   </button>
                 </>
               ) : (
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#F0FDF4', border: '2px solid #BBF7D0', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
-                    <span style={{ fontSize: '22px' }}>✅</span>
-                  </div>
-                  <p style={{ margin: '0 0 4px', fontSize: '16px', fontWeight: '700', color: '#166534' }}>Campaign Created!</p>
-                  <p style={{ margin: '0 0 16px', fontSize: '12px', color: '#888' }}>Status: PAUSED — enable it in Google Ads when ready</p>
-                  <div style={{ background: '#F9FAFB', borderRadius: '8px', padding: '14px', textAlign: 'left', marginBottom: '16px' }}>
-                    <p style={{ margin: '0 0 5px', fontSize: '12px', color: '#888' }}><strong style={{ color: '#171717' }}>Campaign:</strong> {gAdsResult.campaign_name}</p>
-                    <p style={{ margin: '0 0 5px', fontSize: '12px', color: '#888' }}><strong style={{ color: '#171717' }}>Campaign ID:</strong> {gAdsResult.campaign_id}</p>
-                    <p style={{ margin: '0 0 5px', fontSize: '12px', color: '#888' }}><strong style={{ color: '#171717' }}>Ad Group ID:</strong> {gAdsResult.ad_group_id}</p>
-                    <p style={{ margin: '0', fontSize: '12px', color: '#888' }}><strong style={{ color: '#171717' }}>Keywords from memory:</strong> {gAdsResult.keywords_added || 0}</p>
-                  </div>
-                  {!gAdsResult.ad_created && gAdsResult.ad_creation_error && (
-                    <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '6px', padding: '10px 13px', marginBottom: '16px', textAlign: 'left' }}>
-                      <p style={{ margin: '0 0 4px', fontSize: '12.5px', fontWeight: '600', color: '#92400E' }}>⚠ Campaign created but ad could not be created</p>
-                      {Array.isArray(gAdsResult.ad_creation_error.policy_violations) ? (
-                        gAdsResult.ad_creation_error.policy_violations.map((v, i) => (
-                          <div key={i} style={{ background: '#FFF5F5', borderRadius: '4px', padding: '7px 9px', marginBottom: i < gAdsResult.ad_creation_error.policy_violations.length - 1 ? '6px' : 0 }}>
-                            <p style={{ margin: '0 0 3px', fontSize: '12px', fontWeight: '700', color: '#991B1B' }}>Policy: {v.topic}</p>
-                            {v.offending_text && v.offending_text.length > 0 && (
-                              <p style={{ margin: '0 0 3px', fontSize: '11.5px', color: '#92400E' }}>Flagged text: "{v.offending_text.join('", "')}"</p>
-                            )}
-                            <p style={{ margin: 0, fontSize: '11.5px', color: '#92400E' }}>{v.explanation}</p>
-                          </div>
-                        ))
-                      ) : Array.isArray(gAdsResult.ad_creation_error.details) ? (
-                        gAdsResult.ad_creation_error.details.map((m, i) => (
-                          <p key={i} style={{ margin: '0 0 2px', fontSize: '12px', color: '#92400E' }}>{m}</p>
-                        ))
-                      ) : Array.isArray(gAdsResult.ad_creation_error) ? (
-                        gAdsResult.ad_creation_error.map((e, i) => (
-                          <p key={i} style={{ margin: '0 0 2px', fontSize: '12px', color: '#92400E' }}>{e.message}{e.field ? ` (field: ${e.field})` : ''}</p>
-                        ))
-                      ) : (
-                        <p style={{ margin: 0, fontSize: '12px', color: '#92400E' }}>
-                          {typeof gAdsResult.ad_creation_error === 'string' ? gAdsResult.ad_creation_error : (gAdsResult.ad_creation_error.error || 'Unknown reason.')}
-                        </p>
-                      )}
-                      <p style={{ margin: '6px 0 0', fontSize: '11.5px', color: '#92400E', opacity: 0.85 }}>Add an ad manually in Google Ads, or fix the flagged text and regenerate the Campaign Launch Kit before pushing again.</p>
-                    </div>
-                  )}
-                  {gAdsResult.ad_created && gAdsResult.ad_creation_error && gAdsResult.ad_creation_error.retried && (
-                    <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '6px', padding: '10px 13px', marginBottom: '16px', textAlign: 'left' }}>
-                      <p style={{ margin: '0 0 4px', fontSize: '12.5px', fontWeight: '600', color: '#1E40AF' }}>ℹ Ad created with some assets removed</p>
-                      <p style={{ margin: 0, fontSize: '11.5px', color: '#1E40AF' }}>{gAdsResult.ad_creation_error.note}</p>
-                    </div>
-                  )}
-                  <a href={gAdsResult.google_ads_dashboard} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#34A853', color: '#fff', padding: '10px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', textDecoration: 'none', marginBottom: '10px' }}>
-                    <ExternalLink size={13} /> Open in Google Ads
-                  </a>
-                  <br />
-                  <button onClick={() => setShowGAdsModal(false)} style={{ background: 'none', border: 'none', color: '#888', fontSize: '12px', cursor: 'pointer', marginTop: '6px' }}>Close</button>
-                </div>
+                <GoogleCampaignSuccessCard result={gAdsResult} onClose={() => setShowGAdsModal(false)} />
               )}
             </div>
           </div>

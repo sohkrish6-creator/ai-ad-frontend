@@ -19,6 +19,7 @@ const links = [
   { path: '/ad-intel',     label: 'Ad Intel',        Icon: Radio           },
   { path: '/ad-creative',  label: 'Ad Creative',     Icon: Palette         },
   { path: '/creative-studio', label: 'Creative Studio', Icon: Wand2       },
+  { path: '/command-center', label: 'Command Center', Icon: MessageSquare },
   { path: '/audience',     label: 'Audience Finder', Icon: Target          },
   { path: '/leads',        label: 'Leads',           Icon: Users           },
   { path: '/youtube',      label: 'YouTube Intel',   Icon: PlaySquare      },

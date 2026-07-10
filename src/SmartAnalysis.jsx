@@ -53,7 +53,7 @@ const LOADING_STAGES = [
 // Walk an arbitrary nested result object and collect a few readable string
 // leaves as "top insights" — deliberately schema-agnostic since each
 // module's internal JSON shape can evolve independently of this page.
-function extractInsights(node, maxItems = 3, acc = []) {
+export function extractInsights(node, maxItems = 3, acc = []) {
   if (acc.length >= maxItems) return acc
   if (typeof node === 'string') {
     const t = node.trim()

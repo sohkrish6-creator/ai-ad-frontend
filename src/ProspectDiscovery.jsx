@@ -79,7 +79,7 @@ function buildHotCopyText(hotProspects) {
   ).join('\n---\n\n')
 }
 
-function ProspectCard({ p, isMobile, industry, city }) {
+export function ProspectCard({ p, isMobile, industry, city }) {
   const navigate = useNavigate()
 
   function openSocialAudit() {
