@@ -14,11 +14,10 @@ const card = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8
 
 const EXAMPLE_CHIPS = [
   'Find hotels in Jaipur',
-  'Audit my website: [url]',
-  'Launch ₹10000 campaign for [url]',
-  "What's trending in [industry] marketing",
-  'Hashtags for [url]',
-  'Reel script for [url]',
+  'Launch a ₹10,000 Google Ads campaign for [website URL]',
+  'Audit my website: [URL]',
+  "What's trending in [industry] marketing right now",
+  'Generate hashtags for [Instagram handle]',
 ]
 
 const INTENT_LABELS = {
@@ -535,7 +534,7 @@ export default function CommandCenter() {
           value={text}
           onChange={e => setText(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Tell me what you need... e.g. 'Skyweds ke liye sohscape.com hai, iska Google ad chalana hai budget 10000'"
+          placeholder="Tell me what you need... e.g. 'Launch a Google Ads campaign for [client website], budget ₹10,000' or 'Find hotels in Jaipur' or 'Generate hashtags for [Instagram handle]'"
           rows={3}
           style={{
             width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid #E5E5E5',
