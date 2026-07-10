@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MessageSquare, Send, Sparkles, AlertTriangle, ArrowRight, Copy, Check, Search, Clapperboard } from 'lucide-react'
+import { MessageSquare, Send, Sparkles, AlertTriangle, ArrowRight, Copy, Check, Search, Clapperboard, ChevronDown, ChevronUp } from 'lucide-react'
 import { useToast } from './ToastContext'
 import { ProspectCard } from './ProspectDiscovery'
 import { GoogleCampaignSuccessCard } from './PushToAdsSection'
@@ -25,9 +25,73 @@ const INTENT_LABELS = {
   full_report: 'Marketing Brain', prospect_discovery: 'Prospect Discovery', campaign_launch_kit: 'Campaign Launch Kit',
   ai_optimizer: 'AI Optimizer', opportunity_engine: 'Opportunity Engine', kpi_engine: 'KPI Engine',
   outreach_ai: 'Outreach AI', website_intelligence: 'Website Intelligence', offer_intelligence: 'Offer Intelligence',
-  autonomous_marketing: 'Autonomous Marketing', full_campaign_launch: 'Full Campaign Launch',
+  autonomous_marketing: 'Autonomous Marketing', full_campaign_launch: 'Full Campaign Launch (Google)',
   trend_research: 'Trend Research', hashtag_generation: 'Hashtags & Captions', ad_script_writing: 'Ad Script Writing',
-  market_query: 'Market Research', unknown: 'Unknown',
+  market_query: 'Market Research', creative_generation: 'Creative Generation', competitor_ad_finder: 'Competitor Ad Finder',
+  weekly_report: 'Weekly Report', meta_campaign_launch: 'Full Campaign Launch (Meta)', unknown: 'Unknown',
+}
+
+// Live step status -> icon glyph + color, shared by the Live Tasks Panel.
+const STEP_STATUS_STYLE = {
+  pending: { glyph: '○', color: '#BBB' },
+  running: { glyph: '◐', color: GOLD },
+  done:    { glyph: '✓', color: '#16A34A' },
+  error:   { glyph: '✕', color: '#DC2626' },
+}
+
+// Right-side (desktop) / inline (mobile) panel shown only while a
+// multi-step intent (full_report, full_campaign_launch, meta_campaign_launch,
+// autonomous_marketing) is actually running in the background — each row
+// reflects a REAL backend phase completing, polled from
+// GET /command/status/{task_id}, never a simulated progress bar. Collapsed
+// by default; click a completed/running step with detail to expand it.
+function TaskPanel({ task }) {
+  const [expanded, setExpanded] = useState({})
+  if (!task) return null
+  return (
+    <div style={{ ...card, padding: '16px', width: '100%', boxSizing: 'border-box' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+        <div style={{
+          width: '7px', height: '7px', borderRadius: '50%',
+          background: task.status === 'error' ? '#DC2626' : GOLD,
+          animation: task.status === 'running' ? 'pulse 1s ease-in-out infinite alternate' : 'none',
+          flexShrink: 0,
+        }} />
+        <p style={{ margin: 0, fontSize: '12.5px', fontWeight: '700', color: '#171717' }}>{INTENT_LABELS[task.intent] || task.intent}</p>
+      </div>
+      <p style={{ margin: '2px 0 12px', fontSize: '11px', color: '#999' }}>"{task.text}"</p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        {(task.steps || []).map(step => {
+          const isOpen = !!expanded[step.key]
+          const st = STEP_STATUS_STYLE[step.status] || STEP_STATUS_STYLE.pending
+          const hasDetail = step.detail != null
+          return (
+            <div key={step.key}>
+              <div
+                onClick={() => hasDetail && setExpanded(e => ({ ...e, [step.key]: !e[step.key] }))}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 8px', borderRadius: '6px',
+                  cursor: hasDetail ? 'pointer' : 'default',
+                  background: step.status === 'running' ? '#FFFDF5' : 'transparent',
+                }}
+              >
+                <span style={{ color: st.color, fontWeight: '700', fontSize: '12px', width: '13px', textAlign: 'center', flexShrink: 0 }}>{st.glyph}</span>
+                <span style={{ fontSize: '12px', color: step.status === 'pending' ? '#BBB' : '#171717', flex: 1, lineHeight: 1.4 }}>{step.label}</span>
+                {hasDetail && (isOpen ? <ChevronUp size={12} color="#BBB" /> : <ChevronDown size={12} color="#BBB" />)}
+              </div>
+              {isOpen && hasDetail && (
+                <div style={{ margin: '4px 0 6px 29px', padding: '8px 10px', background: '#FAFAFA', border: '1px solid #EEE', borderRadius: '6px', maxHeight: '220px', overflowY: 'auto' }}>
+                  <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'inherit', fontSize: '10.5px', color: '#666', lineHeight: 1.5 }}>
+                    {typeof step.detail === 'string' ? step.detail : JSON.stringify(step.detail, null, 2)}
+                  </pre>
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
 }
 
 function CopyBtn({ text, label = 'Copy' }) {
@@ -139,6 +203,33 @@ function CommandResultCard({ item, navigate }) {
                 ) : (
                   <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '12px 14px', color: '#BE123C', fontSize: '13px' }}>
                     {gads?.error || (Array.isArray(gads?.errors) ? gads.errors.map(e => e.message).join('; ') : 'Campaign creation failed — see backend logs.')}
+                  </div>
+                )}
+              </div>
+            )
+          })()}
+
+          {data.intent === 'meta_campaign_launch' && (() => {
+            const brain = data.result?.brain_result
+            const meta  = data.result?.meta_result
+            return (
+              <div>
+                {brain?.trust_verdict && <TrustBadge verdict={brain.trust_verdict} basedOn={brain.based_on} />}
+                {brain?.validation_warning && <ValidationWarningBanner message={brain.validation_warning} />}
+                {meta?.success ? (
+                  <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '7px', padding: '14px' }}>
+                    <p style={{ margin: '0 0 6px', fontSize: '13px', fontWeight: '700', color: '#166534' }}>✅ Meta Campaign Created — Status: PAUSED</p>
+                    <p style={{ margin: '0 0 4px', fontSize: '12px', color: '#166534' }}>Campaign ID: {meta.campaign_id} · Ad Set ID: {meta.adset_id}</p>
+                    {meta.action_needed && <p style={{ margin: '0 0 8px', fontSize: '12px', color: '#166534' }}>{meta.message}</p>}
+                    {meta.meta_ads_manager_link && (
+                      <a href={meta.meta_ads_manager_link} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#1877F2', color: '#fff', padding: '8px 16px', borderRadius: '7px', fontSize: '12.5px', fontWeight: '600', textDecoration: 'none' }}>
+                        <ArrowRight size={12} /> Open in Meta Ads Manager
+                      </a>
+                    )}
+                  </div>
+                ) : (
+                  <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '12px 14px', color: '#BE123C', fontSize: '13px' }}>
+                    {meta?.error || 'Campaign creation failed — see backend logs.'}
                   </div>
                 )}
               </div>
@@ -301,7 +392,7 @@ function CommandResultCard({ item, navigate }) {
             )
           })()}
 
-          {!['prospect_discovery', 'full_campaign_launch', 'trend_research', 'market_query', 'hashtag_generation', 'ad_script_writing'].includes(data.intent) && (() => {
+          {!['prospect_discovery', 'full_campaign_launch', 'meta_campaign_launch', 'trend_research', 'market_query', 'hashtag_generation', 'ad_script_writing'].includes(data.intent) && (() => {
             const insights = extractInsights(data.result, 4)
             return insights.length > 0 ? (
               <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
@@ -327,15 +418,55 @@ export default function CommandCenter() {
   const [text, setText]         = useState('')
   const [feed, setFeed]         = useState([])
   const [asking, setAsking]     = useState(false)
+  const [activeTask, setActiveTask] = useState(null) // { taskId, text, timestamp, intent, reasoning, paramsUsed, steps, status }
   const pendingContext = useRef(null) // carries url/industry/city/budget/goal forward across a "missing param" reply
+
+  // Live Tasks Panel: polls GET /command/status/{task_id} every 2s for the
+  // 4 multi-step intents until the backend actually finishes — every step
+  // status shown here reflects a real completed backend phase, never a
+  // simulated/fake progress animation. Runs once per task_id (not per
+  // status change) so it manages its own interval/cleanup correctly.
+  useEffect(() => {
+    if (!activeTask) return
+    let cancelled = false
+
+    async function poll() {
+      try {
+        const res = await fetch(`${BACKEND}/command/status/${activeTask.taskId}`)
+        const statusData = await res.json()
+        if (cancelled || !statusData.success) return
+        if (statusData.status === 'done' || statusData.status === 'error') {
+          const finalData = {
+            success: statusData.status === 'done',
+            intent: statusData.intent,
+            reasoning: statusData.reasoning,
+            params_used: statusData.params_used,
+            result: statusData.result,
+            ...(statusData.extra_fields || {}),
+          }
+          setFeed(f => [{ id: Date.now(), text: activeTask.text, status: 'done', data: finalData, timestamp: activeTask.timestamp }, ...f])
+          setActiveTask(null)
+          if (finalData.success) toast.success('Done!')
+          else toast.error('Something went wrong — see details in the result.')
+        } else {
+          setActiveTask(prev => prev ? { ...prev, steps: statusData.steps, status: statusData.status } : prev)
+        }
+      } catch {
+        // transient network hiccup — just try again on the next tick
+      }
+    }
+
+    poll()
+    const interval = setInterval(poll, 2000)
+    return () => { cancelled = true; clearInterval(interval) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTask?.taskId])
 
   async function handleAsk() {
     const trimmed = text.trim()
-    if (!trimmed || asking) return
+    if (!trimmed || asking || (activeTask && activeTask.status === 'running')) return
 
-    const id = Date.now()
     const timestamp = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
-    setFeed(f => [{ id, text: trimmed, status: 'loading', data: null, timestamp }, ...f])
     setText('')
     setAsking(true)
 
@@ -351,13 +482,22 @@ export default function CommandCenter() {
         }),
       })
       const data = await res.json()
-      pendingContext.current = (data.success === false && data.params_used) ? data.params_used : null
-      setFeed(f => f.map(item => item.id === id ? { ...item, status: 'done', data } : item))
-      if (data.success) toast.success('Done!')
-      else toast.error(data.error || 'Could not complete that.')
+
+      if (data.multi_step && data.task_id) {
+        pendingContext.current = null
+        setActiveTask({
+          taskId: data.task_id, text: trimmed, timestamp,
+          intent: data.intent, reasoning: data.reasoning, paramsUsed: data.params_used,
+          steps: [], status: 'running',
+        })
+      } else {
+        pendingContext.current = (data.success === false && data.params_used) ? data.params_used : null
+        setFeed(f => [{ id: Date.now(), text: trimmed, status: 'done', data, timestamp }, ...f])
+        if (data.success) toast.success('Done!')
+        else toast.error(data.error || 'Could not complete that.')
+      }
     } catch (e) {
-      pendingContext.current = null
-      setFeed(f => f.map(item => item.id === id ? { ...item, status: 'error', data: { error: `Backend se connect nahi ho paya: ${e.message}` } } : item))
+      setFeed(f => [{ id: Date.now(), text: trimmed, status: 'error', data: { error: `Backend se connect nahi ho paya: ${e.message}` }, timestamp }, ...f])
       toast.error('Backend se connect nahi ho paya.')
     }
     setAsking(false)
@@ -371,17 +511,17 @@ export default function CommandCenter() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAsk() }
   }
 
+  const busy = asking || (activeTask && activeTask.status === 'running')
+
   const page = {
     minHeight: '100vh', background: '#FAFAFA',
     padding: isMobile ? '28px 16px' : '40px 36px',
-    maxWidth: '820px', width: '100%', boxSizing: 'border-box',
+    maxWidth: activeTask ? '1160px' : '820px', width: '100%', boxSizing: 'border-box',
     fontFamily: '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif',
   }
 
-  return (
-    <div style={page}>
-      <style>{`@keyframes pulse { from { opacity: 0.4; } to { opacity: 1; } }`}</style>
-
+  const mainColumn = (
+    <div style={{ maxWidth: '820px', width: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
         <MessageSquare size={20} color={GOLD} />
         <h1 style={{ fontSize: '22px', fontWeight: '600', margin: 0, letterSpacing: '-0.4px' }}>Command Center</h1>
@@ -414,23 +554,39 @@ export default function CommandCenter() {
           ))}
         </div>
         <button
-          onClick={handleAsk} disabled={asking || !text.trim()}
+          onClick={handleAsk} disabled={busy || !text.trim()}
           style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%',
             padding: '12px', borderRadius: '8px', border: 'none', fontSize: '14px', fontWeight: '700',
-            cursor: (asking || !text.trim()) ? 'not-allowed' : 'pointer',
-            background: (asking || !text.trim()) ? '#E5C158' : GOLD, color: '#171717',
+            cursor: (busy || !text.trim()) ? 'not-allowed' : 'pointer',
+            background: (busy || !text.trim()) ? '#E5C158' : GOLD, color: '#171717',
           }}
         >
-          <Send size={14} /> {asking ? 'Asking...' : 'Ask'}
+          <Send size={14} /> {asking ? 'Asking...' : busy ? 'Working...' : 'Ask'}
         </button>
       </div>
+
+      {isMobile && activeTask && <div style={{ marginBottom: '14px' }}><TaskPanel task={activeTask} /></div>}
 
       {feed.length > 0 && (
         <div>
           {feed.map(item => <CommandResultCard key={item.id} item={item} navigate={navigate} />)}
         </div>
       )}
+    </div>
+  )
+
+  return (
+    <div style={page}>
+      <style>{`@keyframes pulse { from { opacity: 0.4; } to { opacity: 1; } }`}</style>
+      {activeTask && !isMobile ? (
+        <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+          {mainColumn}
+          <div style={{ width: '280px', flexShrink: 0, position: 'sticky', top: '20px' }}>
+            <TaskPanel task={activeTask} />
+          </div>
+        </div>
+      ) : mainColumn}
     </div>
   )
 }
