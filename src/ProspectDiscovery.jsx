@@ -4,16 +4,14 @@ import { Crosshair, Copy, Check, ExternalLink, Phone, MapPin, TrendingUp, Flame,
 import CityInput, { getLastCity } from './CityInput'
 import { useToast } from './ToastContext'
 import { useLoadingSteps } from './useLoadingSteps'
+import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
-const GOLD    = '#D4AF37'
 const LS_KEY  = 'adsoh_prospect_result'
 const SIE_PREFILL_LS_KEY = 'adsoh_social_intel_prefill'
 const PROSPECT_LOADING_STEPS = ['Scanning Google Maps...', 'Enriching business details...', 'Scoring prospects...']
 
-const card = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
-const lbl  = { display: 'block', color: '#999', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '7px' }
-const inp  = { width: '100%', padding: '10px 13px', borderRadius: '7px', border: '1px solid #E5E5E5', background: '#FAFAFA', color: '#171717', fontSize: '14px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
 
 const INDUSTRIES = [
   'Hospitality (Hotels, Restaurants, Cafes)', 'Schools & Education', 'Healthcare & Clinics',
@@ -45,7 +43,7 @@ function CopyBtn({ text, label = 'Copy' }) {
 
 function ClassBadge({ c }) {
   const map = {
-    hot:  { bg: '#FEF2F2', color: '#BE123C', border: '#FECDD3', icon: '🔥', label: 'Hot' },
+    hot:  { bg: '#FEF2F2', color: RED, border: '#FECDD3', icon: '🔥', label: 'Hot' },
     warm: { bg: '#FFFBEB', color: '#D97706', border: '#FDE68A', icon: '🌡️', label: 'Warm' },
     cold: { bg: '#EFF6FF', color: '#1D4ED8', border: '#BFDBFE', icon: '🧊', label: 'Cold' },
   }
@@ -57,7 +55,7 @@ function ScoreBar({ score }) {
   const color = score >= 75 ? '#BE123C' : score >= 50 ? '#D97706' : '#1D4ED8'
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-      <div style={{ flex: 1, height: '6px', borderRadius: '3px', background: '#F0F0F0', overflow: 'hidden' }}>
+      <div style={{ flex: 1, height: '6px', borderRadius: '3px', background: SLATE_L, overflow: 'hidden' }}>
         <div style={{ height: '100%', width: score + '%', background: color, borderRadius: '3px', transition: 'width 0.6s ease' }} />
       </div>
       <span style={{ fontSize: '12px', fontWeight: '700', color, minWidth: '28px' }}>{score}</span>
@@ -100,14 +98,14 @@ export function ProspectCard({ p, isMobile, industry, city }) {
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '3px' }}>
-            <p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: '#171717' }}>{p.name}</p>
+            <p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: BONE }}>{p.name}</p>
             <ClassBadge c={p.classification} />
             {p.google_rating && (
-              <span style={{ fontSize: '11px', color: '#888', fontWeight: '500' }}>⭐ {p.google_rating} ({p.total_reviews} reviews)</span>
+              <span style={{ fontSize: '11px', color: MUTED, fontWeight: '500' }}>⭐ {p.google_rating} ({p.total_reviews} reviews)</span>
             )}
           </div>
           {p.address && (
-            <p style={{ margin: 0, fontSize: '11px', color: '#888', display: 'flex', alignItems: 'center', gap: '3px' }}>
+            <p style={{ margin: 0, fontSize: '11px', color: MUTED, display: 'flex', alignItems: 'center', gap: '3px' }}>
               <MapPin size={10} /> {p.address}
             </p>
           )}
@@ -116,14 +114,14 @@ export function ProspectCard({ p, isMobile, industry, city }) {
 
       {/* Opportunity Score */}
       <div style={{ marginBottom: '10px' }}>
-        <p style={{ margin: '0 0 4px', fontSize: '10px', fontWeight: '700', color: '#999', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Opportunity Score</p>
+        <p style={{ margin: '0 0 4px', fontSize: '10px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Opportunity Score</p>
         <ScoreBar score={p.opportunity_score || 0} />
       </div>
 
       {/* Tags row */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px' }}>
         {p.weakness_found && (
-          <span style={{ padding: '3px 9px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', background: '#FEF2F2', color: '#BE123C', border: '1px solid #FECDD3' }}>
+          <span style={{ padding: '3px 9px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', background: '#FEF2F2', color: RED, border: '1px solid #FECDD3' }}>
             ❌ {p.weakness_found}
           </span>
         )}
@@ -141,9 +139,9 @@ export function ProspectCard({ p, isMobile, industry, city }) {
           { label: 'Expected LTV', value: p.expected_ltv },
           { label: 'Mktg Maturity', value: p.marketing_maturity },
         ].map(m => (
-          <div key={m.label} style={{ background: '#FAFAFA', borderRadius: '6px', padding: '8px 10px', border: '1px solid #F0F0F0' }}>
-            <p style={{ margin: '0 0 2px', fontSize: '10px', fontWeight: '700', color: '#999', textTransform: 'uppercase' }}>{m.label}</p>
-            <p style={{ margin: 0, fontSize: '12px', fontWeight: '600', color: '#171717', textTransform: 'capitalize' }}>{m.value || '—'}</p>
+          <div key={m.label} style={{ background: INK, borderRadius: '6px', padding: '8px 10px', border: '1px solid #F0F0F0' }}>
+            <p style={{ margin: '0 0 2px', fontSize: '10px', fontWeight: '700', color: MUTED, textTransform: 'uppercase' }}>{m.label}</p>
+            <p style={{ margin: 0, fontSize: '12px', fontWeight: '600', color: BONE, textTransform: 'capitalize' }}>{m.value || '—'}</p>
           </div>
         ))}
       </div>
@@ -151,8 +149,8 @@ export function ProspectCard({ p, isMobile, industry, city }) {
       {/* Why Contact */}
       {p.why_contact && (
         <div style={{ background: '#F9FAFB', borderRadius: '6px', padding: '9px 12px', marginBottom: '10px', border: '1px solid #F0F0F0' }}>
-          <p style={{ margin: '0 0 2px', fontSize: '10px', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Why Contact</p>
-          <p style={{ margin: 0, fontSize: '12.5px', color: '#333', lineHeight: '1.45' }}>{p.why_contact}</p>
+          <p style={{ margin: '0 0 2px', fontSize: '10px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Why Contact</p>
+          <p style={{ margin: 0, fontSize: '12.5px', color: BONE, lineHeight: '1.45' }}>{p.why_contact}</p>
         </div>
       )}
 
@@ -163,14 +161,14 @@ export function ProspectCard({ p, isMobile, industry, city }) {
             <p style={{ margin: 0, fontSize: '10px', fontWeight: '700', color: GOLD, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Suggested Opening Line</p>
             <CopyBtn text={p.suggested_opening_line} label="Copy" />
           </div>
-          <p style={{ margin: 0, fontSize: '12.5px', color: '#333', lineHeight: '1.5', fontStyle: 'italic' }}>"{p.suggested_opening_line}"</p>
+          <p style={{ margin: 0, fontSize: '12.5px', color: BONE, lineHeight: '1.5', fontStyle: 'italic' }}>"{p.suggested_opening_line}"</p>
         </div>
       )}
 
       {/* Footer row */}
       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
         {p.phone && (
-          <a href={'tel:' + p.phone} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#555', textDecoration: 'none', background: '#F5F5F5', border: '1px solid #E5E5E5', padding: '4px 10px', borderRadius: '5px' }}>
+          <a href={'tel:' + p.phone} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#555', textDecoration: 'none', background: SLATE_M, border: `1px solid ${SLATE_L}`, padding: '4px 10px', borderRadius: '5px' }}>
             <Phone size={11} /> {p.phone}
           </a>
         )}
@@ -209,7 +207,7 @@ export default function ProspectDiscovery() {
   const resolvedIndustry = industry === 'Other' ? industryOther : industry
 
   const page = {
-    minHeight: '100vh', background: '#FAFAFA',
+    minHeight: '100vh', background: INK,
     padding: isMobile ? '28px 16px' : '40px 36px',
     maxWidth: '960px', width: '100%', boxSizing: 'border-box',
     fontFamily: '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif',
@@ -247,7 +245,7 @@ export default function ProspectDiscovery() {
   const all  = d.prospects          || []
 
   const TABS = [
-    { key: 'hot',  label: '🔥 Hot',  count: hot.length,  color: '#BE123C', bg: '#FEF2F2',  border: '#FECDD3' },
+    { key: 'hot',  label: '🔥 Hot',  count: hot.length,  color: RED, bg: '#FEF2F2',  border: '#FECDD3' },
     { key: 'warm', label: '🌡️ Warm', count: warm.length, color: '#D97706', bg: '#FFFBEB',  border: '#FDE68A' },
     { key: 'cold', label: '🧊 Cold', count: cold.length, color: '#1D4ED8', bg: '#EFF6FF',  border: '#BFDBFE' },
   ]
@@ -261,12 +259,12 @@ export default function ProspectDiscovery() {
         <Crosshair size={20} color={GOLD} />
         <h1 style={{ fontSize: '22px', fontWeight: '600', margin: 0, letterSpacing: '-0.4px' }}>Prospect Discovery</h1>
       </div>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 28px' }}>Find real local businesses on Google Maps and score them as marketing agency prospects.</p>
+      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 28px' }}>Find real local businesses on Google Maps and score them as marketing agency prospects.</p>
 
       {/* Form */}
       <div style={{ maxWidth: '640px', width: '100%' }}>
         <div style={{ ...card, padding: isMobile ? '20px 16px' : '26px', marginBottom: '16px' }}>
-          {error && <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: '#BE123C', fontSize: '13px' }}>{error}</div>}
+          {error && <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: RED, fontSize: '13px' }}>{error}</div>}
 
           <div style={{ marginBottom: '14px' }}>
             <label style={lbl}>Industry <span style={{ color: '#DC2626', fontWeight: '700' }}>*</span></label>
@@ -324,7 +322,7 @@ export default function ProspectDiscovery() {
                 <span style={{ fontSize: '11px', fontWeight: '700', color: GOLD }}>{i + 1}</span>
               </div>
               <div style={{ flex: 1 }}>
-                <p style={{ margin: '0 0 5px', fontSize: '13px', fontWeight: '500', color: '#171717' }}>{label}</p>
+                <p style={{ margin: '0 0 5px', fontSize: '13px', fontWeight: '500', color: BONE }}>{label}</p>
                 <Shimmer h="8px" w="55%" />
               </div>
             </div>
@@ -334,9 +332,9 @@ export default function ProspectDiscovery() {
 
       {/* Cache banner */}
       {fromCache && result && !loading && (
-        <div style={{ maxWidth: '960px', width: '100%', background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '7px', padding: '9px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>Showing previous result · Scan again to refresh</p>
-          <button onClick={() => { localStorage.removeItem(LS_KEY); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
+        <div style={{ maxWidth: '960px', width: '100%', background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '9px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>Showing previous result · Scan again to refresh</p>
+          <button onClick={() => { localStorage.removeItem(LS_KEY); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: MUTED, textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
         </div>
       )}
 
@@ -347,8 +345,8 @@ export default function ProspectDiscovery() {
           {/* Report header */}
           <div style={{ ...card, padding: '12px 18px', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
             <div>
-              <p style={{ margin: 0, fontSize: '13px', fontWeight: '600', color: '#171717' }}>{d.industry} in {d.city}</p>
-              <p style={{ margin: '2px 0 0', fontSize: '11px', color: '#999' }}>
+              <p style={{ margin: 0, fontSize: '13px', fontWeight: '600', color: BONE }}>{d.industry} in {d.city}</p>
+              <p style={{ margin: '2px 0 0', fontSize: '11px', color: MUTED }}>
                 Query: "{d.search_query_used}" · Source: {d.data_source}
                 {result.google_places_used ? ' ✓' : ' (mock data — add GOOGLE_PLACES_API_KEY)'}
               </p>
@@ -359,13 +357,13 @@ export default function ProspectDiscovery() {
           {/* Summary bar */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '12px' }}>
             {[
-              { label: 'Total Found', value: d.total_found || all.length, color: '#171717' },
-              { label: '🔥 Hot',       value: hot.length,                 color: '#BE123C' },
+              { label: 'Total Found', value: d.total_found || all.length, color: BONE },
+              { label: '🔥 Hot',       value: hot.length,                 color: RED },
               { label: '🌡️ Warm',      value: warm.length,                color: '#D97706' },
               { label: '🧊 Cold',      value: cold.length,                color: '#1D4ED8' },
             ].map(m => (
               <div key={m.label} style={{ ...card, padding: '12px', textAlign: 'center' }}>
-                <p style={{ margin: '0 0 2px', fontSize: '10px', fontWeight: '700', color: '#999', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{m.label}</p>
+                <p style={{ margin: '0 0 2px', fontSize: '10px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{m.label}</p>
                 <p style={{ margin: 0, fontSize: '22px', fontWeight: '700', color: m.color }}>{m.value}</p>
               </div>
             ))}
@@ -378,7 +376,7 @@ export default function ProspectDiscovery() {
                 <TrendingUp size={14} color={GOLD} />
                 <p style={{ margin: 0, fontSize: '11px', fontWeight: '700', color: GOLD, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Top Opportunity</p>
               </div>
-              <p style={{ margin: 0, fontSize: '13.5px', color: '#333', lineHeight: '1.5' }}>{d.top_opportunity}</p>
+              <p style={{ margin: 0, fontSize: '13.5px', color: BONE, lineHeight: '1.5' }}>{d.top_opportunity}</p>
             </div>
           )}
 
@@ -404,7 +402,7 @@ export default function ProspectDiscovery() {
           {/* Prospect Cards */}
           {tabData.length === 0 ? (
             <div style={{ ...card, padding: '24px', textAlign: 'center' }}>
-              <p style={{ margin: 0, color: '#888', fontSize: '13px' }}>No {activeTab} prospects found in this scan.</p>
+              <p style={{ margin: 0, color: MUTED, fontSize: '13px' }}>No {activeTab} prospects found in this scan.</p>
             </div>
           ) : (
             tabData.map(p => <ProspectCard key={p.rank || p.name} p={p} isMobile={isMobile} industry={resolvedIndustry} city={city} />)

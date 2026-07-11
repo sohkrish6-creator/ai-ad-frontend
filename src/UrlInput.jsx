@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react'
+import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+
 
 const LS_KEY_ANALYZE = 'adsoh_analyze_result'
-const GOLD = '#D4AF37'
-const card = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
-const inputSt = { width: '100%', padding: '10px 13px', borderRadius: '7px', border: '1px solid #E5E5E5', background: '#FAFAFA', color: '#171717', fontSize: '14px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
-const lbl = { display: 'block', color: '#999', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '7px' }
 
 function UrlInput() {
   const [unlocked, setUnlocked] = useState(false)
@@ -115,15 +113,15 @@ function UrlInput() {
   }
 
   const isMobile = window.innerWidth < 768
-  const page = { minHeight: '100vh', background: '#FAFAFA', padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '820px', width: '100%', boxSizing: 'border-box' }
+  const page = { minHeight: '100vh', background: INK, padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '820px', width: '100%', boxSizing: 'border-box' }
 
   // Password Screen
   if (!unlocked) return (
-    <div style={{ minHeight: '100vh', background: '#FAFAFA', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px', boxSizing: 'border-box' }}>
+    <div style={{ minHeight: '100vh', background: INK, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px', boxSizing: 'border-box' }}>
       <div style={{ ...card, padding: '32px 24px', width: '100%', maxWidth: '320px', textAlign: 'center' }}>
-        <div style={{ width: '48px', height: '48px', background: '#F5F5F5', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px', fontSize: '22px' }}>🔐</div>
-        <h2 style={{ color: '#171717', fontSize: '16px', fontWeight: '600', margin: '0 0 6px' }}>AI Analyzer</h2>
-        <p style={{ color: '#999', fontSize: '13px', margin: '0 0 22px' }}>Access code daalo</p>
+        <div style={{ width: '48px', height: '48px', background: SLATE_M, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px', fontSize: '22px' }}>🔐</div>
+        <h2 style={{ color: BONE, fontSize: '16px', fontWeight: '600', margin: '0 0 6px' }}>AI Analyzer</h2>
+        <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 22px' }}>Access code daalo</p>
         <input type="password" value={accessCode} onChange={e => setAccessCode(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') { if (accessCode === 'sohscape2024') setUnlocked(true); else alert('Wrong access code!') } }}
           placeholder="••••••••" style={{ ...inputSt, marginBottom: '10px', textAlign: 'center' }} />
@@ -139,10 +137,10 @@ function UrlInput() {
   if (loading) return (
     <div style={page}>
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>AI Analyzer</h1>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 32px' }}>Analyzing website...</p>
+      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 32px' }}>Analyzing website...</p>
       <div style={{ ...card, padding: '40px', textAlign: 'center' }}>
-        <p style={{ color: '#666', fontSize: '14px', margin: '0 0 6px' }}>Website crawl ho rahi hai, strategy ban rahi hai...</p>
-        <p style={{ color: '#999', fontSize: '13px', margin: 0 }}>30–60 seconds lagenge</p>
+        <p style={{ color: MUTED, fontSize: '14px', margin: '0 0 6px' }}>Website crawl ho rahi hai, strategy ban rahi hai...</p>
+        <p style={{ color: MUTED, fontSize: '13px', margin: 0 }}>30–60 seconds lagenge</p>
       </div>
     </div>
   )
@@ -151,7 +149,7 @@ function UrlInput() {
   if (mismatch) return (
     <div style={page}>
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>AI Analyzer</h1>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 32px' }}>Category confirmation needed</p>
+      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 32px' }}>Category confirmation needed</p>
       <div style={{ maxWidth: '600px', width: '100%' }}>
         <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '8px', padding: '18px 20px', marginBottom: '20px', display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
           <span style={{ fontSize: '20px', flexShrink: 0 }}>⚠️</span>
@@ -175,7 +173,7 @@ function UrlInput() {
         {mismatch.evidence?.length > 0 && (
           <div style={{ ...card, padding: '16px', marginBottom: '20px' }}>
             <p style={{ ...lbl, marginBottom: '10px' }}>Website Evidence</p>
-            {mismatch.evidence.map((e, i) => <p key={i} style={{ margin: '0 0 5px', fontSize: '13px', color: '#666', lineHeight: '1.5' }}>• {e}</p>)}
+            {mismatch.evidence.map((e, i) => <p key={i} style={{ margin: '0 0 5px', fontSize: '13px', color: MUTED, lineHeight: '1.5' }}>• {e}</p>)}
           </div>
         )}
 
@@ -183,10 +181,10 @@ function UrlInput() {
           <button onClick={() => runAnalyze(mismatch.recommended_category)} style={{ width: '100%', padding: '13px', borderRadius: '8px', border: 'none', background: '#171717', color: '#fff', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
             Use AI Detected Category ({mismatch.recommended_category})
           </button>
-          <button onClick={() => runAnalyze(mismatch.selected_category)} style={{ width: '100%', padding: '13px', borderRadius: '8px', border: '1px solid #E5E5E5', background: 'transparent', color: '#666', fontSize: '14px', fontWeight: '500', cursor: 'pointer' }}>
+          <button onClick={() => runAnalyze(mismatch.selected_category)} style={{ width: '100%', padding: '13px', borderRadius: '8px', border: `1px solid ${SLATE_L}`, background: 'transparent', color: MUTED, fontSize: '14px', fontWeight: '500', cursor: 'pointer' }}>
             Keep My Selection ({mismatch.selected_category})
           </button>
-          <button onClick={() => setMismatch(null)} style={{ width: '100%', padding: '11px', borderRadius: '8px', border: 'none', background: 'transparent', color: '#999', fontSize: '13px', cursor: 'pointer' }}>
+          <button onClick={() => setMismatch(null)} style={{ width: '100%', padding: '11px', borderRadius: '8px', border: 'none', background: 'transparent', color: MUTED, fontSize: '13px', cursor: 'pointer' }}>
             ← Edit Inputs
           </button>
         </div>
@@ -200,21 +198,21 @@ function UrlInput() {
     return (
       <div style={page}>
         {fromCache && (
-          <div style={{ background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '7px', padding: '9px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>Showing previous result · Generate new report to refresh</p>
-            <button onClick={() => { localStorage.removeItem(LS_KEY_ANALYZE); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
+          <div style={{ background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '9px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>Showing previous result · Generate new report to refresh</p>
+            <button onClick={() => { localStorage.removeItem(LS_KEY_ANALYZE); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: MUTED, textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
           </div>
         )}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
             <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>AI Analyzer</h1>
-            <p style={{ color: '#999', fontSize: '13px', margin: 0 }}>{result.url}{result.detected_category ? ` · ${result.detected_category}` : ''}</p>
+            <p style={{ color: MUTED, fontSize: '13px', margin: 0 }}>{result.url}{result.detected_category ? ` · ${result.detected_category}` : ''}</p>
           </div>
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             <button onClick={downloadPDF} style={{ background: '#22C55E', border: 'none', color: '#fff', padding: '7px 16px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer', fontWeight: '600' }}>
               Download PDF
             </button>
-            <button onClick={() => { localStorage.removeItem(LS_KEY_ANALYZE); setResult(null); setFromCache(false) }} style={{ background: 'transparent', border: '1px solid #E5E5E5', color: '#666', padding: '7px 16px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
+            <button onClick={() => { localStorage.removeItem(LS_KEY_ANALYZE); setResult(null); setFromCache(false) }} style={{ background: 'transparent', border: `1px solid ${SLATE_L}`, color: MUTED, padding: '7px 16px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
               ← New Analysis
             </button>
           </div>
@@ -228,16 +226,16 @@ function UrlInput() {
             }
             if (line.match(/^\d+\./)) {
               return (
-                <div key={i} style={{ background: '#F9F9F9', border: '1px solid #EAEAEA', borderRadius: '7px', padding: '10px 14px', marginBottom: '7px', fontSize: '14px', color: '#171717', lineHeight: '1.5', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+                <div key={i} style={{ background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '10px 14px', marginBottom: '7px', fontSize: '14px', color: BONE, lineHeight: '1.5', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
                   <span>{line}</span>
                   <button onClick={() => { navigator.clipboard.writeText(line.replace(/^\d+\.\s*/, '')); setCopiedIndex(i); setTimeout(() => setCopiedIndex(null), 1500) }}
-                    style={{ background: copiedIndex === i ? '#22C55E' : '#F0F0F0', border: '1px solid #E5E5E5', color: copiedIndex === i ? '#fff' : '#666', padding: '4px 10px', borderRadius: '5px', fontSize: '11px', cursor: 'pointer', flexShrink: 0, fontWeight: '600' }}>
+                    style={{ background: copiedIndex === i ? '#22C55E' : '#F0F0F0', border: `1px solid ${SLATE_L}`, color: copiedIndex === i ? '#fff' : '#666', padding: '4px 10px', borderRadius: '5px', fontSize: '11px', cursor: 'pointer', flexShrink: 0, fontWeight: '600' }}>
                     {copiedIndex === i ? '✓' : 'Copy'}
                   </button>
                 </div>
               )
             }
-            if (line.trim()) return <p key={i} style={{ color: '#666', fontSize: '14px', lineHeight: '1.6', margin: '4px 0' }}>{line}</p>
+            if (line.trim()) return <p key={i} style={{ color: MUTED, fontSize: '14px', lineHeight: '1.6', margin: '4px 0' }}>{line}</p>
             return null
           })}
         </div>
@@ -249,11 +247,11 @@ function UrlInput() {
   return (
     <div style={page}>
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>AI Analyzer</h1>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 32px' }}>Apni website URL daalo — AI real strategy banayega</p>
+      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 32px' }}>Apni website URL daalo — AI real strategy banayega</p>
 
       <div style={{ maxWidth: '560px', width: '100%' }}>
         <div style={{ ...card, padding: isMobile ? '20px 16px' : '28px' }}>
-          {error && <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '20px', color: '#BE123C', fontSize: '13px' }}>{error}</div>}
+          {error && <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '20px', color: RED, fontSize: '13px' }}>{error}</div>}
 
           <div style={{ marginBottom: '18px' }}>
             <label style={lbl}>Website URL</label>
@@ -271,7 +269,7 @@ function UrlInput() {
           <div style={{ marginBottom: '18px' }}>
             <label style={lbl}>Monthly Ad Budget (₹)</label>
             <input type="number" value={budget} onChange={e => setBudget(e.target.value)} placeholder="10000" style={inputSt} />
-            {budget && <p style={{ color: '#999', fontSize: '12px', margin: '6px 0 0' }}>Daily budget: ₹{Math.round(parseInt(budget) / 30).toLocaleString()}</p>}
+            {budget && <p style={{ color: MUTED, fontSize: '12px', margin: '6px 0 0' }}>Daily budget: ₹{Math.round(parseInt(budget) / 30).toLocaleString()}</p>}
           </div>
 
           <div style={{ marginBottom: '28px' }}>

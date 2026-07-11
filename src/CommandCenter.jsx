@@ -6,11 +6,11 @@ import { ProspectCard } from './ProspectDiscovery'
 import { GoogleCampaignSuccessCard } from './PushToAdsSection'
 import { extractInsights } from './SmartAnalysis'
 import { TrustBadge, ValidationWarningBanner } from './TrustLayer'
+import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
-const GOLD    = '#D4AF37'
 
-const card = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
 
 const EXAMPLE_CHIPS = [
   'Find hotels in Jaipur',
@@ -32,9 +32,9 @@ const INTENT_LABELS = {
 
 // Live step status -> icon glyph + color, shared by the Live Tasks Panel.
 const STEP_STATUS_STYLE = {
-  pending: { glyph: '○', color: '#BBB' },
+  pending: { glyph: '○', color: MUTED },
   running: { glyph: '◐', color: GOLD },
-  done:    { glyph: '✓', color: '#16A34A' },
+  done:    { glyph: '✓', color: GREEN },
   error:   { glyph: '✕', color: '#DC2626' },
 }
 
@@ -56,9 +56,9 @@ function TaskPanel({ task }) {
           animation: task.status === 'running' ? 'pulse 1s ease-in-out infinite alternate' : 'none',
           flexShrink: 0,
         }} />
-        <p style={{ margin: 0, fontSize: '12.5px', fontWeight: '700', color: '#171717' }}>{INTENT_LABELS[task.intent] || task.intent}</p>
+        <p style={{ margin: 0, fontSize: '12.5px', fontWeight: '700', color: BONE }}>{INTENT_LABELS[task.intent] || task.intent}</p>
       </div>
-      <p style={{ margin: '2px 0 12px', fontSize: '11px', color: '#999' }}>"{task.text}"</p>
+      <p style={{ margin: '2px 0 12px', fontSize: '11px', color: MUTED }}>"{task.text}"</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
         {(task.steps || []).map(step => {
           const isOpen = !!expanded[step.key]
@@ -79,8 +79,8 @@ function TaskPanel({ task }) {
                 {hasDetail && (isOpen ? <ChevronUp size={12} color="#BBB" /> : <ChevronDown size={12} color="#BBB" />)}
               </div>
               {isOpen && hasDetail && (
-                <div style={{ margin: '4px 0 6px 29px', padding: '8px 10px', background: '#FAFAFA', border: '1px solid #EEE', borderRadius: '6px', maxHeight: '220px', overflowY: 'auto' }}>
-                  <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'inherit', fontSize: '10.5px', color: '#666', lineHeight: 1.5 }}>
+                <div style={{ margin: '4px 0 6px 29px', padding: '8px 10px', background: INK, border: '1px solid #EEE', borderRadius: '6px', maxHeight: '220px', overflowY: 'auto' }}>
+                  <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'inherit', fontSize: '10.5px', color: MUTED, lineHeight: 1.5 }}>
                     {typeof step.detail === 'string' ? step.detail : JSON.stringify(step.detail, null, 2)}
                   </pre>
                 </div>
@@ -131,8 +131,8 @@ function CommandResultCard({ item, navigate }) {
   return (
     <div style={{ ...card, padding: '18px 20px', marginBottom: '12px' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px', marginBottom: '10px' }}>
-        <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: '#171717', lineHeight: 1.5 }}>"{text}"</p>
-        <span style={{ fontSize: '11px', color: '#BBB', flexShrink: 0, whiteSpace: 'nowrap' }}>{timestamp}</span>
+        <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: BONE, lineHeight: 1.5 }}>"{text}"</p>
+        <span style={{ fontSize: '11px', color: MUTED, flexShrink: 0, whiteSpace: 'nowrap' }}>{timestamp}</span>
       </div>
 
       {status === 'loading' && (
@@ -143,7 +143,7 @@ function CommandResultCard({ item, navigate }) {
       )}
 
       {status === 'error' && (
-        <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', color: '#BE123C', fontSize: '13px' }}>
+        <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', color: RED, fontSize: '13px' }}>
           {data?.error || 'Something went wrong.'}
         </div>
       )}
@@ -157,7 +157,7 @@ function CommandResultCard({ item, navigate }) {
           {data.available_commands && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '10px' }}>
               {data.available_commands.map((c, i) => (
-                <span key={i} style={{ fontSize: '11.5px', color: '#666', background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '20px', padding: '4px 11px' }}>{c}</span>
+                <span key={i} style={{ fontSize: '11.5px', color: MUTED, background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '20px', padding: '4px 11px' }}>{c}</span>
               ))}
             </div>
           )}
@@ -169,8 +169,8 @@ function CommandResultCard({ item, navigate }) {
           {data.reasoning && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '12px' }}>
               <Sparkles size={13} color={GOLD} />
-              <p style={{ margin: 0, fontSize: '12.5px', color: '#888' }}>
-                Understood: <strong style={{ color: '#171717' }}>{INTENT_LABELS[data.intent] || data.intent}</strong> — {data.reasoning}
+              <p style={{ margin: 0, fontSize: '12.5px', color: MUTED }}>
+                Understood: <strong style={{ color: BONE }}>{INTENT_LABELS[data.intent] || data.intent}</strong> — {data.reasoning}
               </p>
             </div>
           )}
@@ -187,7 +187,7 @@ function CommandResultCard({ item, navigate }) {
                   View Full Report <ArrowRight size={12} />
                 </button>
               </div>
-            ) : <p style={{ margin: 0, fontSize: '13px', color: '#999' }}>No prospects found.</p>
+            ) : <p style={{ margin: 0, fontSize: '13px', color: MUTED }}>No prospects found.</p>
           })()}
 
           {data.intent === 'full_campaign_launch' && (() => {
@@ -200,7 +200,7 @@ function CommandResultCard({ item, navigate }) {
                 {gads?.success ? (
                   <GoogleCampaignSuccessCard result={gads} />
                 ) : (
-                  <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '12px 14px', color: '#BE123C', fontSize: '13px' }}>
+                  <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '7px', padding: '12px 14px', color: RED, fontSize: '13px' }}>
                     {gads?.error || (Array.isArray(gads?.errors) ? gads.errors.map(e => e.message).join('; ') : 'Campaign creation failed — see backend logs.')}
                   </div>
                 )}
@@ -216,7 +216,7 @@ function CommandResultCard({ item, navigate }) {
                 {brain?.trust_verdict && <TrustBadge verdict={brain.trust_verdict} basedOn={brain.based_on} />}
                 {brain?.validation_warning && <ValidationWarningBanner message={brain.validation_warning} />}
                 {meta?.success ? (
-                  <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '7px', padding: '14px' }}>
+                  <div style={{ background: 'rgba(63,166,107,0.1)', border: '1px solid #BBF7D0', borderRadius: '7px', padding: '14px' }}>
                     <p style={{ margin: '0 0 6px', fontSize: '13px', fontWeight: '700', color: '#166534' }}>✅ Meta Campaign Created — Status: PAUSED</p>
                     <p style={{ margin: '0 0 4px', fontSize: '12px', color: '#166534' }}>Campaign ID: {meta.campaign_id} · Ad Set ID: {meta.adset_id}</p>
                     {meta.action_needed && <p style={{ margin: '0 0 8px', fontSize: '12px', color: '#166534' }}>{meta.message}</p>}
@@ -227,7 +227,7 @@ function CommandResultCard({ item, navigate }) {
                     )}
                   </div>
                 ) : (
-                  <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '12px 14px', color: '#BE123C', fontSize: '13px' }}>
+                  <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '7px', padding: '12px 14px', color: RED, fontSize: '13px' }}>
                     {meta?.error || 'Campaign creation failed — see backend logs.'}
                   </div>
                 )}
@@ -250,7 +250,7 @@ function CommandResultCard({ item, navigate }) {
                   <>
                     {(r.trending_themes || []).length > 0 && (
                       <div style={{ marginBottom: '10px' }}>
-                        <p style={{ margin: '0 0 6px', fontSize: '11px', fontWeight: '700', color: '#999', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Trending Themes</p>
+                        <p style={{ margin: '0 0 6px', fontSize: '11px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Trending Themes</p>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                           {r.trending_themes.map((t, i) => <Tag key={i}>{t}</Tag>)}
                         </div>
@@ -258,7 +258,7 @@ function CommandResultCard({ item, navigate }) {
                     )}
                     {(r.trending_formats || []).length > 0 && (
                       <div style={{ marginBottom: '10px' }}>
-                        <p style={{ margin: '0 0 6px', fontSize: '11px', fontWeight: '700', color: '#999', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Trending Formats</p>
+                        <p style={{ margin: '0 0 6px', fontSize: '11px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Trending Formats</p>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                           {r.trending_formats.map((t, i) => <Tag key={i} color="#8A6D1D" bg="#FDF8EE" border="#E5DABB">{t}</Tag>)}
                         </div>
@@ -266,7 +266,7 @@ function CommandResultCard({ item, navigate }) {
                     )}
                     {(r.example_angles || []).length > 0 && (
                       <div style={{ marginBottom: '10px' }}>
-                        <p style={{ margin: '0 0 6px', fontSize: '11px', fontWeight: '700', color: '#999', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Real Example Angles</p>
+                        <p style={{ margin: '0 0 6px', fontSize: '11px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Real Example Angles</p>
                         <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
                           {r.example_angles.map((a, i) => (
                             <li key={i} style={{ fontSize: '13px', color: '#444', lineHeight: 1.6, marginBottom: '4px', paddingLeft: '14px', position: 'relative' }}>
@@ -278,14 +278,14 @@ function CommandResultCard({ item, navigate }) {
                     )}
                     {r.how_to_adapt && (
                       <div style={{ background: '#F9FAFB', border: '1px solid #F0F0F0', borderRadius: '7px', padding: '10px 13px', marginBottom: '10px' }}>
-                        <p style={{ margin: '0 0 3px', fontSize: '10.5px', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em' }}>How to Adapt</p>
-                        <p style={{ margin: 0, fontSize: '13px', color: '#333', lineHeight: 1.6 }}>{r.how_to_adapt}</p>
+                        <p style={{ margin: '0 0 3px', fontSize: '10.5px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.05em' }}>How to Adapt</p>
+                        <p style={{ margin: 0, fontSize: '13px', color: BONE, lineHeight: 1.6 }}>{r.how_to_adapt}</p>
                       </div>
                     )}
                   </>
                 ) : (
                   <>
-                    {r.answer && <p style={{ margin: '0 0 10px', fontSize: '13.5px', color: '#333', lineHeight: 1.6 }}>{r.answer}</p>}
+                    {r.answer && <p style={{ margin: '0 0 10px', fontSize: '13.5px', color: BONE, lineHeight: 1.6 }}>{r.answer}</p>}
                     {(r.key_findings || []).length > 0 && (
                       <ul style={{ margin: '0 0 10px', padding: 0, listStyle: 'none' }}>
                         {r.key_findings.map((f, i) => (
@@ -300,7 +300,7 @@ function CommandResultCard({ item, navigate }) {
                 {r.based_on && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px' }}>
                     <Search size={11} color="#999" />
-                    <p style={{ margin: 0, fontSize: '11px', color: '#999', fontStyle: 'italic' }}>{r.based_on}</p>
+                    <p style={{ margin: 0, fontSize: '11px', color: MUTED, fontStyle: 'italic' }}>{r.based_on}</p>
                   </div>
                 )}
               </div>
@@ -322,7 +322,7 @@ function CommandResultCard({ item, navigate }) {
                 )}
                 {buckets.map(({ key, label }) => (r.hashtags?.[key] || []).length > 0 && (
                   <div key={key} style={{ marginBottom: '10px' }}>
-                    <p style={{ margin: '0 0 6px', fontSize: '11px', fontWeight: '700', color: '#999', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</p>
+                    <p style={{ margin: '0 0 6px', fontSize: '11px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</p>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                       {r.hashtags[key].map((h, i) => <Tag key={i} color="#6366F1" bg="#EEF2FF" border="#C7D2FE">{h.startsWith('#') ? h : `#${h}`}</Tag>)}
                     </div>
@@ -335,10 +335,10 @@ function CommandResultCard({ item, navigate }) {
                 )}
                 {(r.captions || []).length > 0 && (
                   <div>
-                    <p style={{ margin: '0 0 6px', fontSize: '11px', fontWeight: '700', color: '#999', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Caption Ideas</p>
+                    <p style={{ margin: '0 0 6px', fontSize: '11px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Caption Ideas</p>
                     {r.captions.map((c, i) => (
-                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px', background: '#FAFAFA', border: '1px solid #EEE', borderRadius: '7px', padding: '9px 12px', marginBottom: '6px' }}>
-                        <p style={{ margin: 0, fontSize: '12.5px', color: '#333', lineHeight: 1.55 }}>{c}</p>
+                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px', background: INK, border: '1px solid #EEE', borderRadius: '7px', padding: '9px 12px', marginBottom: '6px' }}>
+                        <p style={{ margin: 0, fontSize: '12.5px', color: BONE, lineHeight: 1.55 }}>{c}</p>
                         <CopyBtn text={c} />
                       </div>
                     ))}
@@ -358,23 +358,23 @@ function CommandResultCard({ item, navigate }) {
                     {r.note}
                   </div>
                 )}
-                <div style={{ background: '#FAFAFA', border: '1px solid #EEE', borderRadius: '7px', padding: '14px', marginBottom: '10px' }}>
+                <div style={{ background: INK, border: '1px solid #EEE', borderRadius: '7px', padding: '14px', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', marginBottom: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
                       <Clapperboard size={14} color={GOLD} />
-                      {r.format_suggestion && <span style={{ fontSize: '11.5px', color: '#888' }}>{r.format_suggestion}</span>}
+                      {r.format_suggestion && <span style={{ fontSize: '11.5px', color: MUTED }}>{r.format_suggestion}</span>}
                     </div>
                     <CopyBtn text={fullScript} label="Copy Script" />
                   </div>
                   {r.hook && (
                     <div style={{ marginBottom: '10px' }}>
                       <p style={{ margin: '0 0 3px', fontSize: '10px', fontWeight: '700', color: GOLD, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Hook</p>
-                      <p style={{ margin: 0, fontSize: '13.5px', color: '#171717', fontWeight: '600', lineHeight: 1.5 }}>{r.hook}</p>
+                      <p style={{ margin: 0, fontSize: '13.5px', color: BONE, fontWeight: '600', lineHeight: 1.5 }}>{r.hook}</p>
                     </div>
                   )}
                   {(r.body || []).length > 0 && (
                     <div style={{ marginBottom: '10px' }}>
-                      <p style={{ margin: '0 0 5px', fontSize: '10px', fontWeight: '700', color: '#999', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Body</p>
+                      <p style={{ margin: '0 0 5px', fontSize: '10px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Body</p>
                       {r.body.map((b, i) => (
                         <p key={i} style={{ margin: '0 0 4px', fontSize: '12.5px', color: '#444', lineHeight: 1.6 }}>{i + 1}. {b}</p>
                       ))}
@@ -382,8 +382,8 @@ function CommandResultCard({ item, navigate }) {
                   )}
                   {r.cta && (
                     <div>
-                      <p style={{ margin: '0 0 3px', fontSize: '10px', fontWeight: '700', color: '#999', textTransform: 'uppercase', letterSpacing: '0.06em' }}>CTA</p>
-                      <p style={{ margin: 0, fontSize: '13px', color: '#171717', fontWeight: '600' }}>{r.cta}</p>
+                      <p style={{ margin: '0 0 3px', fontSize: '10px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.06em' }}>CTA</p>
+                      <p style={{ margin: 0, fontSize: '13px', color: BONE, fontWeight: '600' }}>{r.cta}</p>
                     </div>
                   )}
                 </div>
@@ -401,7 +401,7 @@ function CommandResultCard({ item, navigate }) {
                   </li>
                 ))}
               </ul>
-            ) : <p style={{ margin: 0, fontSize: '13px', color: '#999' }}>Done — no summary text available.</p>
+            ) : <p style={{ margin: 0, fontSize: '13px', color: MUTED }}>Done — no summary text available.</p>
           })()}
         </div>
       )}
@@ -513,7 +513,7 @@ export default function CommandCenter() {
   const busy = asking || (activeTask && activeTask.status === 'running')
 
   const page = {
-    minHeight: '100vh', background: '#FAFAFA',
+    minHeight: '100vh', background: INK,
     padding: isMobile ? '28px 16px' : '40px 36px',
     maxWidth: activeTask ? '1160px' : '820px', width: '100%', boxSizing: 'border-box',
     fontFamily: '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif',
@@ -525,7 +525,7 @@ export default function CommandCenter() {
         <MessageSquare size={20} color={GOLD} />
         <h1 style={{ fontSize: '22px', fontWeight: '600', margin: 0, letterSpacing: '-0.4px' }}>Command Center</h1>
       </div>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 24px' }}>
+      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 24px' }}>
         Tell it what you need in plain language — it figures out which engine to run.
       </p>
 
@@ -537,8 +537,8 @@ export default function CommandCenter() {
           placeholder="Tell me what you need... e.g. 'Launch a Google Ads campaign for [client website], budget ₹10,000' or 'Find hotels in Jaipur' or 'Generate hashtags for [Instagram handle]'"
           rows={3}
           style={{
-            width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid #E5E5E5',
-            background: '#FAFAFA', color: '#171717', fontSize: '14px', boxSizing: 'border-box',
+            width: '100%', padding: '12px 14px', borderRadius: '8px', border: `1px solid ${SLATE_L}`,
+            background: INK, color: BONE, fontSize: '14px', boxSizing: 'border-box',
             outline: 'none', fontFamily: 'inherit', resize: 'vertical', marginBottom: '10px',
           }}
         />
@@ -546,7 +546,7 @@ export default function CommandCenter() {
           {EXAMPLE_CHIPS.map((chip, i) => (
             <button
               key={i} onClick={() => handleChipClick(chip)}
-              style={{ fontSize: '11.5px', color: '#666', background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '20px', padding: '5px 12px', cursor: 'pointer', fontFamily: 'inherit' }}
+              style={{ fontSize: '11.5px', color: MUTED, background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '20px', padding: '5px 12px', cursor: 'pointer', fontFamily: 'inherit' }}
             >
               {chip}
             </button>
@@ -558,7 +558,7 @@ export default function CommandCenter() {
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%',
             padding: '12px', borderRadius: '8px', border: 'none', fontSize: '14px', fontWeight: '700',
             cursor: (busy || !text.trim()) ? 'not-allowed' : 'pointer',
-            background: (busy || !text.trim()) ? '#E5C158' : GOLD, color: '#171717',
+            background: (busy || !text.trim()) ? '#E5C158' : GOLD, color: BONE,
           }}
         >
           <Send size={14} /> {asking ? 'Asking...' : busy ? 'Working...' : 'Ask'}

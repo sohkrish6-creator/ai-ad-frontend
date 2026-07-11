@@ -1,16 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { Link2, CheckCircle, RefreshCw, ChevronRight, AlertCircle } from 'lucide-react'
+import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
-const GOLD = '#D4AF37'
-
-const card = {
-  background: '#fff',
-  border: '1px solid #EAEAEA',
-  borderRadius: '8px',
-  boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-}
 
 function Skeleton({ w = '100%', h = '16px', radius = '4px', style = {} }) {
   return <div className="skeleton" style={{ width: w, height: h, borderRadius: radius, flexShrink: 0, ...style }} />
@@ -18,7 +12,7 @@ function Skeleton({ w = '100%', h = '16px', radius = '4px', style = {} }) {
 
 function ProgressBar({ pct }) {
   return (
-    <div style={{ background: '#F0F0F0', borderRadius: '999px', height: '8px', overflow: 'hidden' }}>
+    <div style={{ background: SLATE_L, borderRadius: '999px', height: '8px', overflow: 'hidden' }}>
       <div style={{
         width: `${Math.max(0, Math.min(100, pct))}%`, height: '100%',
         background: `linear-gradient(90deg, ${GOLD}, #E8C84A)`,
@@ -153,9 +147,9 @@ export default function GoogleAdsConnect() {
       <div style={{ maxWidth: '760px', margin: '0 auto', padding: '36px 20px 60px', fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
           <Link2 size={20} color={GOLD} />
-          <h1 style={{ fontSize: '22px', fontWeight: '700', color: '#171717', margin: 0, letterSpacing: '-0.5px' }}>Google Ads Account Import</h1>
+          <h1 style={{ fontSize: '22px', fontWeight: '700', color: BONE, margin: 0, letterSpacing: '-0.5px' }}>Google Ads Account Import</h1>
         </div>
-        <p style={{ fontSize: '13px', color: '#999', margin: '0 0 24px' }}>
+        <p style={{ fontSize: '13px', color: MUTED, margin: '0 0 24px' }}>
           Connect a Google Ads account via OAuth, pick which account to import, and pull 12 months of performance data into AdSoh.
         </p>
 
@@ -173,18 +167,18 @@ export default function GoogleAdsConnect() {
 
         {/* Connection status / connect button */}
         <div style={{ ...card, padding: '22px 20px', marginBottom: '20px' }}>
-          <p style={{ fontSize: '11px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.07em', color: '#999', margin: '0 0 14px' }}>
+          <p style={{ fontSize: '11px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.07em', color: MUTED, margin: '0 0 14px' }}>
             Connection
           </p>
           {accountsLoading ? (
             <Skeleton w="60%" h="20px" />
           ) : connected === false ? (
             <div>
-              <p style={{ fontSize: '13px', color: '#666', margin: '0 0 14px' }}>
+              <p style={{ fontSize: '13px', color: MUTED, margin: '0 0 14px' }}>
                 No Google account connected yet. You'll be redirected to Google to sign in and grant access — never enter a Google password here.
               </p>
               <button onClick={handleConnect} style={{
-                background: GOLD, color: '#171717', border: 'none', borderRadius: '7px',
+                background: GOLD, color: BONE, border: 'none', borderRadius: '7px',
                 padding: '11px 22px', fontSize: '13px', fontWeight: '700', cursor: 'pointer',
                 display: 'inline-flex', alignItems: 'center', gap: '8px',
               }}>
@@ -194,17 +188,17 @@ export default function GoogleAdsConnect() {
           ) : connected === true ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <CheckCircle size={14} color="#16A34A" />
-              <p style={{ margin: 0, fontSize: '13px', color: '#171717', fontWeight: '600' }}>Connected</p>
+              <p style={{ margin: 0, fontSize: '13px', color: BONE, fontWeight: '600' }}>Connected</p>
               <button onClick={handleConnect} style={{
-                marginLeft: 'auto', background: 'transparent', border: '1px solid #E5E5E5', borderRadius: '6px',
-                padding: '5px 12px', fontSize: '12px', color: '#999', cursor: 'pointer',
+                marginLeft: 'auto', background: 'transparent', border: `1px solid ${SLATE_L}`, borderRadius: '6px',
+                padding: '5px 12px', fontSize: '12px', color: MUTED, cursor: 'pointer',
               }}>Reconnect</button>
             </div>
           ) : (
             <div>
-              <p style={{ fontSize: '13px', color: '#BE123C', margin: '0 0 14px' }}>{accountsError || 'Could not determine connection status.'}</p>
+              <p style={{ fontSize: '13px', color: RED, margin: '0 0 14px' }}>{accountsError || 'Could not determine connection status.'}</p>
               <button onClick={handleConnect} style={{
-                background: GOLD, color: '#171717', border: 'none', borderRadius: '7px',
+                background: GOLD, color: BONE, border: 'none', borderRadius: '7px',
                 padding: '11px 22px', fontSize: '13px', fontWeight: '700', cursor: 'pointer',
                 display: 'inline-flex', alignItems: 'center', gap: '8px',
               }}>
@@ -218,12 +212,12 @@ export default function GoogleAdsConnect() {
         {connected === true && (
           <div style={{ ...card, padding: '22px 20px', marginBottom: '20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-              <p style={{ fontSize: '11px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.07em', color: '#999', margin: 0 }}>
+              <p style={{ fontSize: '11px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.07em', color: MUTED, margin: 0 }}>
                 Ad Accounts
               </p>
               <button onClick={loadAccounts} disabled={accountsLoading} style={{
                 display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '5px',
-                border: '1px solid #E5E5E5', background: 'transparent', cursor: 'pointer', color: '#999', fontSize: '11px',
+                border: `1px solid ${SLATE_L}`, background: 'transparent', cursor: 'pointer', color: MUTED, fontSize: '11px',
               }}>
                 <RefreshCw size={11} className={accountsLoading ? 'spin' : ''} /> Refresh
               </button>
@@ -235,9 +229,9 @@ export default function GoogleAdsConnect() {
                 <Skeleton h="46px" />
               </>
             ) : accountsError ? (
-              <p style={{ fontSize: '13px', color: '#BE123C', margin: 0 }}>{accountsError}</p>
+              <p style={{ fontSize: '13px', color: RED, margin: 0 }}>{accountsError}</p>
             ) : accounts.length === 0 ? (
-              <p style={{ fontSize: '13px', color: '#999', margin: 0 }}>No ad accounts found for this Google login.</p>
+              <p style={{ fontSize: '13px', color: MUTED, margin: 0 }}>No ad accounts found for this Google login.</p>
             ) : (
               accounts.map((a) => (
                 <div key={a.customer_id} className="gads-account-row" style={{
@@ -248,10 +242,10 @@ export default function GoogleAdsConnect() {
                   marginBottom: '8px', transition: 'background 0.15s ease',
                 }}>
                   <div>
-                    <p style={{ margin: '0 0 2px', fontSize: '13px', fontWeight: '600', color: '#171717' }}>
+                    <p style={{ margin: '0 0 2px', fontSize: '13px', fontWeight: '600', color: BONE }}>
                       {a.account_name || `Account ${a.customer_id}`}
                     </p>
-                    <p style={{ margin: 0, fontSize: '11px', color: '#999' }}>{a.customer_id}</p>
+                    <p style={{ margin: 0, fontSize: '11px', color: MUTED }}>{a.customer_id}</p>
                   </div>
                   {a.selected ? (
                     <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', fontWeight: '700', color: GOLD, textTransform: 'uppercase' }}>
@@ -262,8 +256,8 @@ export default function GoogleAdsConnect() {
                       onClick={() => handleSelect(a.customer_id)}
                       disabled={selectingCid === a.customer_id}
                       style={{
-                        background: 'transparent', border: '1px solid #E5E5E5', borderRadius: '6px',
-                        padding: '6px 14px', fontSize: '12px', fontWeight: '600', color: '#171717', cursor: 'pointer',
+                        background: 'transparent', border: `1px solid ${SLATE_L}`, borderRadius: '6px',
+                        padding: '6px 14px', fontSize: '12px', fontWeight: '600', color: BONE, cursor: 'pointer',
                       }}
                     >
                       {selectingCid === a.customer_id ? 'Selecting…' : 'Select'}
@@ -278,7 +272,7 @@ export default function GoogleAdsConnect() {
         {/* Import trigger + progress */}
         {connected === true && selectedAccount && (
           <div style={{ ...card, padding: '22px 20px', marginBottom: '20px' }}>
-            <p style={{ fontSize: '11px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.07em', color: '#999', margin: '0 0 14px' }}>
+            <p style={{ fontSize: '11px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.07em', color: MUTED, margin: '0 0 14px' }}>
               Import — Last 12 Months
             </p>
 
@@ -287,7 +281,7 @@ export default function GoogleAdsConnect() {
                 onClick={() => handleImport(false)}
                 disabled={importStarting}
                 style={{
-                  background: GOLD, color: '#171717', border: 'none', borderRadius: '7px',
+                  background: GOLD, color: BONE, border: 'none', borderRadius: '7px',
                   padding: '11px 22px', fontSize: '13px', fontWeight: '700', cursor: 'pointer',
                 }}
               >
@@ -298,29 +292,29 @@ export default function GoogleAdsConnect() {
             {jobStatus && (
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <p style={{ margin: 0, fontSize: '13px', color: '#171717', fontWeight: '600' }}>
+                  <p style={{ margin: 0, fontSize: '13px', color: BONE, fontWeight: '600' }}>
                     {jobStatus.current_step || jobStatus.status}
                   </p>
-                  <p style={{ margin: 0, fontSize: '13px', color: '#999' }}>{jobStatus.progress_pct ?? 0}%</p>
+                  <p style={{ margin: 0, fontSize: '13px', color: MUTED }}>{jobStatus.progress_pct ?? 0}%</p>
                 </div>
                 <ProgressBar pct={jobStatus.progress_pct ?? 0} />
 
                 {jobRunning && (
-                  <p style={{ fontSize: '12px', color: '#999', margin: '10px 0 0' }}>
+                  <p style={{ fontSize: '12px', color: MUTED, margin: '10px 0 0' }}>
                     {jobStatus.stale ? 'This import may be stuck — try refresh below.' : 'Importing… this can take a few minutes for large accounts.'}
                   </p>
                 )}
 
                 {jobFailed && (
-                  <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '6px', padding: '10px 14px', marginTop: '10px' }}>
-                    <p style={{ margin: 0, fontSize: '13px', color: '#BE123C' }}>{jobStatus.error || 'Import failed.'}</p>
+                  <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '6px', padding: '10px 14px', marginTop: '10px' }}>
+                    <p style={{ margin: 0, fontSize: '13px', color: RED }}>{jobStatus.error || 'Import failed.'}</p>
                   </div>
                 )}
 
                 {jobDone && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '14px' }}>
                     <CheckCircle size={14} color="#16A34A" />
-                    <p style={{ margin: 0, fontSize: '13px', color: '#171717' }}>Import complete.</p>
+                    <p style={{ margin: 0, fontSize: '13px', color: BONE }}>Import complete.</p>
                     <button
                       onClick={() => navigate('/google-ads/dashboard')}
                       style={{
@@ -339,8 +333,8 @@ export default function GoogleAdsConnect() {
                     onClick={() => handleImport(true)}
                     disabled={importStarting}
                     style={{
-                      marginTop: '14px', background: 'transparent', border: '1px solid #E5E5E5', borderRadius: '6px',
-                      padding: '8px 16px', fontSize: '12px', fontWeight: '600', color: '#171717', cursor: 'pointer',
+                      marginTop: '14px', background: 'transparent', border: `1px solid ${SLATE_L}`, borderRadius: '6px',
+                      padding: '8px 16px', fontSize: '12px', fontWeight: '600', color: BONE, cursor: 'pointer',
                     }}
                   >
                     {importStarting ? 'Starting…' : 'Refresh Import'}

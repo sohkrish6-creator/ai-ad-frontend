@@ -3,13 +3,11 @@ import CityInput, { getLastCity } from './CityInput'
 
 const LS_KEY_VIS = 'adsoh_visibility_result'
 import { Eye, Copy, Check, ChevronDown, ChevronUp, Zap, Search, Bot, MapPin, FileText } from 'lucide-react'
+import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
-const GOLD    = '#D4AF37'
 
-const card = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
-const lbl  = { display: 'block', color: '#999', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '7px' }
-const inp  = { width: '100%', padding: '10px 13px', borderRadius: '7px', border: '1px solid #E5E5E5', background: '#FAFAFA', color: '#171717', fontSize: '14px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
 
 const INDUSTRIES = [
   'Hospitality (Hotels, Restaurants, Cafes)', 'Schools & Education', 'Healthcare & Clinics',
@@ -67,7 +65,7 @@ function SectionCard({ title, icon: Icon, iconColor, score, children, expanded, 
             <Icon size={15} color={scoreColor(score)} />
           </div>
           <div>
-            <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: '#171717' }}>{title}</p>
+            <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: BONE }}>{title}</p>
             <p style={{ margin: '1px 0 0', fontSize: '12px', color: scoreColor(score), fontWeight: '600' }}>{score}/100</p>
           </div>
         </div>
@@ -83,7 +81,7 @@ function SectionCard({ title, icon: Icon, iconColor, score, children, expanded, 
 }
 
 function Label({ children }) {
-  return <p style={{ margin: '14px 0 6px', fontSize: '11px', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{children}</p>
+  return <p style={{ margin: '14px 0 6px', fontSize: '11px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{children}</p>
 }
 
 function BulletList({ items, color = '#444' }) {
@@ -181,7 +179,7 @@ export default function VisibilityIntelligence() {
   const resolvedIndustry = industry === 'Other' ? industryOther : industry
 
   const page = {
-    minHeight: '100vh', background: '#FAFAFA',
+    minHeight: '100vh', background: INK,
     padding: isMobile ? '28px 16px' : '40px 36px',
     maxWidth: '880px', width: '100%', boxSizing: 'border-box',
     fontFamily: '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif',
@@ -213,12 +211,12 @@ export default function VisibilityIntelligence() {
         <Eye size={20} color={GOLD} />
         <h1 style={{ fontSize: '22px', fontWeight: '600', margin: 0, letterSpacing: '-0.4px' }}>Visibility Intelligence</h1>
       </div>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 28px' }}>SEO · AEO · GEO — full-spectrum visibility audit grounded in your actual site content + live keyword data.</p>
+      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 28px' }}>SEO · AEO · GEO — full-spectrum visibility audit grounded in your actual site content + live keyword data.</p>
 
       {/* Input */}
       <div style={{ maxWidth: '640px', width: '100%' }}>
         <div style={{ ...card, padding: isMobile ? '20px 16px' : '26px', marginBottom: '16px' }}>
-          {error && <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: '#BE123C', fontSize: '13px' }}>{error}</div>}
+          {error && <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: RED, fontSize: '13px' }}>{error}</div>}
 
           <div style={{ marginBottom: '14px' }}>
             <label style={lbl}>Website URL <span style={{ color: '#DC2626' }}>*</span></label>
@@ -227,7 +225,7 @@ export default function VisibilityIntelligence() {
 
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
             <div>
-              <label style={lbl}>Industry <span style={{ color: '#BBB', fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
+              <label style={lbl}>Industry <span style={{ color: MUTED, fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
               <select value={industry} onChange={e => setIndustry(e.target.value)} style={{ ...inp, color: industry ? '#171717' : '#999' }}>
                 <option value="">— Any industry —</option>
                 {INDUSTRIES.map(o => <option key={o} value={o}>{o}</option>)}
@@ -267,7 +265,7 @@ export default function VisibilityIntelligence() {
                 <span style={{ fontSize: '11px', fontWeight: '700', color: GOLD }}>{i + 1}</span>
               </div>
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: '13px', fontWeight: '500', color: '#171717', margin: '0 0 6px' }}>{label}</p>
+                <p style={{ fontSize: '13px', fontWeight: '500', color: BONE, margin: '0 0 6px' }}>{label}</p>
                 <Shimmer h="9px" w="55%" />
               </div>
             </div>
@@ -277,9 +275,9 @@ export default function VisibilityIntelligence() {
 
       {/* Results */}
       {fromCache && result && !loading && (
-        <div style={{ maxWidth: '820px', width: '100%', background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '7px', padding: '9px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>Showing previous result · Generate new report to refresh</p>
-          <button onClick={() => { localStorage.removeItem(LS_KEY_VIS); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
+        <div style={{ maxWidth: '820px', width: '100%', background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '9px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>Showing previous result · Generate new report to refresh</p>
+          <button onClick={() => { localStorage.removeItem(LS_KEY_VIS); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: MUTED, textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
         </div>
       )}
 
@@ -301,11 +299,11 @@ export default function VisibilityIntelligence() {
                 <span style={{ fontSize: '10px', color: scoreColor(score), fontWeight: '600', marginTop: '2px' }}>/100</span>
               </div>
               <div style={{ flex: 1, minWidth: '180px' }}>
-                <p style={{ margin: '0 0 4px', fontSize: '17px', fontWeight: '700', color: '#171717', letterSpacing: '-0.3px' }}>
+                <p style={{ margin: '0 0 4px', fontSize: '17px', fontWeight: '700', color: BONE, letterSpacing: '-0.3px' }}>
                   {score >= 75 ? 'Good visibility' : score >= 50 ? 'Visibility needs work' : 'Low visibility — urgent fixes needed'}
                 </p>
                 <p style={{ margin: '0 0 10px', fontSize: '14px', color: '#555', lineHeight: '1.5' }}>{v.overall_verdict}</p>
-                <p style={{ margin: 0, fontSize: '11px', color: '#999' }}>{result.url}{result.memory_used ? ' · Memory context used' : ''}</p>
+                <p style={{ margin: 0, fontSize: '11px', color: MUTED }}>{result.url}{result.memory_used ? ' · Memory context used' : ''}</p>
               </div>
               <CopyBtn text={buildCopyText(result)} />
             </div>
@@ -316,7 +314,7 @@ export default function VisibilityIntelligence() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
                   <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: GOLD }} />
                   <h3 style={{ fontSize: '15px', fontWeight: '600', margin: 0 }}>Priority Actions</h3>
-                  <span style={{ fontSize: '12px', color: '#999' }}>ordered by visibility ROI</span>
+                  <span style={{ fontSize: '12px', color: MUTED }}>ordered by visibility ROI</span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {v.priority_actions.map((action, i) => (
@@ -350,7 +348,7 @@ export default function VisibilityIntelligence() {
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px',
                 }}>
                   <span style={{ fontSize: '15px', fontWeight: '700', color: scoreColor(s) }}>{s}</span>
-                  <span style={{ fontSize: '10px', color: '#888', fontWeight: '600' }}>{label}</span>
+                  <span style={{ fontSize: '10px', color: MUTED, fontWeight: '600' }}>{label}</span>
                 </button>
               ))}
             </div>
@@ -372,16 +370,16 @@ export default function VisibilityIntelligence() {
                     <div style={{ overflowX: 'auto' }}>
                       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px' }}>
                         <thead>
-                          <tr style={{ background: '#F9F9F9' }}>
+                          <tr style={{ background: SLATE_M }}>
                             {['Keyword', 'Intent', 'Priority'].map(h => (
-                              <th key={h} style={{ textAlign: 'left', padding: '7px 10px', color: '#888', fontWeight: '600', borderBottom: '1px solid #EAEAEA', whiteSpace: 'nowrap' }}>{h}</th>
+                              <th key={h} style={{ textAlign: 'left', padding: '7px 10px', color: MUTED, fontWeight: '600', borderBottom: '1px solid #EAEAEA', whiteSpace: 'nowrap' }}>{h}</th>
                             ))}
                           </tr>
                         </thead>
                         <tbody>
                           {v.seo.recommended_keywords.map((kw, i) => (
                             <tr key={i} style={{ borderBottom: '1px solid #F5F5F5' }}>
-                              <td style={{ padding: '7px 10px', color: '#171717', fontWeight: '500' }}>{kw.keyword}</td>
+                              <td style={{ padding: '7px 10px', color: BONE, fontWeight: '500' }}>{kw.keyword}</td>
                               <td style={{ padding: '7px 10px' }}>
                                 <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', background: (INTENT_COLORS[kw.intent] || '#888') + '15', color: INTENT_COLORS[kw.intent] || '#888' }}>
                                   {kw.intent}
@@ -423,9 +421,9 @@ export default function VisibilityIntelligence() {
                   <Label>Questions to Answer on Your Site</Label>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     {(v.aeo.recommended_questions || []).map((q, i) => (
-                      <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', background: '#F9F9F9', border: '1px solid #F0F0F0', borderRadius: '6px', padding: '9px 12px' }}>
+                      <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', background: SLATE_M, border: '1px solid #F0F0F0', borderRadius: '6px', padding: '9px 12px' }}>
                         <span style={{ fontSize: '11px', fontWeight: '700', color: '#8B5CF6', flexShrink: 0, minWidth: '18px' }}>Q{i + 1}</span>
-                        <p style={{ margin: 0, fontSize: '13px', color: '#333', lineHeight: '1.5' }}>{q}</p>
+                        <p style={{ margin: 0, fontSize: '13px', color: BONE, lineHeight: '1.5' }}>{q}</p>
                       </div>
                     ))}
                   </div>
@@ -466,9 +464,9 @@ export default function VisibilityIntelligence() {
                   <Label>8 High-Value Topic Ideas</Label>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     {(v.content_strategy.recommended_topics || []).map((topic, i) => (
-                      <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', padding: '8px 12px', background: '#FAFAFA', border: '1px solid #F0F0F0', borderRadius: '6px' }}>
+                      <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', padding: '8px 12px', background: INK, border: '1px solid #F0F0F0', borderRadius: '6px' }}>
                         <span style={{ fontSize: '11px', fontWeight: '700', color: GOLD, flexShrink: 0, minWidth: '18px' }}>{i + 1}</span>
-                        <p style={{ margin: 0, fontSize: '13px', color: '#333', lineHeight: '1.5' }}>{topic}</p>
+                        <p style={{ margin: 0, fontSize: '13px', color: BONE, lineHeight: '1.5' }}>{topic}</p>
                       </div>
                     ))}
                   </div>

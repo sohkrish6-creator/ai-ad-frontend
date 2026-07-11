@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react'
+import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+
 
 const LS_KEY_ADCREATIVE = 'adsoh_adcreative_result'
-const GOLD = '#D4AF37'
-const card = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
-const inputSt = { width: '100%', padding: '10px 13px', borderRadius: '7px', border: '1px solid #E5E5E5', background: '#FAFAFA', color: '#171717', fontSize: '14px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
-const lbl = { display: 'block', color: '#999', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '7px' }
 
 function AdCreative() {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
@@ -45,15 +43,15 @@ function AdCreative() {
     return text.split(/CREATIVE \d+:/).filter(b => b.trim()).map(b => b.trim())
   }
 
-  const page = { minHeight: '100vh', background: '#FAFAFA', padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '820px', width: '100%', boxSizing: 'border-box' }
+  const page = { minHeight: '100vh', background: INK, padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '820px', width: '100%', boxSizing: 'border-box' }
 
   if (loading) return (
     <div style={page}>
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Ad Creative</h1>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 32px' }}>Generating creatives...</p>
+      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 32px' }}>Generating creatives...</p>
       <div style={{ ...card, padding: '40px', textAlign: 'center' }}>
-        <p style={{ color: '#666', fontSize: '14px', margin: '0 0 6px' }}>3 alag-alag creatives ban rahe hain...</p>
-        <p style={{ color: '#999', fontSize: '13px', margin: 0 }}>20–40 seconds lagenge</p>
+        <p style={{ color: MUTED, fontSize: '14px', margin: '0 0 6px' }}>3 alag-alag creatives ban rahe hain...</p>
+        <p style={{ color: MUTED, fontSize: '13px', margin: 0 }}>20–40 seconds lagenge</p>
       </div>
     </div>
   )
@@ -63,17 +61,17 @@ function AdCreative() {
     return (
       <div style={page}>
         {fromCache && (
-          <div style={{ background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '7px', padding: '9px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>Showing previous result · Generate new report to refresh</p>
-            <button onClick={() => { localStorage.removeItem(LS_KEY_ADCREATIVE); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
+          <div style={{ background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '9px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>Showing previous result · Generate new report to refresh</p>
+            <button onClick={() => { localStorage.removeItem(LS_KEY_ADCREATIVE); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: MUTED, textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
           </div>
         )}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
             <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Ad Creative</h1>
-            <p style={{ color: '#999', fontSize: '13px', margin: 0 }}>{offer} · {platform} · {language}</p>
+            <p style={{ color: MUTED, fontSize: '13px', margin: 0 }}>{offer} · {platform} · {language}</p>
           </div>
-          <button onClick={() => { localStorage.removeItem(LS_KEY_ADCREATIVE); setResult(null); setFromCache(false) }} style={{ background: 'transparent', border: '1px solid #E5E5E5', color: '#666', padding: '7px 16px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>← New</button>
+          <button onClick={() => { localStorage.removeItem(LS_KEY_ADCREATIVE); setResult(null); setFromCache(false) }} style={{ background: 'transparent', border: `1px solid ${SLATE_L}`, color: MUTED, padding: '7px 16px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>← New</button>
         </div>
 
         {creatives.map((c, idx) => (
@@ -82,7 +80,7 @@ function AdCreative() {
               <h2 style={{ fontSize: '14px', fontWeight: '600', color: GOLD, margin: 0 }}>Creative {idx + 1}</h2>
               <button
                 onClick={() => { navigator.clipboard.writeText('CREATIVE ' + (idx + 1) + ':\n' + c); setCopiedIndex(idx); setTimeout(() => setCopiedIndex(null), 1500) }}
-                style={{ background: copiedIndex === idx ? '#22C55E' : '#F5F5F5', border: '1px solid #E5E5E5', color: copiedIndex === idx ? '#fff' : '#666', padding: '5px 12px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', fontWeight: '600' }}
+                style={{ background: copiedIndex === idx ? '#22C55E' : '#F5F5F5', border: `1px solid ${SLATE_L}`, color: copiedIndex === idx ? '#fff' : '#666', padding: '5px 12px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', fontWeight: '600' }}
               >
                 {copiedIndex === idx ? '✓ Copied' : 'Copy'}
               </button>
@@ -94,12 +92,12 @@ function AdCreative() {
               if (colonIdx > 0 && colonIdx < 25) {
                 return (
                   <div key={i} style={{ marginBottom: '12px' }}>
-                    <span style={{ fontSize: '10px', color: '#999', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{clean.slice(0, colonIdx)}</span>
-                    <p style={{ margin: '3px 0 0', fontSize: '14px', color: '#171717', lineHeight: '1.5' }}>{clean.slice(colonIdx + 1).trim()}</p>
+                    <span style={{ fontSize: '10px', color: MUTED, fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{clean.slice(0, colonIdx)}</span>
+                    <p style={{ margin: '3px 0 0', fontSize: '14px', color: BONE, lineHeight: '1.5' }}>{clean.slice(colonIdx + 1).trim()}</p>
                   </div>
                 )
               }
-              return <p key={i} style={{ fontSize: '14px', color: '#666', margin: '4px 0' }}>{clean}</p>
+              return <p key={i} style={{ fontSize: '14px', color: MUTED, margin: '4px 0' }}>{clean}</p>
             })}
           </div>
         ))}
@@ -110,11 +108,11 @@ function AdCreative() {
   return (
     <div style={page}>
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Ad Creative</h1>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 32px' }}>Offer daalo — AI poori ad creative banayega (copy + image idea + layout)</p>
+      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 32px' }}>Offer daalo — AI poori ad creative banayega (copy + image idea + layout)</p>
 
       <div style={{ maxWidth: '560px', width: '100%' }}>
         <div style={{ ...card, padding: '28px' }}>
-          {error && <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '20px', color: '#BE123C', fontSize: '13px' }}>{error}</div>}
+          {error && <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '20px', color: RED, fontSize: '13px' }}>{error}</div>}
 
           <div style={{ marginBottom: '16px' }}>
             <label style={lbl}>Website URL</label>

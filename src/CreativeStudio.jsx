@@ -7,9 +7,10 @@ import { useToast } from './ToastContext'
 import { useLoadingSteps } from './useLoadingSteps'
 import CityInput, { getLastCity } from './CityInput'
 import { TrustBadge, ValidationWarningBanner, NeedsMarketingBrainNotice } from './TrustLayer'
+import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
-const GOLD    = '#D4AF37'
 const LS_KEY  = 'adsoh_creative_studio_result'
 const LOADING_STEPS = [
   'Analyzing business & audience first...', 'Reading campaign data...', 'Checking performance signals...',
@@ -18,9 +19,6 @@ const LOADING_STEPS = [
 
 const OBJECTIVES = ['Awareness', 'Traffic', 'Leads', 'Sales', 'Branding']
 
-const card = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
-const lbl  = { display: 'block', color: '#999', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '7px' }
-const inp  = { width: '100%', padding: '10px 13px', borderRadius: '7px', border: '1px solid #E5E5E5', background: '#FAFAFA', color: '#171717', fontSize: '14px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
 
 function CopyBtn({ text, label = 'Copy' }) {
   const [copied, setCopied] = useState(false)
@@ -49,8 +47,8 @@ function Section({ icon: Icon, title, sub, defaultOpen = true, children }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
           <Icon size={16} color={GOLD} style={{ flexShrink: 0 }} />
           <div>
-            <p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: '#171717' }}>{title}</p>
-            {sub && <p style={{ margin: '1px 0 0', fontSize: '11.5px', color: '#999' }}>{sub}</p>}
+            <p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: BONE }}>{title}</p>
+            {sub && <p style={{ margin: '1px 0 0', fontSize: '11.5px', color: MUTED }}>{sub}</p>}
           </div>
         </div>
         {open ? <ChevronUp size={16} color="#BBB" /> : <ChevronDown size={16} color="#BBB" />}
@@ -66,10 +64,10 @@ function ScoreBar({ label, value }) {
   return (
     <div style={{ marginBottom: '7px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-        <span style={{ fontSize: '11px', color: '#888' }}>{label}</span>
+        <span style={{ fontSize: '11px', color: MUTED }}>{label}</span>
         <span style={{ fontSize: '11px', fontWeight: '700', color }}>{v}</span>
       </div>
-      <div style={{ height: '5px', borderRadius: '3px', background: '#F0F0F0', overflow: 'hidden' }}>
+      <div style={{ height: '5px', borderRadius: '3px', background: SLATE_L, overflow: 'hidden' }}>
         <div style={{ height: '100%', width: `${Math.min(100, Math.max(0, v))}%`, background: color, borderRadius: '3px' }} />
       </div>
     </div>
@@ -98,14 +96,14 @@ function ConceptCard({ concept }) {
       {(concept.applicable_platforms_and_sizes || []).length > 0 && (
         <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginBottom: '10px' }}>
           {concept.applicable_platforms_and_sizes.map((s, i) => (
-            <span key={i} style={{ fontSize: '10.5px', color: '#888', background: '#F5F5F5', border: '1px solid #EAEAEA', borderRadius: '5px', padding: '2px 7px' }}>{s}</span>
+            <span key={i} style={{ fontSize: '10.5px', color: MUTED, background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '5px', padding: '2px 7px' }}>{s}</span>
           ))}
         </div>
       )}
 
-      <p style={{ margin: '0 0 4px', fontSize: '15px', fontWeight: '600', color: '#171717' }}>{concept.headline}</p>
-      {concept.subheadline && <p style={{ margin: '0 0 8px', fontSize: '13px', color: '#666' }}>{concept.subheadline}</p>}
-      {concept.caption && <p style={{ margin: '0 0 8px', fontSize: '12.5px', color: '#888', lineHeight: 1.5 }}>{concept.caption}</p>}
+      <p style={{ margin: '0 0 4px', fontSize: '15px', fontWeight: '600', color: BONE }}>{concept.headline}</p>
+      {concept.subheadline && <p style={{ margin: '0 0 8px', fontSize: '13px', color: MUTED }}>{concept.subheadline}</p>}
+      {concept.caption && <p style={{ margin: '0 0 8px', fontSize: '12.5px', color: MUTED, lineHeight: 1.5 }}>{concept.caption}</p>}
       {concept.cta && (
         <span style={{ display: 'inline-block', padding: '4px 11px', borderRadius: '6px', fontSize: '12px', fontWeight: '600', background: '#171717', color: '#fff', marginBottom: '10px' }}>
           {concept.cta}
@@ -120,13 +118,13 @@ function ConceptCard({ concept }) {
         </div>
       )}
 
-      <p style={{ margin: '0 0 12px', fontSize: '12.5px', color: '#888', lineHeight: 1.5 }}>
-        <strong style={{ color: '#666' }}>Visual direction: </strong>{concept.visual_direction}
+      <p style={{ margin: '0 0 12px', fontSize: '12.5px', color: MUTED, lineHeight: 1.5 }}>
+        <strong style={{ color: MUTED }}>Visual direction: </strong>{concept.visual_direction}
       </p>
 
-      <div style={{ background: '#FAFAFA', border: '1px solid #EEE', borderRadius: '7px', padding: '12px 14px', marginBottom: '14px' }}>
+      <div style={{ background: INK, border: '1px solid #EEE', borderRadius: '7px', padding: '12px 14px', marginBottom: '14px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '7px' }}>
-          <span style={{ fontSize: '11px', fontWeight: '700', color: '#999', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Image Prompt — ready to paste</span>
+          <span style={{ fontSize: '11px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Image Prompt — ready to paste</span>
           <CopyBtn text={concept.image_prompt} label="Copy Prompt" />
         </div>
         <p style={{ margin: 0, fontSize: '12px', color: '#444', lineHeight: 1.6, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', whiteSpace: 'pre-wrap' }}>
@@ -142,19 +140,19 @@ function ConceptCard({ concept }) {
 
       {concept.ai_review && (
         <div style={{ marginBottom: '14px' }}>
-          <p style={{ margin: '0 0 6px', fontSize: '11px', fontWeight: '700', color: '#999', textTransform: 'uppercase', letterSpacing: '0.06em' }}>AI Review</p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 14px', fontSize: '12px', color: '#666' }}>
-            <p style={{ margin: 0 }}><strong style={{ color: '#16A34A' }}>Strong:</strong> {concept.ai_review.strong}</p>
+          <p style={{ margin: '0 0 6px', fontSize: '11px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.06em' }}>AI Review</p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 14px', fontSize: '12px', color: MUTED }}>
+            <p style={{ margin: 0 }}><strong style={{ color: GREEN }}>Strong:</strong> {concept.ai_review.strong}</p>
             <p style={{ margin: 0 }}><strong style={{ color: '#DC2626' }}>Weak:</strong> {concept.ai_review.weak}</p>
-            <p style={{ margin: 0 }}><strong style={{ color: '#666' }}>Scroll-stopping:</strong> {concept.ai_review.scroll_stopping}</p>
-            <p style={{ margin: 0 }}><strong style={{ color: '#666' }}>CTA standout:</strong> {concept.ai_review.cta_standout}</p>
-            <p style={{ margin: 0, gridColumn: '1 / -1' }}><strong style={{ color: '#666' }}>Audience match:</strong> {concept.ai_review.audience_match}</p>
+            <p style={{ margin: 0 }}><strong style={{ color: MUTED }}>Scroll-stopping:</strong> {concept.ai_review.scroll_stopping}</p>
+            <p style={{ margin: 0 }}><strong style={{ color: MUTED }}>CTA standout:</strong> {concept.ai_review.cta_standout}</p>
+            <p style={{ margin: 0, gridColumn: '1 / -1' }}><strong style={{ color: MUTED }}>Audience match:</strong> {concept.ai_review.audience_match}</p>
           </div>
         </div>
       )}
 
       <div>
-        <p style={{ margin: '0 0 8px', fontSize: '11px', fontWeight: '700', color: '#999', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Score Breakdown</p>
+        <p style={{ margin: '0 0 8px', fontSize: '11px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Score Breakdown</p>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px' }}>
           <ScoreBar label="Visual Appeal" value={scores.visual_appeal} />
           <ScoreBar label="Headline" value={scores.headline} />
@@ -164,7 +162,7 @@ function ConceptCard({ concept }) {
           <ScoreBar label="Scroll-Stopping" value={scores.scroll_stopping} />
           <ScoreBar label="Conversion Potential" value={scores.conversion_potential} />
         </div>
-        {scores.reasoning && <p style={{ margin: '6px 0 0', fontSize: '11.5px', color: '#999', fontStyle: 'italic' }}>{scores.reasoning}</p>}
+        {scores.reasoning && <p style={{ margin: '6px 0 0', fontSize: '11.5px', color: MUTED, fontStyle: 'italic' }}>{scores.reasoning}</p>}
       </div>
     </div>
   )
@@ -242,7 +240,7 @@ export default function CreativeStudio() {
   const ds = c.data_sources_used || {}
 
   const page = {
-    minHeight: '100vh', background: '#FAFAFA',
+    minHeight: '100vh', background: INK,
     padding: isMobile ? '28px 16px' : '40px 36px',
     maxWidth: '900px', width: '100%', boxSizing: 'border-box',
     fontFamily: '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif',
@@ -254,7 +252,7 @@ export default function CreativeStudio() {
         <Wand2 size={20} color={GOLD} />
         <h1 style={{ fontSize: '22px', fontWeight: '600', margin: 0, letterSpacing: '-0.4px' }}>Creative Studio</h1>
       </div>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 8px' }}>Complete creative strategy + production-ready image prompts, built from your real business & campaign intelligence.</p>
+      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 8px' }}>Complete creative strategy + production-ready image prompts, built from your real business & campaign intelligence.</p>
       <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '7px', padding: '9px 13px', marginBottom: '24px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
         <Info size={14} color="#1E40AF" style={{ flexShrink: 0, marginTop: '1px' }} />
         <p style={{ margin: 0, fontSize: '12px', color: '#1E40AF', lineHeight: 1.5 }}>
@@ -265,7 +263,7 @@ export default function CreativeStudio() {
       {/* Input */}
       <div style={{ maxWidth: '640px', width: '100%' }}>
         <div style={{ ...card, padding: isMobile ? '20px 16px' : '26px', marginBottom: '16px' }}>
-          {error && <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: '#BE123C', fontSize: '13px' }}>{error}</div>}
+          {error && <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: RED, fontSize: '13px' }}>{error}</div>}
 
           <div style={{ display: 'flex', gap: '4px', marginBottom: '18px', borderBottom: '1px solid #EAEAEA' }}>
             {[{ key: 'business', label: 'For a Business' }, { key: 'campaign', label: 'For a Live Campaign' }].map(t => (
@@ -290,11 +288,11 @@ export default function CreativeStudio() {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
                 <div>
-                  <label style={lbl}>Industry <span style={{ color: '#BBB', fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
+                  <label style={lbl}>Industry <span style={{ color: MUTED, fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
                   <input type="text" value={industry} onChange={e => setIndustry(e.target.value)} placeholder="e.g. Hospitality" style={inp} />
                 </div>
                 <div>
-                  <label style={lbl}>City <span style={{ color: '#BBB', fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
+                  <label style={lbl}>City <span style={{ color: MUTED, fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
                   <CityInput value={city} onChange={setCity} style={inp} />
                 </div>
               </div>
@@ -323,7 +321,7 @@ export default function CreativeStudio() {
                 <div style={{ marginBottom: '14px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '7px' }}>
                     <label style={{ ...lbl, marginBottom: 0 }}>Select Campaign <span style={{ color: '#DC2626' }}>*</span></label>
-                    <button onClick={loadCampaigns} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#999', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px' }}>
+                    <button onClick={loadCampaigns} style={{ background: 'none', border: 'none', cursor: 'pointer', color: MUTED, display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px' }}>
                       <RefreshCw size={11} /> Refresh
                     </button>
                   </div>
@@ -344,11 +342,11 @@ export default function CreativeStudio() {
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
                     <div>
-                      <label style={lbl}>Industry <span style={{ color: '#BBB', fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
+                      <label style={lbl}>Industry <span style={{ color: MUTED, fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
                       <input type="text" value={industry} onChange={e => setIndustry(e.target.value)} placeholder="e.g. Hospitality" style={inp} />
                     </div>
                     <div>
-                      <label style={lbl}>City <span style={{ color: '#BBB', fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
+                      <label style={lbl}>City <span style={{ color: MUTED, fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
                       <CityInput value={city} onChange={setCity} style={inp} />
                     </div>
                   </div>
@@ -365,7 +363,7 @@ export default function CreativeStudio() {
               </select>
             </div>
             <div>
-              <label style={lbl}>Offer <span style={{ color: '#BBB', fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
+              <label style={lbl}>Offer <span style={{ color: MUTED, fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
               <input type="text" value={offer} onChange={e => setOffer(e.target.value)} placeholder="e.g. Free consultation" style={inp} />
             </div>
           </div>
@@ -374,7 +372,7 @@ export default function CreativeStudio() {
             onClick={handleGenerate} disabled={loading}
             style={{
               width: '100%', padding: '13px', borderRadius: '8px', border: 'none', cursor: loading ? 'not-allowed' : 'pointer',
-              background: loading ? '#E5C158' : GOLD, color: '#171717', fontSize: '14px', fontWeight: '700',
+              background: loading ? '#E5C158' : GOLD, color: BONE, fontSize: '14px', fontWeight: '700',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
             }}
           >
@@ -387,9 +385,9 @@ export default function CreativeStudio() {
       {result && (
         <div style={{ maxWidth: '760px', width: '100%' }}>
           {fromCache && (
-            <div style={{ background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '7px', padding: '9px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>Showing previous result · Generate new to refresh</p>
-              <button onClick={clearReport} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline' }}>Clear</button>
+            <div style={{ background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '9px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>Showing previous result · Generate new to refresh</p>
+              <button onClick={clearReport} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: MUTED, textDecoration: 'underline' }}>Clear</button>
             </div>
           )}
 
@@ -400,7 +398,7 @@ export default function CreativeStudio() {
           <div style={{ ...card, padding: '18px', marginBottom: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
               <Lightbulb size={15} color={GOLD} />
-              <p style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: '#171717' }}>Intelligence Applied</p>
+              <p style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: BONE }}>Intelligence Applied</p>
             </div>
             <p style={{ margin: '0 0 10px', fontSize: '13px', color: '#444', lineHeight: 1.6 }}>{c.intelligence_applied}</p>
             {c.performance_context && c.performance_context !== 'N/A' && !c.performance_context.startsWith('N/A') && (
@@ -416,7 +414,7 @@ export default function CreativeStudio() {
 
           <Section icon={Sparkles} title="Creative Strategy" sub={c.creative_strategy?.primary_goal}>
             <p style={{ margin: '0 0 8px', fontSize: '13px', color: '#444' }}><strong>Dominant emotion:</strong> {c.creative_strategy?.dominant_emotion}</p>
-            <p style={{ margin: 0, fontSize: '13px', color: '#666', lineHeight: 1.6 }}>{c.creative_strategy?.why}</p>
+            <p style={{ margin: 0, fontSize: '13px', color: MUTED, lineHeight: 1.6 }}>{c.creative_strategy?.why}</p>
           </Section>
 
           <Section icon={Layers} title="Color Psychology" sub={c.color_psychology?.why_for_this_industry}>
@@ -424,9 +422,9 @@ export default function CreativeStudio() {
               {(c.color_psychology?.palette || []).map((p, i) => (
                 <div key={i} style={{ textAlign: 'center', width: '100px' }}>
                   <div style={{ width: '100%', height: '52px', borderRadius: '8px', background: p.hex, border: '1px solid #0000000F', marginBottom: '6px' }} />
-                  <p style={{ margin: 0, fontSize: '11.5px', fontWeight: '700', color: '#171717' }}>{p.name}</p>
-                  <p style={{ margin: 0, fontSize: '10.5px', color: '#999' }}>{p.hex}</p>
-                  <p style={{ margin: '2px 0 0', fontSize: '10.5px', color: '#999' }}>{p.reason}</p>
+                  <p style={{ margin: 0, fontSize: '11.5px', fontWeight: '700', color: BONE }}>{p.name}</p>
+                  <p style={{ margin: 0, fontSize: '10.5px', color: MUTED }}>{p.hex}</p>
+                  <p style={{ margin: '2px 0 0', fontSize: '10.5px', color: MUTED }}>{p.reason}</p>
                 </div>
               ))}
             </div>
@@ -435,7 +433,7 @@ export default function CreativeStudio() {
           <Section icon={Type} title="Typography" defaultOpen={false}>
             <p style={{ margin: '0 0 6px', fontSize: '13px', color: '#444' }}><strong>Style:</strong> {c.typography?.style}</p>
             <p style={{ margin: '0 0 6px', fontSize: '13px', color: '#444' }}><strong>Fonts:</strong> {(c.typography?.recommended_fonts || []).join(', ')}</p>
-            <p style={{ margin: 0, fontSize: '13px', color: '#666' }}>{c.typography?.why}</p>
+            <p style={{ margin: 0, fontSize: '13px', color: MUTED }}>{c.typography?.why}</p>
           </Section>
 
           <Section icon={LayoutGrid} title="Layout Blueprint" defaultOpen={false}>
@@ -450,15 +448,15 @@ export default function CreativeStudio() {
 
           <Section icon={CalendarDays} title="Seasonal & Localization" sub="Based on today's real date and your target city" defaultOpen={false}>
             <p style={{ margin: '0 0 4px', fontSize: '13px', color: '#444' }}><strong>Relevant occasions:</strong> {(c.seasonal_intelligence?.current_relevant_occasions || []).join(', ') || 'None flagged'}</p>
-            <p style={{ margin: '0 0 12px', fontSize: '13px', color: '#666' }}>{c.seasonal_intelligence?.recommendation}</p>
+            <p style={{ margin: '0 0 12px', fontSize: '13px', color: MUTED }}>{c.seasonal_intelligence?.recommendation}</p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
               <MapPin size={13} color="#999" />
               <strong style={{ fontSize: '13px', color: '#444' }}>Localization: {c.localization?.use_or_skip}</strong>
             </div>
-            {(c.localization?.city_elements || []).length > 0 && <p style={{ margin: 0, fontSize: '13px', color: '#666' }}>{c.localization.city_elements.join(', ')}</p>}
+            {(c.localization?.city_elements || []).length > 0 && <p style={{ margin: 0, fontSize: '13px', color: MUTED }}>{c.localization.city_elements.join(', ')}</p>}
           </Section>
 
-          <h2 style={{ fontSize: '16px', fontWeight: '700', color: '#171717', margin: '24px 0 12px' }}>3 Creative Concepts</h2>
+          <h2 style={{ fontSize: '16px', fontWeight: '700', color: BONE, margin: '24px 0 12px' }}>3 Creative Concepts</h2>
           <div style={{ display: 'flex', gap: '6px', marginBottom: '16px', flexWrap: 'wrap' }}>
             {concepts.map((v, i) => (
               <button
@@ -478,19 +476,19 @@ export default function CreativeStudio() {
 
           <Section icon={Trophy} title="A/B Prediction">
             <p style={{ margin: '0 0 6px', fontSize: '13px', color: '#444' }}><strong>Likely winner:</strong> {c.ab_prediction?.likely_winner}</p>
-            <p style={{ margin: '0 0 6px', fontSize: '13px', color: '#666' }}>{c.ab_prediction?.why}</p>
-            <p style={{ margin: '0 0 6px', fontSize: '13px', color: '#666' }}><strong>Expected CTR difference:</strong> {c.ab_prediction?.expected_ctr_difference}</p>
+            <p style={{ margin: '0 0 6px', fontSize: '13px', color: MUTED }}>{c.ab_prediction?.why}</p>
+            <p style={{ margin: '0 0 6px', fontSize: '13px', color: MUTED }}><strong>Expected CTR difference:</strong> {c.ab_prediction?.expected_ctr_difference}</p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
               <span style={{ fontSize: '13px', color: '#444' }}><strong>Confidence:</strong></span>
               <span style={{ fontSize: '13px', fontWeight: '700', color: (c.ab_prediction?.confidence || 0) >= 60 ? '#16A34A' : '#D97706' }}>{c.ab_prediction?.confidence}/100</span>
             </div>
-            <p style={{ margin: 0, fontSize: '11.5px', color: '#999', fontStyle: 'italic' }}>{c.ab_prediction?.caveat}</p>
+            <p style={{ margin: 0, fontSize: '11.5px', color: MUTED, fontStyle: 'italic' }}>{c.ab_prediction?.caveat}</p>
           </Section>
 
           <div style={{ ...card, padding: '18px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
               <Database size={15} color={GOLD} />
-              <p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: '#171717' }}>Data Sources Used</p>
+              <p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: BONE }}>Data Sources Used</p>
             </div>
             {[
               ['Business DNA', ds.business_dna],

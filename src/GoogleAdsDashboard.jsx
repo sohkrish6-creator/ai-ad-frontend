@@ -5,18 +5,10 @@ import {
   TrendingUp, TrendingDown, ChevronDown, ChevronUp, RefreshCw, Smartphone, MapPin,
 } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
+import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
-const GOLD = '#D4AF37'
-const RED = '#BE123C'
-const GREEN = '#16A34A'
-
-const card = {
-  background: '#fff',
-  border: '1px solid #EAEAEA',
-  borderRadius: '8px',
-  boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-}
 
 function useCountUp(target, duration = 700, enabled = true) {
   const [count, setCount] = useState(0)
@@ -47,10 +39,10 @@ function StatCard({ label, value, Icon, prefix = '', suffix = '', decimals = 0 }
   return (
     <div style={{ ...card, padding: '16px 14px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-        <p style={{ fontSize: '10px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.06em', color: '#999', margin: 0 }}>{label}</p>
+        <p style={{ fontSize: '10px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.06em', color: MUTED, margin: 0 }}>{label}</p>
         <Icon size={13} color="#BBB" />
       </div>
-      <p style={{ fontSize: '22px', fontWeight: '600', margin: 0, letterSpacing: '-1px', color: '#171717' }}>
+      <p style={{ fontSize: '22px', fontWeight: '600', margin: 0, letterSpacing: '-1px', color: BONE }}>
         {prefix}{display}{suffix}
       </p>
     </div>
@@ -60,29 +52,29 @@ function StatCard({ label, value, Icon, prefix = '', suffix = '', decimals = 0 }
 function Collapsible({ title, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
-    <div style={{ border: '1px solid #EAEAEA', borderRadius: '7px', overflow: 'hidden', marginBottom: '8px' }}>
+    <div style={{ border: `1px solid ${SLATE_L}`, borderRadius: '7px', overflow: 'hidden', marginBottom: '8px' }}>
       <button onClick={() => setOpen(o => !o)} style={{
-        width: '100%', background: '#FAFAFA', border: 'none', padding: '10px 14px',
+        width: '100%', background: INK, border: 'none', padding: '10px 14px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer',
-        color: '#171717', fontSize: '13px', fontWeight: '600',
+        color: BONE, fontSize: '13px', fontWeight: '600',
       }}>
         {title}
         {open ? <ChevronUp size={14} color="#999" /> : <ChevronDown size={14} color="#999" />}
       </button>
-      {open && <div style={{ padding: '14px', background: '#fff' }}>{children}</div>}
+      {open && <div style={{ padding: '14px', background: SLATE }}>{children}</div>}
     </div>
   )
 }
 
 function Table({ columns, rows, emptyMsg }) {
-  if (!rows || rows.length === 0) return <p style={{ fontSize: '13px', color: '#999', margin: 0 }}>{emptyMsg}</p>
+  if (!rows || rows.length === 0) return <p style={{ fontSize: '13px', color: MUTED, margin: 0 }}>{emptyMsg}</p>
   return (
     <div style={{ overflowX: 'auto' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
         <thead>
           <tr style={{ borderBottom: '1px solid #EAEAEA' }}>
             {columns.map(c => (
-              <th key={c.key} style={{ textAlign: c.align || 'left', padding: '6px 8px', color: '#999', fontWeight: '600', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '0.04em' }}>
+              <th key={c.key} style={{ textAlign: c.align || 'left', padding: '6px 8px', color: MUTED, fontWeight: '600', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '0.04em' }}>
                 {c.label}
               </th>
             ))}
@@ -92,7 +84,7 @@ function Table({ columns, rows, emptyMsg }) {
           {rows.map((r, i) => (
             <tr key={i} style={{ borderBottom: i < rows.length - 1 ? '1px solid #F5F5F5' : 'none' }}>
               {columns.map(c => (
-                <td key={c.key} style={{ padding: '7px 8px', textAlign: c.align || 'left', color: '#333' }}>
+                <td key={c.key} style={{ padding: '7px 8px', textAlign: c.align || 'left', color: BONE }}>
                   {c.render ? c.render(r[c.key], r) : r[c.key]}
                 </td>
               ))}
@@ -155,7 +147,7 @@ export default function GoogleAdsDashboard() {
   if (error) {
     return (
       <div style={{ maxWidth: '760px', margin: '0 auto', padding: '36px 20px 60px' }}>
-        <div style={{ ...card, padding: '18px', background: '#FFF1F2', border: '1px solid #FECDD3' }}>
+        <div style={{ ...card, padding: '18px', background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3' }}>
           <p style={{ margin: '0 0 10px', fontSize: '13px', color: RED }}>{error}</p>
           <button onClick={() => navigate('/google-ads')} style={{
             background: '#171717', color: '#fff', border: 'none', borderRadius: '6px',
@@ -180,15 +172,15 @@ export default function GoogleAdsDashboard() {
       <div style={{ maxWidth: '1040px', margin: '0 auto', padding: '36px 20px 60px', fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '10px' }}>
           <div>
-            <h1 style={{ fontSize: '22px', fontWeight: '700', color: '#171717', margin: 0, letterSpacing: '-0.5px' }}>
+            <h1 style={{ fontSize: '22px', fontWeight: '700', color: BONE, margin: 0, letterSpacing: '-0.5px' }}>
               {data.account_name || data.customer_id}
             </h1>
-            <p style={{ fontSize: '12px', color: '#999', margin: '4px 0 0' }}>
+            <p style={{ fontSize: '12px', color: MUTED, margin: '4px 0 0' }}>
               Last imported: {data.last_imported_at ? new Date(data.last_imported_at).toLocaleString() : 'never'}
             </p>
           </div>
           <button onClick={handleRefresh} disabled={refreshing} style={{
-            display: 'flex', alignItems: 'center', gap: '6px', background: GOLD, color: '#171717',
+            display: 'flex', alignItems: 'center', gap: '6px', background: GOLD, color: BONE,
             border: 'none', borderRadius: '7px', padding: '9px 18px', fontSize: '13px', fontWeight: '700', cursor: 'pointer',
           }}>
             <RefreshCw size={13} className={refreshing ? 'spin' : ''} /> {refreshing ? 'Starting…' : 'Refresh Import'}
@@ -211,7 +203,7 @@ export default function GoogleAdsDashboard() {
           <div style={{ ...card, padding: '18px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
               <TrendingUp size={13} color={GREEN} />
-              <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', color: '#999', margin: 0 }}>Top Campaigns</p>
+              <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', color: MUTED, margin: 0 }}>Top Campaigns</p>
             </div>
             <Table
               emptyMsg="No campaign data yet."
@@ -228,7 +220,7 @@ export default function GoogleAdsDashboard() {
           <div style={{ ...card, padding: '18px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
               <TrendingDown size={13} color={RED} />
-              <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', color: '#999', margin: 0 }}>Worst Campaigns</p>
+              <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', color: MUTED, margin: 0 }}>Worst Campaigns</p>
             </div>
             <Table
               emptyMsg="No campaign data yet."
@@ -245,7 +237,7 @@ export default function GoogleAdsDashboard() {
           <div style={{ ...card, padding: '18px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
               <TrendingUp size={13} color={GREEN} />
-              <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', color: '#999', margin: 0 }}>Top Keywords</p>
+              <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', color: MUTED, margin: 0 }}>Top Keywords</p>
             </div>
             <Table
               emptyMsg="No keyword data yet."
@@ -262,9 +254,9 @@ export default function GoogleAdsDashboard() {
           <div style={{ ...card, padding: '18px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
               <TrendingDown size={13} color={RED} />
-              <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', color: '#999', margin: 0 }}>Waste Keywords</p>
+              <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', color: MUTED, margin: 0 }}>Waste Keywords</p>
             </div>
-            <p style={{ fontSize: '11px', color: '#BBB', margin: '0 0 10px' }}>≥5 clicks, 0 conversions</p>
+            <p style={{ fontSize: '11px', color: MUTED, margin: '0 0 10px' }}>≥5 clicks, 0 conversions</p>
             <Table
               emptyMsg="No wasted spend detected."
               rows={c.waste_keywords}
@@ -282,7 +274,7 @@ export default function GoogleAdsDashboard() {
           <div style={{ ...card, padding: '18px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
               <Smartphone size={13} color="#999" />
-              <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', color: '#999', margin: 0 }}>Device Performance</p>
+              <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', color: MUTED, margin: 0 }}>Device Performance</p>
             </div>
             {c.device_performance && c.device_performance.length > 0 ? (
               <div style={{ width: '100%', height: 160 }}>
@@ -296,14 +288,14 @@ export default function GoogleAdsDashboard() {
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-            ) : <p style={{ fontSize: '13px', color: '#999', margin: 0 }}>No device data yet.</p>}
+            ) : <p style={{ fontSize: '13px', color: MUTED, margin: 0 }}>No device data yet.</p>}
           </div>
 
           {/* Location Performance */}
           <div style={{ ...card, padding: '18px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
               <MapPin size={13} color="#999" />
-              <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', color: '#999', margin: 0 }}>Location Performance</p>
+              <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', color: MUTED, margin: 0 }}>Location Performance</p>
             </div>
             <Table
               emptyMsg="No location data yet."
@@ -319,18 +311,18 @@ export default function GoogleAdsDashboard() {
 
         {/* AI Summary */}
         <div style={{ ...card, padding: '18px' }}>
-          <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', color: '#999', margin: '0 0 14px' }}>
+          <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', color: MUTED, margin: '0 0 14px' }}>
             AI Summary
           </p>
           {!ai ? (
-            <p style={{ fontSize: '13px', color: '#999', margin: 0 }}>No AI summary yet — run an import to generate one.</p>
+            <p style={{ fontSize: '13px', color: MUTED, margin: 0 }}>No AI summary yet — run an import to generate one.</p>
           ) : (
             <>
               <Collapsible title="Best Performing Campaigns" defaultOpen>
                 {(ai.best_performing_campaigns || []).map((x, i) => (
                   <div key={i} style={{ marginBottom: '10px' }}>
-                    <p style={{ margin: '0 0 2px', fontSize: '13px', fontWeight: '600', color: '#171717' }}>{x.campaign_name}</p>
-                    <p style={{ margin: '0 0 2px', fontSize: '12px', color: '#666' }}>{x.why}</p>
+                    <p style={{ margin: '0 0 2px', fontSize: '13px', fontWeight: '600', color: BONE }}>{x.campaign_name}</p>
+                    <p style={{ margin: '0 0 2px', fontSize: '12px', color: MUTED }}>{x.why}</p>
                     <p style={{ margin: 0, fontSize: '12px', color: GOLD }}>{x.recommendation}</p>
                   </div>
                 ))}
@@ -338,8 +330,8 @@ export default function GoogleAdsDashboard() {
               <Collapsible title="Poor Performing Campaigns">
                 {(ai.poor_performing_campaigns || []).map((x, i) => (
                   <div key={i} style={{ marginBottom: '10px' }}>
-                    <p style={{ margin: '0 0 2px', fontSize: '13px', fontWeight: '600', color: '#171717' }}>{x.campaign_name}</p>
-                    <p style={{ margin: '0 0 2px', fontSize: '12px', color: '#666' }}>{x.why}</p>
+                    <p style={{ margin: '0 0 2px', fontSize: '13px', fontWeight: '600', color: BONE }}>{x.campaign_name}</p>
+                    <p style={{ margin: '0 0 2px', fontSize: '12px', color: MUTED }}>{x.why}</p>
                     <p style={{ margin: 0, fontSize: '12px', color: RED }}>{x.recommendation}</p>
                   </div>
                 ))}
@@ -348,33 +340,33 @@ export default function GoogleAdsDashboard() {
                 {ai.budget_waste && (
                   <div>
                     <p style={{ margin: '0 0 6px', fontSize: '13px', fontWeight: '600', color: RED }}>{ai.budget_waste.total_wasted_estimate}</p>
-                    <p style={{ margin: '0 0 6px', fontSize: '12px', color: '#666' }}>{ai.budget_waste.summary}</p>
-                    <p style={{ margin: 0, fontSize: '12px', color: '#999' }}>{(ai.budget_waste.top_waste_keywords || []).join(', ')}</p>
+                    <p style={{ margin: '0 0 6px', fontSize: '12px', color: MUTED }}>{ai.budget_waste.summary}</p>
+                    <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>{(ai.budget_waste.top_waste_keywords || []).join(', ')}</p>
                   </div>
                 )}
               </Collapsible>
               <Collapsible title="Best Keywords">
                 {(ai.best_keywords || []).map((x, i) => (
                   <div key={i} style={{ marginBottom: '8px' }}>
-                    <p style={{ margin: '0 0 2px', fontSize: '13px', fontWeight: '600', color: '#171717' }}>{x.keyword}</p>
-                    <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>{x.why}</p>
+                    <p style={{ margin: '0 0 2px', fontSize: '13px', fontWeight: '600', color: BONE }}>{x.keyword}</p>
+                    <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>{x.why}</p>
                   </div>
                 ))}
               </Collapsible>
               <Collapsible title="Waste Keywords">
                 {(ai.waste_keywords || []).map((x, i) => (
                   <div key={i} style={{ marginBottom: '8px' }}>
-                    <p style={{ margin: '0 0 2px', fontSize: '13px', fontWeight: '600', color: '#171717' }}>{x.keyword} — {x.cost}</p>
-                    <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>{x.why}</p>
+                    <p style={{ margin: '0 0 2px', fontSize: '13px', fontWeight: '600', color: BONE }}>{x.keyword} — {x.cost}</p>
+                    <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>{x.why}</p>
                   </div>
                 ))}
               </Collapsible>
               <Collapsible title="Recommended Next Campaign">
                 {ai.recommended_next_campaign && (
                   <div>
-                    <p style={{ margin: '0 0 4px', fontSize: '13px', fontWeight: '600', color: '#171717' }}>{ai.recommended_next_campaign.concept}</p>
-                    <p style={{ margin: '0 0 4px', fontSize: '12px', color: '#666' }}>Audience: {ai.recommended_next_campaign.target_audience}</p>
-                    <p style={{ margin: '0 0 4px', fontSize: '12px', color: '#666' }}>Suggested budget: {ai.recommended_next_campaign.suggested_budget}</p>
+                    <p style={{ margin: '0 0 4px', fontSize: '13px', fontWeight: '600', color: BONE }}>{ai.recommended_next_campaign.concept}</p>
+                    <p style={{ margin: '0 0 4px', fontSize: '12px', color: MUTED }}>Audience: {ai.recommended_next_campaign.target_audience}</p>
+                    <p style={{ margin: '0 0 4px', fontSize: '12px', color: MUTED }}>Suggested budget: {ai.recommended_next_campaign.suggested_budget}</p>
                     <p style={{ margin: 0, fontSize: '12px', color: GOLD }}>{ai.recommended_next_campaign.rationale}</p>
                   </div>
                 )}

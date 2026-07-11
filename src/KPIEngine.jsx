@@ -4,15 +4,13 @@ import { useToast } from './ToastContext'
 import CityInput, { getLastCity } from './CityInput'
 import { useLoadingSteps } from './useLoadingSteps'
 import { TrustBadge, ValidationWarningBanner } from './TrustLayer'
+import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+
 
 const BACKEND  = 'https://ai-ad-backend-zhpj.onrender.com'
-const GOLD     = '#D4AF37'
 const LS_KEY   = 'adsoh_kpi_result'
 const KPI_LOADING_STEPS = ['Gathering benchmarks...', 'Calculating predictions...', 'Building budget breakdown...']
 
-const card = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
-const lbl  = { display: 'block', color: '#999', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '7px' }
-const inp  = { width: '100%', padding: '10px 13px', borderRadius: '7px', border: '1px solid #E5E5E5', background: '#FAFAFA', color: '#171717', fontSize: '14px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
 
 const INDUSTRIES = [
   'Hospitality (Hotels, Restaurants, Cafes)', 'Schools & Education', 'Healthcare & Clinics',
@@ -60,11 +58,11 @@ function MetricCard({ label, value, range, benchmark }) {
 
   return (
     <div style={{ ...card, padding: '16px 18px' }}>
-      <p style={{ margin: '0 0 6px', fontSize: '11px', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</p>
+      <p style={{ margin: '0 0 6px', fontSize: '11px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</p>
       <p style={{ margin: '0 0 3px', fontSize: '22px', fontWeight: '700', color: accent, letterSpacing: '-0.5px', lineHeight: 1.1 }}>{value || '—'}</p>
-      {range && <p style={{ margin: '0 0 6px', fontSize: '11px', color: '#999' }}>Range: {range}</p>}
+      {range && <p style={{ margin: '0 0 6px', fontSize: '11px', color: MUTED }}>Range: {range}</p>}
       {benchmark && (
-        <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '20px', fontSize: '10px', fontWeight: '600', background: '#F5F5F5', color: '#888', border: '1px solid #EAEAEA' }}>{benchmark}</span>
+        <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '20px', fontSize: '10px', fontWeight: '600', background: SLATE_M, color: MUTED, border: `1px solid ${SLATE_L}` }}>{benchmark}</span>
       )}
     </div>
   )
@@ -143,7 +141,7 @@ export default function KPIEngine() {
   const resolvedIndustry = industry === 'Other' ? industryOther : industry
 
   const page = {
-    minHeight: '100vh', background: '#FAFAFA',
+    minHeight: '100vh', background: INK,
     padding: isMobile ? '28px 16px' : '40px 36px',
     maxWidth: '900px', width: '100%', boxSizing: 'border-box',
     fontFamily: '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif',
@@ -181,15 +179,15 @@ export default function KPIEngine() {
         <BarChart2 size={20} color={GOLD} />
         <h1 style={{ fontSize: '22px', fontWeight: '600', margin: 0, letterSpacing: '-0.4px' }}>KPI Engine</h1>
       </div>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 28px' }}>Predict campaign KPIs before launch — CPL, ROAS, CAC, LTV, and success criteria based on your industry + memory.</p>
+      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 28px' }}>Predict campaign KPIs before launch — CPL, ROAS, CAC, LTV, and success criteria based on your industry + memory.</p>
 
       {/* Input */}
       <div style={{ maxWidth: '640px', width: '100%' }}>
         <div style={{ ...card, padding: isMobile ? '20px 16px' : '26px', marginBottom: '16px' }}>
-          {error && <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: '#BE123C', fontSize: '13px' }}>{error}</div>}
+          {error && <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: RED, fontSize: '13px' }}>{error}</div>}
 
           <div style={{ marginBottom: '14px' }}>
-            <label style={lbl}>Business URL <span style={{ color: '#BBB', fontWeight: '400', textTransform: 'none' }}>(optional — for memory lookup)</span></label>
+            <label style={lbl}>Business URL <span style={{ color: MUTED, fontWeight: '400', textTransform: 'none' }}>(optional — for memory lookup)</span></label>
             <input type="text" value={url} onChange={e => setUrl(e.target.value)} placeholder="e.g. sohscape.com" style={inp} />
           </div>
 
@@ -216,9 +214,9 @@ export default function KPIEngine() {
 
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
             <div>
-              <label style={lbl}>Monthly Budget ₹ <span style={{ color: '#BBB', fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
+              <label style={lbl}>Monthly Budget ₹ <span style={{ color: MUTED, fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
               <input type="number" value={budget} onChange={e => setBudget(e.target.value)} placeholder="e.g. 15000" style={inp} min="0" />
-              <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#999' }}>Leave blank to assume ₹10,000/month</p>
+              <p style={{ margin: '4px 0 0', fontSize: '11px', color: MUTED }}>Leave blank to assume ₹10,000/month</p>
             </div>
             <div>
               <label style={lbl}>Campaign Goal</label>
@@ -249,7 +247,7 @@ export default function KPIEngine() {
                 <span style={{ fontSize: '11px', fontWeight: '700', color: GOLD }}>{i + 1}</span>
               </div>
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: '13px', fontWeight: '500', color: '#171717', margin: '0 0 6px' }}>{label}</p>
+                <p style={{ fontSize: '13px', fontWeight: '500', color: BONE, margin: '0 0 6px' }}>{label}</p>
                 <Shimmer h="9px" w="55%" />
               </div>
             </div>
@@ -259,9 +257,9 @@ export default function KPIEngine() {
 
       {/* Cache banner */}
       {fromCache && result && !loading && (
-        <div style={{ maxWidth: '860px', width: '100%', background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '7px', padding: '9px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>Showing previous result · Generate new report to refresh</p>
-          <button onClick={() => { localStorage.removeItem(LS_KEY); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
+        <div style={{ maxWidth: '860px', width: '100%', background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '9px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>Showing previous result · Generate new report to refresh</p>
+          <button onClick={() => { localStorage.removeItem(LS_KEY); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: MUTED, textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
         </div>
       )}
 
@@ -275,8 +273,8 @@ export default function KPIEngine() {
           {/* Report header */}
           <div style={{ ...card, padding: '14px 20px', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
             <div>
-              <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: '#171717' }}>KPI Predictions — {resolvedIndustry || result.business_key}</p>
-              <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#999' }}>{city} · {goal}{result.memory_used ? ' · memory used' : ''}</p>
+              <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: BONE }}>KPI Predictions — {resolvedIndustry || result.business_key}</p>
+              <p style={{ margin: '2px 0 0', fontSize: '12px', color: MUTED }}>{city} · {goal}{result.memory_used ? ' · memory used' : ''}</p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               {k.confidence !== undefined && (
@@ -296,7 +294,7 @@ export default function KPIEngine() {
             <div style={{ ...card, padding: isMobile ? '20px 16px' : '24px', marginBottom: '12px', border: `2px solid ${GOLD}40`, background: '#FFFDF5' }}>
               <p style={{ margin: '0 0 4px', fontSize: '11px', fontWeight: '700', color: GOLD, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Primary KPI — North Star Metric</p>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', flexWrap: 'wrap', margin: '8px 0 10px' }}>
-                <span style={{ fontSize: '28px', fontWeight: '700', color: '#171717', letterSpacing: '-0.5px' }}>{k.primary_kpi.target}</span>
+                <span style={{ fontSize: '28px', fontWeight: '700', color: BONE, letterSpacing: '-0.5px' }}>{k.primary_kpi.target}</span>
                 <span style={{ fontSize: '16px', fontWeight: '600', color: GOLD }}>{k.primary_kpi.metric}</span>
               </div>
               <p style={{ margin: 0, fontSize: '13.5px', color: '#555', lineHeight: '1.5' }}>{k.primary_kpi.why}</p>
@@ -335,7 +333,7 @@ export default function KPIEngine() {
             const milestones = [
               { key: 'week_1',  label: 'Week 1',   color: '#6366F1', text: sc.week_1 },
               { key: 'week_2',  label: 'Week 2',   color: GOLD,      text: sc.week_2 },
-              { key: 'month_1', label: 'Month 1',  color: '#16A34A', text: sc.month_1 },
+              { key: 'month_1', label: 'Month 1',  color: GREEN, text: sc.month_1 },
               { key: 'month_2', label: 'Month 2',  color: '#D97706', text: sc.month_2 },
               { key: 'month_3', label: 'Month 3',  color: '#DC2626', text: sc.month_3 },
             ]
@@ -351,7 +349,7 @@ export default function KPIEngine() {
                         </div>
                         {i < milestones.length - 1 && <div style={{ width: '2px', height: '14px', background: '#EAEAEA', margin: '3px 0' }} />}
                       </div>
-                      <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#333', lineHeight: '1.5', flex: 1 }}>{m.text}</p>
+                      <p style={{ margin: '4px 0 0', fontSize: '13px', color: BONE, lineHeight: '1.5', flex: 1 }}>{m.text}</p>
                     </div>
                   ))}
                 </div>
@@ -373,7 +371,7 @@ export default function KPIEngine() {
               return (
                 <div style={{ ...card, padding: '20px' }}>
                   <p style={{ margin: '0 0 4px', fontSize: '13px', fontWeight: '600', color: '#555' }}>Budget Breakdown</p>
-                  <p style={{ margin: '0 0 14px', fontSize: '18px', fontWeight: '700', color: '#171717' }}>{bb.recommended_total}</p>
+                  <p style={{ margin: '0 0 14px', fontSize: '18px', fontWeight: '700', color: BONE }}>{bb.recommended_total}</p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px' }}>
                     {rows.map(r => r.value ? (
                       <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -381,13 +379,13 @@ export default function KPIEngine() {
                           <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: r.color, flexShrink: 0 }} />
                           <span style={{ fontSize: '13px', color: '#555' }}>{r.label}</span>
                         </div>
-                        <span style={{ fontSize: '13px', fontWeight: '600', color: '#171717' }}>{r.value}</span>
+                        <span style={{ fontSize: '13px', fontWeight: '600', color: BONE }}>{r.value}</span>
                       </div>
                     ) : null)}
                   </div>
                   {bb.daily_budget && (
-                    <div style={{ background: '#F9F9F9', border: '1px solid #EAEAEA', borderRadius: '6px', padding: '8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '12px', color: '#888', fontWeight: '600' }}>DAILY BUDGET</span>
+                    <div style={{ background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '6px', padding: '8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '12px', color: MUTED, fontWeight: '600' }}>DAILY BUDGET</span>
                       <span style={{ fontSize: '14px', fontWeight: '700', color: GOLD }}>{bb.daily_budget}</span>
                     </div>
                   )}
@@ -404,7 +402,7 @@ export default function KPIEngine() {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
                     {[
                       { label: 'Est. CAC', value: cl.estimated_cac, color: '#DC2626', bg: '#FEF2F2' },
-                      { label: 'Est. LTV', value: cl.estimated_ltv, color: '#16A34A', bg: '#F0FDF4' },
+                      { label: 'Est. LTV', value: cl.estimated_ltv, color: GREEN, bg: '#F0FDF4' },
                     ].map(x => (
                       <div key={x.label} style={{ background: x.bg, borderRadius: '8px', padding: '12px', textAlign: 'center' }}>
                         <p style={{ margin: '0 0 4px', fontSize: '10px', fontWeight: '700', color: x.color, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{x.label}</p>
@@ -420,7 +418,7 @@ export default function KPIEngine() {
                   )}
                   {cl.payback_period && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 2px' }}>
-                      <span style={{ fontSize: '12px', color: '#888' }}>Payback period</span>
+                      <span style={{ fontSize: '12px', color: MUTED }}>Payback period</span>
                       <span style={{ fontSize: '13px', fontWeight: '600', color: '#555' }}>{cl.payback_period}</span>
                     </div>
                   )}
@@ -438,12 +436,12 @@ export default function KPIEngine() {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {k.secondary_kpis.map((s, i) => (
-                  <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', padding: '10px 14px', background: '#FAFAFA', borderRadius: '7px', border: '1px solid #F0F0F0' }}>
+                  <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', padding: '10px 14px', background: INK, borderRadius: '7px', border: '1px solid #F0F0F0' }}>
                     <div style={{ minWidth: '140px', flexShrink: 0 }}>
-                      <p style={{ margin: '0 0 2px', fontSize: '12px', fontWeight: '700', color: '#171717' }}>{s.metric}</p>
+                      <p style={{ margin: '0 0 2px', fontSize: '12px', fontWeight: '700', color: BONE }}>{s.metric}</p>
                       <p style={{ margin: 0, fontSize: '13px', fontWeight: '600', color: GOLD }}>{s.target}</p>
                     </div>
-                    <p style={{ margin: 0, fontSize: '12.5px', color: '#666', lineHeight: '1.5', borderLeft: '2px solid #EAEAEA', paddingLeft: '12px' }}>{s.why}</p>
+                    <p style={{ margin: 0, fontSize: '12.5px', color: MUTED, lineHeight: '1.5', borderLeft: '2px solid #EAEAEA', paddingLeft: '12px' }}>{s.why}</p>
                   </div>
                 ))}
               </div>
@@ -452,8 +450,8 @@ export default function KPIEngine() {
 
           {/* Confidence */}
           {k.confidence_reason && (
-            <div style={{ background: '#F9F9F9', border: '1px solid #EAEAEA', borderRadius: '7px', padding: '11px 15px' }}>
-              <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>
+            <div style={{ background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '11px 15px' }}>
+              <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>
                 <strong style={{ color: '#555' }}>Confidence {k.confidence}/100:</strong> {k.confidence_reason}
               </p>
             </div>

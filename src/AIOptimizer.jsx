@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Zap, Copy, Check, TrendingUp, TrendingDown, Minus, ArrowRight, PauseCircle, PlayCircle, Users, Palette, DollarSign, Search, FlaskConical } from 'lucide-react'
 import CityInput, { getLastCity } from './CityInput'
+import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
-const GOLD    = '#D4AF37'
 const LS_KEY  = 'adsoh_optimizer_result'
 
-const card = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
-const lbl  = { display: 'block', color: '#999', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '7px' }
-const inp  = { width: '100%', padding: '10px 13px', borderRadius: '7px', border: '1px solid #E5E5E5', background: '#FAFAFA', color: '#171717', fontSize: '14px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
 
 const INDUSTRIES = [
   'Hospitality (Hotels, Restaurants, Cafes)', 'Schools & Education', 'Healthcare & Clinics',
@@ -39,9 +37,9 @@ function CopyBtn({ text }) {
 
 function UrgencyBadge({ urgency }) {
   const map = {
-    immediate:   { bg: '#FEF2F2', color: '#BE123C', border: '#FECDD3' },
+    immediate:   { bg: '#FEF2F2', color: RED, border: '#FECDD3' },
     'this week': { bg: '#FFFBEB', color: '#D97706', border: '#FDE68A' },
-    monitor:     { bg: '#F5F5F5', color: '#666',    border: '#E5E5E5' },
+    monitor:     { bg: '#F5F5F5', color: MUTED,    border: '#E5E5E5' },
   }
   const k = (urgency || '').toLowerCase()
   const s = map[k] || map.monitor
@@ -50,8 +48,8 @@ function UrgencyBadge({ urgency }) {
 
 function ActionBadge({ action }) {
   const map = {
-    add:    { bg: '#F0FDF4', color: '#16A34A', border: '#BBF7D0' },
-    remove: { bg: '#FEF2F2', color: '#BE123C', border: '#FECDD3' },
+    add:    { bg: '#F0FDF4', color: GREEN, border: '#BBF7D0' },
+    remove: { bg: '#FEF2F2', color: RED, border: '#FECDD3' },
     modify: { bg: '#FFFBEB', color: '#D97706', border: '#FDE68A' },
   }
   const k = (action || '').toLowerCase()
@@ -140,7 +138,7 @@ export default function AIOptimizer() {
   const resolvedIndustry = industry === 'Other' ? industryOther : industry
 
   const page = {
-    minHeight: '100vh', background: '#FAFAFA',
+    minHeight: '100vh', background: INK,
     padding: isMobile ? '28px 16px' : '40px 36px',
     maxWidth: '960px', width: '100%', boxSizing: 'border-box',
     fontFamily: '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif',
@@ -178,8 +176,8 @@ export default function AIOptimizer() {
 
   const verdictStyle = (() => {
     const v = (o.overall_verdict || '').toLowerCase()
-    if (v.includes('urgent')) return { bg: '#FEF2F2', border: '#FECDD3', color: '#BE123C' }
-    if (v.includes('well'))   return { bg: '#F0FDF4', border: '#BBF7D0', color: '#16A34A' }
+    if (v.includes('urgent')) return { bg: '#FEF2F2', border: '#FECDD3', color: RED }
+    if (v.includes('well'))   return { bg: '#F0FDF4', border: '#BBF7D0', color: GREEN }
     return { bg: '#FFFBEB', border: '#FDE68A', color: '#D97706' }
   })()
 
@@ -191,17 +189,17 @@ export default function AIOptimizer() {
         <Zap size={20} color={GOLD} />
         <h1 style={{ fontSize: '22px', fontWeight: '600', margin: 0, letterSpacing: '-0.4px' }}>AI Optimizer</h1>
       </div>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 28px' }}>Compare expected KPIs vs actual performance and get specific, data-backed optimization recommendations.</p>
+      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 28px' }}>Compare expected KPIs vs actual performance and get specific, data-backed optimization recommendations.</p>
 
       {/* Form */}
       <div style={{ maxWidth: '640px', width: '100%' }}>
         <div style={{ ...card, padding: isMobile ? '20px 16px' : '26px', marginBottom: '16px' }}>
-          {error && <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: '#BE123C', fontSize: '13px' }}>{error}</div>}
+          {error && <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: RED, fontSize: '13px' }}>{error}</div>}
 
           <div style={{ marginBottom: '14px' }}>
-            <label style={lbl}>Business URL <span style={{ color: '#BBB', fontWeight: '400', textTransform: 'none' }}>(optional — for memory)</span></label>
+            <label style={lbl}>Business URL <span style={{ color: MUTED, fontWeight: '400', textTransform: 'none' }}>(optional — for memory)</span></label>
             <input type="text" value={url} onChange={e => setUrl(e.target.value)} placeholder="e.g. sohscape.com" style={inp} />
-            <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#999' }}>Same URL + Industry as Marketing Brain, KPI Engine, and Performance Intelligence</p>
+            <p style={{ margin: '4px 0 0', fontSize: '11px', color: MUTED }}>Same URL + Industry as Marketing Brain, KPI Engine, and Performance Intelligence</p>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
@@ -246,7 +244,7 @@ export default function AIOptimizer() {
                 <span style={{ fontSize: '11px', fontWeight: '700', color: GOLD }}>{i + 1}</span>
               </div>
               <div style={{ flex: 1 }}>
-                <p style={{ margin: '0 0 5px', fontSize: '13px', fontWeight: '500', color: '#171717' }}>{label}</p>
+                <p style={{ margin: '0 0 5px', fontSize: '13px', fontWeight: '500', color: BONE }}>{label}</p>
                 <Shimmer h="8px" w="50%" />
               </div>
             </div>
@@ -256,9 +254,9 @@ export default function AIOptimizer() {
 
       {/* Cache banner */}
       {fromCache && result && !loading && (
-        <div style={{ maxWidth: '960px', width: '100%', background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '7px', padding: '9px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>Showing previous result · Optimise again to refresh</p>
-          <button onClick={() => { localStorage.removeItem(LS_KEY); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
+        <div style={{ maxWidth: '960px', width: '100%', background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '9px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>Showing previous result · Optimise again to refresh</p>
+          <button onClick={() => { localStorage.removeItem(LS_KEY); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: MUTED, textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
         </div>
       )}
 
@@ -269,8 +267,8 @@ export default function AIOptimizer() {
           {/* Report header */}
           <div style={{ ...card, padding: '14px 20px', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
             <div>
-              <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: '#171717' }}>AI Optimizer Report</p>
-              <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#999' }}>
+              <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: BONE }}>AI Optimizer Report</p>
+              <p style={{ margin: '2px 0 0', fontSize: '12px', color: MUTED }}>
                 {result.has_kpi ? '✓ KPI data' : '⚠ No KPI data'}
                 {' · '}
                 {result.has_perf ? '✓ Performance data' : '⚠ No Performance data'}
@@ -293,7 +291,7 @@ export default function AIOptimizer() {
                 <p style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: verdictStyle.color, textTransform: 'capitalize' }}>{o.overall_verdict}</p>
               </div>
               {o.health_change && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '20px', background: '#fff', border: '1px solid #EAEAEA' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '20px', background: SLATE, border: `1px solid ${SLATE_L}` }}>
                   {o.health_change === 'improving' ? <TrendingUp size={13} color="#16A34A" /> : o.health_change === 'declining' ? <TrendingDown size={13} color="#DC2626" /> : <Minus size={13} color="#D97706" />}
                   <span style={{ fontSize: '12px', fontWeight: '600', color: '#555', textTransform: 'capitalize' }}>{o.health_change}</span>
                 </div>
@@ -312,10 +310,10 @@ export default function AIOptimizer() {
                       <span style={{ fontSize: '11px', fontWeight: '700', color: i === 0 ? '#fff' : '#666' }}>{a.priority}</span>
                     </div>
                     <div style={{ flex: 1 }}>
-                      <p style={{ margin: '0 0 4px', fontSize: '13.5px', fontWeight: i === 0 ? '600' : '500', color: '#171717', lineHeight: '1.4' }}>{a.action}</p>
+                      <p style={{ margin: '0 0 4px', fontSize: '13.5px', fontWeight: i === 0 ? '600' : '500', color: BONE, lineHeight: '1.4' }}>{a.action}</p>
                       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '12px', color: '#16A34A', fontWeight: '500' }}>→ {a.expected_impact}</span>
-                        <span style={{ fontSize: '12px', color: '#888' }}>{a.time_to_implement}</span>
+                        <span style={{ fontSize: '12px', color: GREEN, fontWeight: '500' }}>→ {a.expected_impact}</span>
+                        <span style={{ fontSize: '12px', color: MUTED }}>{a.time_to_implement}</span>
                       </div>
                     </div>
                   </div>
@@ -335,11 +333,11 @@ export default function AIOptimizer() {
                   {pr.map((p, i) => (
                     <div key={i} style={{ borderLeft: '3px solid #DC2626', paddingLeft: '12px' }}>
                       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '4px' }}>
-                        <p style={{ margin: 0, fontSize: '13px', fontWeight: '600', color: '#171717' }}>{p.what}</p>
+                        <p style={{ margin: 0, fontSize: '13px', fontWeight: '600', color: BONE }}>{p.what}</p>
                         <UrgencyBadge urgency={p.urgency} />
                       </div>
                       <p style={{ margin: '0 0 4px', fontSize: '12px', color: '#555', lineHeight: '1.45' }}>{p.why}</p>
-                      {p.expected_saving && <p style={{ margin: 0, fontSize: '11px', fontWeight: '600', color: '#16A34A' }}>Save: {p.expected_saving}</p>}
+                      {p.expected_saving && <p style={{ margin: 0, fontSize: '11px', fontWeight: '600', color: GREEN }}>Save: {p.expected_saving}</p>}
                     </div>
                   ))}
                 </div>
@@ -354,8 +352,8 @@ export default function AIOptimizer() {
                   {sr.map((s, i) => (
                     <div key={i} style={{ borderLeft: '3px solid #16A34A', paddingLeft: '12px' }}>
                       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '4px' }}>
-                        <p style={{ margin: 0, fontSize: '13px', fontWeight: '600', color: '#171717' }}>{s.what}</p>
-                        <span style={{ fontSize: '11px', fontWeight: '700', color: '#16A34A', background: '#F0FDF4', border: '1px solid #BBF7D0', padding: '2px 7px', borderRadius: '4px', whiteSpace: 'nowrap' }}>{s.how_much}</span>
+                        <p style={{ margin: 0, fontSize: '13px', fontWeight: '600', color: BONE }}>{s.what}</p>
+                        <span style={{ fontSize: '11px', fontWeight: '700', color: GREEN, background: 'rgba(63,166,107,0.1)', border: '1px solid #BBF7D0', padding: '2px 7px', borderRadius: '4px', whiteSpace: 'nowrap' }}>{s.how_much}</span>
                       </div>
                       <p style={{ margin: '0 0 4px', fontSize: '12px', color: '#555', lineHeight: '1.45' }}>{s.why}</p>
                       {s.expected_impact && <p style={{ margin: 0, fontSize: '11px', fontWeight: '600', color: '#6366F1' }}>Impact: {s.expected_impact}</p>}
@@ -372,7 +370,7 @@ export default function AIOptimizer() {
               <SectionHeader icon={Users} label="Audience Recommendations" color="#6366F1" />
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: '10px' }}>
                 {ar.map((a, i) => (
-                  <div key={i} style={{ background: '#FAFAFA', border: '1px solid #F0F0F0', borderRadius: '7px', padding: '12px 14px' }}>
+                  <div key={i} style={{ background: INK, border: '1px solid #F0F0F0', borderRadius: '7px', padding: '12px 14px' }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
                       <span style={{ fontSize: '11px', background: '#EEF2FF', color: '#6366F1', border: '1px solid #C7D2FE', padding: '2px 7px', borderRadius: '4px', fontWeight: '600', flexShrink: 0 }}>Current</span>
                       <p style={{ margin: 0, fontSize: '12px', color: '#555', lineHeight: '1.4' }}>{a.current}</p>
@@ -380,9 +378,9 @@ export default function AIOptimizer() {
                     {a.problem && <p style={{ margin: '0 0 6px', fontSize: '12px', color: '#DC2626', lineHeight: '1.4' }}>Problem: {a.problem}</p>}
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
                       <ArrowRight size={12} color={GOLD} style={{ flexShrink: 0, marginTop: '3px' }} />
-                      <p style={{ margin: 0, fontSize: '12.5px', fontWeight: '500', color: '#171717', lineHeight: '1.4' }}>{a.recommended_change}</p>
+                      <p style={{ margin: 0, fontSize: '12.5px', fontWeight: '500', color: BONE, lineHeight: '1.4' }}>{a.recommended_change}</p>
                     </div>
-                    {a.expected_improvement && <p style={{ margin: 0, fontSize: '11px', color: '#16A34A', fontWeight: '600' }}>{a.expected_improvement}</p>}
+                    {a.expected_improvement && <p style={{ margin: 0, fontSize: '11px', color: GREEN, fontWeight: '600' }}>{a.expected_improvement}</p>}
                   </div>
                 ))}
               </div>
@@ -395,16 +393,16 @@ export default function AIOptimizer() {
               <SectionHeader icon={Palette} label="Creative Recommendations" color="#D97706" />
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: '10px' }}>
                 {cr.map((c, i) => (
-                  <div key={i} style={{ background: '#FAFAFA', border: '1px solid #F0F0F0', borderRadius: '7px', padding: '12px 14px' }}>
+                  <div key={i} style={{ background: INK, border: '1px solid #F0F0F0', borderRadius: '7px', padding: '12px 14px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', gap: '8px' }}>
                       <p style={{ margin: 0, fontSize: '12px', fontWeight: '600', color: '#DC2626', lineHeight: '1.4', flex: 1 }}>Issue: {c.issue}</p>
                       <FormatBadge format={c.format} />
                     </div>
-                    <p style={{ margin: '0 0 8px', fontSize: '12.5px', color: '#333', lineHeight: '1.45' }}>{c.recommendation}</p>
+                    <p style={{ margin: '0 0 8px', fontSize: '12.5px', color: BONE, lineHeight: '1.45' }}>{c.recommendation}</p>
                     {c.hook_suggestion && (
                       <div style={{ background: GOLD + '10', border: `1px solid ${GOLD}30`, borderRadius: '5px', padding: '7px 10px' }}>
                         <p style={{ margin: '0 0 2px', fontSize: '10px', fontWeight: '700', color: GOLD, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Hook</p>
-                        <p style={{ margin: 0, fontSize: '12px', color: '#333', fontStyle: 'italic', lineHeight: '1.4' }}>"{c.hook_suggestion}"</p>
+                        <p style={{ margin: 0, fontSize: '12px', color: BONE, fontStyle: 'italic', lineHeight: '1.4' }}>"{c.hook_suggestion}"</p>
                       </div>
                     )}
                   </div>
@@ -418,9 +416,9 @@ export default function AIOptimizer() {
             <div style={{ ...card, padding: isMobile ? '18px 14px' : '22px', marginBottom: '12px' }}>
               <SectionHeader icon={DollarSign} label="Budget Reallocation" color="#16A34A" />
               <div style={{ display: 'flex', gap: '16px', marginBottom: '14px', flexWrap: 'wrap' }}>
-                {[{ label: 'Current', value: br.current_total, color: '#888' }, { label: 'Recommended', value: br.recommended_total, color: '#16A34A' }].map(x => (
-                  <div key={x.label} style={{ background: '#FAFAFA', border: '1px solid #EAEAEA', borderRadius: '7px', padding: '10px 16px' }}>
-                    <p style={{ margin: '0 0 2px', fontSize: '10px', fontWeight: '700', color: '#999', textTransform: 'uppercase' }}>{x.label}</p>
+                {[{ label: 'Current', value: br.current_total, color: MUTED }, { label: 'Recommended', value: br.recommended_total, color: GREEN }].map(x => (
+                  <div key={x.label} style={{ background: INK, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '10px 16px' }}>
+                    <p style={{ margin: '0 0 2px', fontSize: '10px', fontWeight: '700', color: MUTED, textTransform: 'uppercase' }}>{x.label}</p>
                     <p style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: x.color }}>{x.value || '—'}</p>
                   </div>
                 ))}
@@ -429,16 +427,16 @@ export default function AIOptimizer() {
                 <thead>
                   <tr>
                     {['Platform', 'Current', 'Recommended', 'Reason'].map(h => (
-                      <th key={h} style={{ textAlign: 'left', padding: '6px 10px', fontSize: '10px', fontWeight: '700', color: '#999', textTransform: 'uppercase', borderBottom: '1px solid #F0F0F0' }}>{h}</th>
+                      <th key={h} style={{ textAlign: 'left', padding: '6px 10px', fontSize: '10px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', borderBottom: '1px solid #F0F0F0' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {br.reallocation.map((row, i) => (
                     <tr key={i} style={{ borderBottom: '1px solid #F7F7F7' }}>
-                      <td style={{ padding: '9px 10px', fontSize: '13px', fontWeight: '600', color: '#171717' }}>{row.platform}</td>
-                      <td style={{ padding: '9px 10px', fontSize: '13px', color: '#888' }}>{row.current}</td>
-                      <td style={{ padding: '9px 10px', fontSize: '13px', fontWeight: '600', color: '#16A34A' }}>{row.recommended}</td>
+                      <td style={{ padding: '9px 10px', fontSize: '13px', fontWeight: '600', color: BONE }}>{row.platform}</td>
+                      <td style={{ padding: '9px 10px', fontSize: '13px', color: MUTED }}>{row.current}</td>
+                      <td style={{ padding: '9px 10px', fontSize: '13px', fontWeight: '600', color: GREEN }}>{row.recommended}</td>
                       <td style={{ padding: '9px 10px', fontSize: '12px', color: '#555', lineHeight: '1.4' }}>{row.reason}</td>
                     </tr>
                   ))}
@@ -453,11 +451,11 @@ export default function AIOptimizer() {
               <SectionHeader icon={Search} label="Keyword Recommendations" color="#555" />
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {kr.map((k, i) => (
-                  <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', padding: '9px 12px', background: '#FAFAFA', borderRadius: '6px', border: '1px solid #F0F0F0' }}>
+                  <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', padding: '9px 12px', background: INK, borderRadius: '6px', border: '1px solid #F0F0F0' }}>
                     <ActionBadge action={k.action} />
                     <div style={{ flex: 1 }}>
-                      <p style={{ margin: '0 0 2px', fontSize: '13px', fontWeight: '600', color: '#171717' }}>{k.keyword}</p>
-                      <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>{k.reason}</p>
+                      <p style={{ margin: '0 0 2px', fontSize: '13px', fontWeight: '600', color: BONE }}>{k.keyword}</p>
+                      <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>{k.reason}</p>
                     </div>
                   </div>
                 ))}
@@ -469,7 +467,7 @@ export default function AIOptimizer() {
           {nt.what_to_test && (
             <div style={{ ...card, padding: isMobile ? '18px 14px' : '22px', marginBottom: '12px', border: `1.5px solid ${GOLD}40`, background: '#FFFDF5' }}>
               <SectionHeader icon={FlaskConical} label="Next Test to Run" color={GOLD} />
-              <p style={{ margin: '0 0 10px', fontSize: '14px', fontWeight: '600', color: '#171717' }}>{nt.what_to_test}</p>
+              <p style={{ margin: '0 0 10px', fontSize: '14px', fontWeight: '600', color: BONE }}>{nt.what_to_test}</p>
               {[
                 { label: 'Hypothesis', value: nt.hypothesis },
                 { label: 'How to Measure', value: nt.how_to_measure },
@@ -477,7 +475,7 @@ export default function AIOptimizer() {
               ].map(row => row.value ? (
                 <div key={row.label} style={{ display: 'flex', gap: '10px', marginBottom: '6px', alignItems: 'flex-start' }}>
                   <span style={{ fontSize: '11px', fontWeight: '700', color: GOLD, minWidth: '110px', flexShrink: 0, paddingTop: '1px' }}>{row.label}</span>
-                  <p style={{ margin: 0, fontSize: '13px', color: '#333', lineHeight: '1.5' }}>{row.value}</p>
+                  <p style={{ margin: 0, fontSize: '13px', color: BONE, lineHeight: '1.5' }}>{row.value}</p>
                 </div>
               ) : null)}
             </div>

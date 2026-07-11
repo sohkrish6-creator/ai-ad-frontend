@@ -6,15 +6,14 @@ import { Copy, Check, Target, TrendingUp, Zap, Users, Tag, MapPin, ChartBar } fr
 import { useToast } from './ToastContext'
 import { useLoadingSteps } from './useLoadingSteps'
 import { TrustBadge, ValidationWarningBanner } from './TrustLayer'
+import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+
 
 const OPP_LOADING_STEPS = ['Loading business memory...', 'Finding best audience...', 'Calculating opportunity score...']
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
-const GOLD    = '#D4AF37'
 
-const card  = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
-const lbl   = { display: 'block', color: '#999', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '7px' }
-const input = { width: '100%', padding: '10px 13px', borderRadius: '7px', border: '1px solid #E5E5E5', background: '#FAFAFA', color: '#171717', fontSize: '14px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
+const input = { width: '100%', padding: '10px 13px', borderRadius: '7px', border: `1px solid ${SLATE_L}`, background: INK, color: BONE, fontSize: '14px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
 
 const INDUSTRIES = [
   'Hospitality (Hotels, Restaurants, Cafes)', 'Schools & Education', 'Healthcare & Clinics',
@@ -164,7 +163,7 @@ export default function OpportunityEngine() {
   }
 
   const page = {
-    minHeight: '100vh', background: '#FAFAFA',
+    minHeight: '100vh', background: INK,
     padding: isMobile ? '28px 16px' : '40px 36px',
     maxWidth: '860px', width: '100%', boxSizing: 'border-box',
     fontFamily: '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif',
@@ -178,7 +177,7 @@ export default function OpportunityEngine() {
         <Target size={20} color={GOLD} />
         <h1 style={{ fontSize: '22px', fontWeight: '600', margin: 0, letterSpacing: '-0.4px' }}>Opportunity Engine</h1>
       </div>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 28px 30px' }}>
+      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 28px 30px' }}>
         Reads your stored business memory and tells you exactly where the highest ROI is — so you know what to do first.
       </p>
 
@@ -195,7 +194,7 @@ export default function OpportunityEngine() {
         <div style={{ ...card, padding: isMobile ? '20px 16px' : '26px 28px', marginBottom: '16px' }}>
 
           {error && (
-            <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: '#BE123C', fontSize: '13px' }}>
+            <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: RED, fontSize: '13px' }}>
               {error}
             </div>
           )}
@@ -210,7 +209,7 @@ export default function OpportunityEngine() {
               placeholder="e.g. sohscape.com or leave blank to use industry+city"
               style={input}
             />
-            <p style={{ margin: '5px 0 0', fontSize: '11px', color: '#BBB' }}>Same URL you used in Marketing Brain — so memory matches.</p>
+            <p style={{ margin: '5px 0 0', fontSize: '11px', color: MUTED }}>Same URL you used in Marketing Brain — so memory matches.</p>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
@@ -224,7 +223,7 @@ export default function OpportunityEngine() {
             <div>
               <label style={lbl}>Target City</label>
               <CityInput value={city} onChange={setCity} style={input} />
-              <p style={{ margin: '5px 0 0', fontSize: '11px', color: '#999' }}>Same city as Marketing Brain B2B target</p>
+              <p style={{ margin: '5px 0 0', fontSize: '11px', color: MUTED }}>Same city as Marketing Brain B2B target</p>
             </div>
           </div>
 
@@ -236,7 +235,7 @@ export default function OpportunityEngine() {
           )}
 
           <div style={{ marginBottom: '22px' }}>
-            <label style={lbl}>Monthly Budget (₹) <span style={{ color: '#BBB', fontWeight: '400', textTransform: 'none' }}>optional</span></label>
+            <label style={lbl}>Monthly Budget (₹) <span style={{ color: MUTED, fontWeight: '400', textTransform: 'none' }}>optional</span></label>
             <input type="number" value={budget} onChange={e => setBudget(e.target.value)} placeholder="e.g. 50000" style={input} />
           </div>
 
@@ -267,7 +266,7 @@ export default function OpportunityEngine() {
                 <span style={{ fontSize: '11px', fontWeight: '700', color: GOLD }}>{i + 1}</span>
               </div>
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: '13px', fontWeight: '500', color: '#171717', margin: '0 0 6px' }}>{label}</p>
+                <p style={{ fontSize: '13px', fontWeight: '500', color: BONE, margin: '0 0 6px' }}>{label}</p>
                 <Shimmer h="8px" w="55%" />
               </div>
             </div>
@@ -277,9 +276,9 @@ export default function OpportunityEngine() {
 
       {/* Results */}
       {fromCache && result && !loading && (
-        <div style={{ maxWidth: '760px', width: '100%', background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '7px', padding: '9px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>Showing previous result · Generate new report to refresh</p>
-          <button onClick={() => { localStorage.removeItem(LS_KEY_OPP); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
+        <div style={{ maxWidth: '760px', width: '100%', background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '9px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>Showing previous result · Generate new report to refresh</p>
+          <button onClick={() => { localStorage.removeItem(LS_KEY_OPP); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: MUTED, textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
         </div>
       )}
 
@@ -311,7 +310,7 @@ export default function OpportunityEngine() {
                 <Target size={16} color={GOLD} />
                 <span style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', color: GOLD }}>What To Do First</span>
               </div>
-              <p style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#171717', lineHeight: '1.5' }}>
+              <p style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: BONE, lineHeight: '1.5' }}>
                 {opp.what_to_do_first}
               </p>
             </div>
@@ -320,10 +319,10 @@ export default function OpportunityEngine() {
           {/* 2. Biggest Opportunity */}
           {opp.biggest_opportunity && (
             <SectionCard icon={TrendingUp} iconColor="#171717" label="Biggest Opportunity">
-              <p style={{ margin: '0 0 8px', fontSize: '15px', fontWeight: '600', color: '#171717' }}>{opp.biggest_opportunity.opportunity}</p>
+              <p style={{ margin: '0 0 8px', fontSize: '15px', fontWeight: '600', color: BONE }}>{opp.biggest_opportunity.opportunity}</p>
               <p style={{ margin: '0 0 10px', fontSize: '13.5px', color: '#555', lineHeight: '1.6' }}>{opp.biggest_opportunity.why}</p>
-              <div style={{ display: 'inline-block', background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '6px', padding: '5px 12px' }}>
-                <span style={{ fontSize: '12px', fontWeight: '600', color: '#16A34A' }}>Expected Impact: {opp.biggest_opportunity.expected_impact}</span>
+              <div style={{ display: 'inline-block', background: 'rgba(63,166,107,0.1)', border: '1px solid #BBF7D0', borderRadius: '6px', padding: '5px 12px' }}>
+                <span style={{ fontSize: '12px', fontWeight: '600', color: GREEN }}>Expected Impact: {opp.biggest_opportunity.expected_impact}</span>
               </div>
             </SectionCard>
           )}
@@ -337,7 +336,7 @@ export default function OpportunityEngine() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
                     <Users size={14} color="#888" />
-                    <span style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', color: '#888' }}>Best Audience</span>
+                    <span style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', color: MUTED }}>Best Audience</span>
                   </div>
                   {opp.highest_roi_audience.priority_score && (
                     <span style={{ fontSize: '11px', fontWeight: '700', color: GOLD, background: GOLD + '15', border: `1px solid ${GOLD}40`, borderRadius: '12px', padding: '2px 8px' }}>
@@ -345,8 +344,8 @@ export default function OpportunityEngine() {
                     </span>
                   )}
                 </div>
-                <p style={{ margin: '0 0 7px', fontSize: '14px', fontWeight: '600', color: '#171717' }}>{opp.highest_roi_audience.segment}</p>
-                <p style={{ margin: 0, fontSize: '12.5px', color: '#666', lineHeight: '1.55' }}>{opp.highest_roi_audience.why}</p>
+                <p style={{ margin: '0 0 7px', fontSize: '14px', fontWeight: '600', color: BONE }}>{opp.highest_roi_audience.segment}</p>
+                <p style={{ margin: 0, fontSize: '12.5px', color: MUTED, lineHeight: '1.55' }}>{opp.highest_roi_audience.why}</p>
               </div>
             )}
 
@@ -356,7 +355,7 @@ export default function OpportunityEngine() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
                     <Tag size={14} color="#888" />
-                    <span style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', color: '#888' }}>Best Offer</span>
+                    <span style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', color: MUTED }}>Best Offer</span>
                   </div>
                   {opp.highest_roi_offer.revenue_potential && (
                     <span style={{
@@ -369,8 +368,8 @@ export default function OpportunityEngine() {
                     </span>
                   )}
                 </div>
-                <p style={{ margin: '0 0 7px', fontSize: '14px', fontWeight: '600', color: '#171717' }}>{opp.highest_roi_offer.offer}</p>
-                <p style={{ margin: 0, fontSize: '12.5px', color: '#666', lineHeight: '1.55' }}>{opp.highest_roi_offer.why}</p>
+                <p style={{ margin: '0 0 7px', fontSize: '14px', fontWeight: '600', color: BONE }}>{opp.highest_roi_offer.offer}</p>
+                <p style={{ margin: 0, fontSize: '12.5px', color: MUTED, lineHeight: '1.55' }}>{opp.highest_roi_offer.why}</p>
               </div>
             )}
 
@@ -379,10 +378,10 @@ export default function OpportunityEngine() {
               <div style={{ ...card, padding: '18px 20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '10px' }}>
                   <ChartBar size={14} color="#888" />
-                  <span style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', color: '#888' }}>Best Platform</span>
+                  <span style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', color: MUTED }}>Best Platform</span>
                 </div>
-                <p style={{ margin: '0 0 7px', fontSize: '14px', fontWeight: '600', color: '#171717' }}>{opp.highest_roi_platform.platform}</p>
-                <p style={{ margin: 0, fontSize: '12.5px', color: '#666', lineHeight: '1.55' }}>{opp.highest_roi_platform.why}</p>
+                <p style={{ margin: '0 0 7px', fontSize: '14px', fontWeight: '600', color: BONE }}>{opp.highest_roi_platform.platform}</p>
+                <p style={{ margin: 0, fontSize: '12.5px', color: MUTED, lineHeight: '1.55' }}>{opp.highest_roi_platform.why}</p>
               </div>
             )}
 
@@ -391,10 +390,10 @@ export default function OpportunityEngine() {
               <div style={{ ...card, padding: '18px 20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '10px' }}>
                   <MapPin size={14} color="#888" />
-                  <span style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', color: '#888' }}>Best Location</span>
+                  <span style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', color: MUTED }}>Best Location</span>
                 </div>
-                <p style={{ margin: '0 0 7px', fontSize: '14px', fontWeight: '600', color: '#171717' }}>{opp.highest_roi_location.area}</p>
-                <p style={{ margin: 0, fontSize: '12.5px', color: '#666', lineHeight: '1.55' }}>{opp.highest_roi_location.why}</p>
+                <p style={{ margin: '0 0 7px', fontSize: '14px', fontWeight: '600', color: BONE }}>{opp.highest_roi_location.area}</p>
+                <p style={{ margin: 0, fontSize: '12.5px', color: MUTED, lineHeight: '1.55' }}>{opp.highest_roi_location.why}</p>
               </div>
             )}
           </div>
@@ -404,7 +403,7 @@ export default function OpportunityEngine() {
             <div style={{ ...card, padding: '20px 22px', marginTop: '10px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
                 <Zap size={15} color={GOLD} />
-                <span style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', color: '#888' }}>Quick Wins This Week</span>
+                <span style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', color: MUTED }}>Quick Wins This Week</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
                 {opp.quick_wins.map((win, i) => (

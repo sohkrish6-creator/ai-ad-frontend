@@ -4,14 +4,12 @@ import {
   Clock, Search, ExternalLink, FileText, Rocket, Sparkles, ChevronDown, ChevronUp,
   RefreshCw, AlertCircle,
 } from 'lucide-react'
+import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
-const GOLD    = '#D4AF37'
 const LS_TAB    = 'adsoh_history_tab'
 const LS_FILTER = 'adsoh_history_filter'
 
-const card = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
-const inp  = { padding: '9px 13px', borderRadius: '7px', border: '1px solid #E5E5E5', background: '#FAFAFA', color: '#171717', fontSize: '13px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
 
 // activity_type → display label, category (for filter chips), icon, and the
 // route to open when a report/analysis row is clicked.
@@ -107,23 +105,23 @@ function ActivityRow({ item, onOpen }) {
         <TypeIcon category={meta.category} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '13.5px', fontWeight: '600', color: '#171717' }}>
+            <span style={{ fontSize: '13.5px', fontWeight: '600', color: BONE }}>
               {item.business_name || item.url || 'Unknown business'}
             </span>
             <span style={{ fontSize: '11px', color: '#AAA', whiteSpace: 'nowrap' }}>{timeAgo(item.created_at)}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '3px 0', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '12px', color: '#666' }}>{meta.label}</span>
-            {item.city && <span style={{ fontSize: '11px', color: '#BBB' }}>· {item.city}</span>}
+            <span style={{ fontSize: '12px', color: MUTED }}>{meta.label}</span>
+            {item.city && <span style={{ fontSize: '11px', color: MUTED }}>· {item.city}</span>}
           </div>
-          <p style={{ margin: 0, fontSize: '12px', color: '#888', lineHeight: '1.5' }}>{item.summary}</p>
+          <p style={{ margin: 0, fontSize: '12px', color: MUTED, lineHeight: '1.5' }}>{item.summary}</p>
         </div>
         {isCampaign && (expanded ? <ChevronUp size={15} color="#BBB" /> : <ChevronDown size={15} color="#BBB" />)}
       </div>
       {isCampaign && expanded && (
         <div style={{ marginTop: '11px', paddingTop: '11px', borderTop: '1px solid #EEE', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
-          <div style={{ fontSize: '12px', color: '#888' }}>
-            <strong style={{ color: '#171717' }}>Campaign ID:</strong> {item.reference_id || 'N/A'}
+          <div style={{ fontSize: '12px', color: MUTED }}>
+            <strong style={{ color: BONE }}>Campaign ID:</strong> {item.reference_id || 'N/A'}
           </div>
           {dashboardLink && (
             <a href={dashboardLink} target="_blank" rel="noopener noreferrer" style={{
@@ -146,15 +144,15 @@ function CampaignRow({ c }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
         <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: platformColor, flexShrink: 0 }} />
         <div>
-          <p style={{ margin: '0 0 2px', fontSize: '13.5px', fontWeight: '600', color: '#171717' }}>{c.name}</p>
-          <p style={{ margin: 0, fontSize: '11px', color: '#999', textTransform: 'capitalize' }}>{c.platform} Ads · ID: {c.campaign_id}</p>
+          <p style={{ margin: '0 0 2px', fontSize: '13.5px', fontWeight: '600', color: BONE }}>{c.name}</p>
+          <p style={{ margin: 0, fontSize: '11px', color: MUTED, textTransform: 'capitalize' }}>{c.platform} Ads · ID: {c.campaign_id}</p>
         </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <StatusBadge status={c.status} />
         <a href={c.dashboard_link} target="_blank" rel="noopener noreferrer" style={{
-          display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#F5F5F5', border: '1px solid #E5E5E5',
-          color: '#171717', padding: '7px 12px', borderRadius: '7px', fontSize: '12px', fontWeight: '600', textDecoration: 'none',
+          display: 'inline-flex', alignItems: 'center', gap: '6px', background: SLATE_M, border: `1px solid ${SLATE_L}`,
+          color: BONE, padding: '7px 12px', borderRadius: '7px', fontSize: '12px', fontWeight: '600', textDecoration: 'none',
         }}>
           <ExternalLink size={12} /> Open
         </a>
@@ -242,7 +240,7 @@ export default function History() {
         <Clock size={20} color={GOLD} />
         <h1 style={{ fontSize: '22px', fontWeight: '600', margin: 0, letterSpacing: '-0.4px' }}>History</h1>
       </div>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 20px' }}>Every report, analysis, and campaign this tool has ever generated — one place to find past work.</p>
+      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 20px' }}>Every report, analysis, and campaign this tool has ever generated — one place to find past work.</p>
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: '4px', marginBottom: '18px', borderBottom: '1px solid #EAEAEA' }}>
@@ -282,7 +280,7 @@ export default function History() {
                 </button>
               ))}
             </div>
-            <button onClick={loadActivity} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#999', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px' }}>
+            <button onClick={loadActivity} style={{ background: 'none', border: 'none', cursor: 'pointer', color: MUTED, display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px' }}>
               <RefreshCw size={12} /> Refresh
             </button>
           </div>
@@ -296,14 +294,14 @@ export default function History() {
             />
           </div>
 
-          {activityLoading && <p style={{ color: '#999', fontSize: '13px' }}>Loading activity...</p>}
+          {activityLoading && <p style={{ color: MUTED, fontSize: '13px' }}>Loading activity...</p>}
           {activityError && (
-            <div style={{ ...card, padding: '14px', display: 'flex', alignItems: 'center', gap: '8px', color: '#BE123C' }}>
+            <div style={{ ...card, padding: '14px', display: 'flex', alignItems: 'center', gap: '8px', color: RED }}>
               <AlertCircle size={15} /> <span style={{ fontSize: '13px' }}>{activityError}</span>
             </div>
           )}
           {!activityLoading && !activityError && filteredActivity.length === 0 && (
-            <p style={{ color: '#999', fontSize: '13px', textAlign: 'center', padding: '30px 0' }}>Nothing here yet — run a report or push a campaign to see it show up.</p>
+            <p style={{ color: MUTED, fontSize: '13px', textAlign: 'center', padding: '30px 0' }}>Nothing here yet — run a report or push a campaign to see it show up.</p>
           )}
           {filteredActivity.map(item => <ActivityRow key={item.id} item={item} onOpen={openActivity} />)}
         </>
@@ -311,9 +309,9 @@ export default function History() {
 
       {tab === 'campaigns' && (
         <>
-          {campaignsLoading && <p style={{ color: '#999', fontSize: '13px' }}>Loading campaigns...</p>}
+          {campaignsLoading && <p style={{ color: MUTED, fontSize: '13px' }}>Loading campaigns...</p>}
           {campaignsError && (
-            <div style={{ ...card, padding: '14px', display: 'flex', alignItems: 'center', gap: '8px', color: '#BE123C', marginBottom: '14px' }}>
+            <div style={{ ...card, padding: '14px', display: 'flex', alignItems: 'center', gap: '8px', color: RED, marginBottom: '14px' }}>
               <AlertCircle size={15} /> <span style={{ fontSize: '13px' }}>{campaignsError}</span>
             </div>
           )}
@@ -321,17 +319,17 @@ export default function History() {
             <>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                 <h3 style={{ fontSize: '13px', fontWeight: '700', color: '#4285F4', margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Google Ads ({googleCampaigns.length})</h3>
-                <button onClick={loadCampaigns} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#999', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px' }}>
+                <button onClick={loadCampaigns} style={{ background: 'none', border: 'none', cursor: 'pointer', color: MUTED, display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px' }}>
                   <RefreshCw size={12} /> Refresh
                 </button>
               </div>
               {campaignErrors.google && <p style={{ fontSize: '12px', color: '#D97706', marginBottom: '10px' }}>Google Ads: {campaignErrors.google}</p>}
-              {googleCampaigns.length === 0 && !campaignErrors.google && <p style={{ color: '#BBB', fontSize: '12px', marginBottom: '20px' }}>No Google Ads campaigns found.</p>}
+              {googleCampaigns.length === 0 && !campaignErrors.google && <p style={{ color: MUTED, fontSize: '12px', marginBottom: '20px' }}>No Google Ads campaigns found.</p>}
               {googleCampaigns.map(c => <CampaignRow key={`g-${c.campaign_id}`} c={c} />)}
 
               <h3 style={{ fontSize: '13px', fontWeight: '700', color: '#0866FF', margin: '24px 0 10px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Meta Ads ({metaCampaigns.length})</h3>
               {campaignErrors.meta && <p style={{ fontSize: '12px', color: '#D97706', marginBottom: '10px' }}>Meta Ads: {campaignErrors.meta}</p>}
-              {metaCampaigns.length === 0 && !campaignErrors.meta && <p style={{ color: '#BBB', fontSize: '12px' }}>No Meta Ads campaigns found.</p>}
+              {metaCampaigns.length === 0 && !campaignErrors.meta && <p style={{ color: MUTED, fontSize: '12px' }}>No Meta Ads campaigns found.</p>}
               {metaCampaigns.map(c => <CampaignRow key={`m-${c.campaign_id}`} c={c} />)}
             </>
           )}

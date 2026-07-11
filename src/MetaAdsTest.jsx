@@ -1,15 +1,9 @@
 import { useState, useEffect } from 'react'
 import { CheckCircle, AlertCircle, AlertTriangle, RefreshCw, ExternalLink } from 'lucide-react'
+import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
-const GOLD = '#D4AF37'
-
-const card = {
-  background: '#fff',
-  border: '1px solid #EAEAEA',
-  borderRadius: '8px',
-  boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-}
 
 export default function MetaAdsTest() {
   const [loading, setLoading] = useState(true)
@@ -83,31 +77,31 @@ export default function MetaAdsTest() {
 
   return (
     <div style={{ maxWidth: '640px', margin: '0 auto', padding: '36px 20px 60px', fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif' }}>
-      <h1 style={{ fontSize: '22px', fontWeight: '700', color: '#171717', margin: '0 0 6px', letterSpacing: '-0.5px' }}>Meta Ads Connection Test</h1>
-      <p style={{ fontSize: '13px', color: '#999', margin: '0 0 24px' }}>
+      <h1 style={{ fontSize: '22px', fontWeight: '700', color: BONE, margin: '0 0 6px', letterSpacing: '-0.5px' }}>Meta Ads Connection Test</h1>
+      <p style={{ fontSize: '13px', color: MUTED, margin: '0 0 24px' }}>
         Read-only connectivity check for the Meta Marketing API — no campaign creation yet.
       </p>
 
       <div style={{ ...card, padding: '22px 20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-          <p style={{ fontSize: '11px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.07em', color: '#999', margin: 0 }}>
+          <p style={{ fontSize: '11px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.07em', color: MUTED, margin: 0 }}>
             Connection
           </p>
           <button onClick={checkConnection} disabled={loading} style={{
             display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '5px',
-            border: '1px solid #E5E5E5', background: 'transparent', cursor: 'pointer', color: '#999', fontSize: '11px',
+            border: `1px solid ${SLATE_L}`, background: 'transparent', cursor: 'pointer', color: MUTED, fontSize: '11px',
           }}>
             <RefreshCw size={11} /> Retest
           </button>
         </div>
 
         {loading ? (
-          <p style={{ fontSize: '13px', color: '#999', margin: 0 }}>Checking connection…</p>
+          <p style={{ fontSize: '13px', color: MUTED, margin: 0 }}>Checking connection…</p>
         ) : result?.connected ? (
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
               <CheckCircle size={14} color="#16A34A" />
-              <p style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: '#171717' }}>Connected</p>
+              <p style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: BONE }}>Connected</p>
             </div>
             <div style={{ fontSize: '13px', color: '#444', lineHeight: '1.9' }}>
               <div><strong>Account:</strong> {result.account_name || '—'}</div>
@@ -121,32 +115,32 @@ export default function MetaAdsTest() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
               <AlertCircle size={14} color="#BE123C" />
-              <p style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: '#BE123C' }}>Not Connected</p>
+              <p style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: RED }}>Not Connected</p>
             </div>
-            <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '6px', padding: '10px 14px' }}>
-              <p style={{ margin: 0, fontSize: '13px', color: '#BE123C', wordBreak: 'break-word' }}>
+            <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '6px', padding: '10px 14px' }}>
+              <p style={{ margin: 0, fontSize: '13px', color: RED, wordBreak: 'break-word' }}>
                 {result?.error || 'Unknown error — see raw response below.'}
               </p>
               {(result?.error_code != null || result?.error_subcode != null || result?.error_type) && (
-                <p style={{ margin: '6px 0 0', fontSize: '12px', color: '#BE123C' }}>
+                <p style={{ margin: '6px 0 0', fontSize: '12px', color: RED }}>
                   {result.error_type ? `type: ${result.error_type}` : ''}
                   {result.error_code != null ? ` · code: ${result.error_code}` : ''}
                   {result.error_subcode != null ? ` · subcode: ${result.error_subcode}` : ''}
                 </p>
               )}
               {result?.error_user_title && (
-                <p style={{ margin: '6px 0 0', fontSize: '12px', color: '#BE123C' }}><strong>{result.error_user_title}</strong></p>
+                <p style={{ margin: '6px 0 0', fontSize: '12px', color: RED }}><strong>{result.error_user_title}</strong></p>
               )}
               {result?.error_user_msg && (
-                <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#BE123C' }}>{result.error_user_msg}</p>
+                <p style={{ margin: '2px 0 0', fontSize: '12px', color: RED }}>{result.error_user_msg}</p>
               )}
               {result?.fbtrace_id && (
-                <p style={{ margin: '6px 0 0', fontSize: '11px', color: '#999' }}>fbtrace_id: {result.fbtrace_id}</p>
+                <p style={{ margin: '6px 0 0', fontSize: '11px', color: MUTED }}>fbtrace_id: {result.fbtrace_id}</p>
               )}
               {result?.raw_body != null && (
                 <pre style={{
-                  margin: '10px 0 0', fontSize: '11px', color: '#666', background: '#FAFAFA',
-                  border: '1px solid #EAEAEA', borderRadius: '5px', padding: '8px 10px',
+                  margin: '10px 0 0', fontSize: '11px', color: MUTED, background: INK,
+                  border: `1px solid ${SLATE_L}`, borderRadius: '5px', padding: '8px 10px',
                   overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word',
                 }}>
                   {typeof result.raw_body === 'string' ? result.raw_body : JSON.stringify(result.raw_body, null, 2)}
@@ -159,10 +153,10 @@ export default function MetaAdsTest() {
 
       {result?.connected && (
         <div style={{ ...card, padding: '22px 20px', marginTop: '20px' }}>
-          <p style={{ fontSize: '11px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.07em', color: '#999', margin: '0 0 14px' }}>
+          <p style={{ fontSize: '11px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.07em', color: MUTED, margin: '0 0 14px' }}>
             Create Test Campaign
           </p>
-          <p style={{ fontSize: '12px', color: '#999', margin: '0 0 14px' }}>
+          <p style={{ fontSize: '12px', color: MUTED, margin: '0 0 14px' }}>
             Creates a real Campaign + Ad Set in this account, PAUSED by default. Nothing goes live until you enable it in Ads Manager.
             Our app is in Development Mode, so Meta blocks it from creating a brand-new ad creative — leave Post ID blank to stop after
             the Ad Set and finish the ad manually, or paste an existing Post ID (from a creative you made in Ads Manager) to complete the Ad automatically.
@@ -170,31 +164,31 @@ export default function MetaAdsTest() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '14px' }}>
             <div>
-              <label style={{ fontSize: '11px', color: '#999', display: 'block', marginBottom: '4px' }}>Campaign Name</label>
+              <label style={{ fontSize: '11px', color: MUTED, display: 'block', marginBottom: '4px' }}>Campaign Name</label>
               <input
                 value={campaignName}
                 onChange={(e) => setCampaignName(e.target.value)}
-                style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', borderRadius: '6px', border: '1px solid #E5E5E5', fontSize: '13px' }}
+                style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', borderRadius: '6px', border: `1px solid ${SLATE_L}`, fontSize: '13px' }}
               />
             </div>
             <div>
-              <label style={{ fontSize: '11px', color: '#999', display: 'block', marginBottom: '4px' }}>Daily Budget (₹)</label>
+              <label style={{ fontSize: '11px', color: MUTED, display: 'block', marginBottom: '4px' }}>Daily Budget (₹)</label>
               <input
                 type="number"
                 value={dailyBudget}
                 onChange={(e) => setDailyBudget(e.target.value)}
-                style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', borderRadius: '6px', border: '1px solid #E5E5E5', fontSize: '13px' }}
+                style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', borderRadius: '6px', border: `1px solid ${SLATE_L}`, fontSize: '13px' }}
               />
             </div>
             <div>
-              <label style={{ fontSize: '11px', color: '#999', display: 'block', marginBottom: '4px' }}>
+              <label style={{ fontSize: '11px', color: MUTED, display: 'block', marginBottom: '4px' }}>
                 Existing Post ID (optional — completes the Ad automatically)
               </label>
               <input
                 value={creativeId}
                 onChange={(e) => setCreativeId(e.target.value)}
                 placeholder="e.g. 1140954839109425_1234567890"
-                style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', borderRadius: '6px', border: '1px solid #E5E5E5', fontSize: '13px' }}
+                style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', borderRadius: '6px', border: `1px solid ${SLATE_L}`, fontSize: '13px' }}
               />
             </div>
           </div>
@@ -203,7 +197,7 @@ export default function MetaAdsTest() {
             onClick={handleCreateCampaign}
             disabled={creating}
             style={{
-              background: GOLD, color: '#171717', border: 'none', borderRadius: '7px',
+              background: GOLD, color: BONE, border: 'none', borderRadius: '7px',
               padding: '10px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer',
             }}
           >
@@ -227,14 +221,14 @@ export default function MetaAdsTest() {
                   target="_blank" rel="noreferrer"
                   style={{
                     marginTop: '10px', display: 'inline-flex', alignItems: 'center', gap: '6px',
-                    fontSize: '12px', fontWeight: '700', color: '#171717', textDecoration: 'none',
+                    fontSize: '12px', fontWeight: '700', color: BONE, textDecoration: 'none',
                   }}
                 >
                   Open in Meta Ads Manager <ExternalLink size={12} />
                 </a>
               </div>
             ) : createResult.success ? (
-              <div style={{ marginTop: '16px', background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '6px', padding: '12px 14px' }}>
+              <div style={{ marginTop: '16px', background: 'rgba(63,166,107,0.1)', border: '1px solid #BBF7D0', borderRadius: '6px', padding: '12px 14px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                   <CheckCircle size={14} color="#16A34A" />
                   <p style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: '#166534' }}>Created — PAUSED</p>
@@ -244,7 +238,7 @@ export default function MetaAdsTest() {
                   <div><strong>Ad Set ID:</strong> {createResult.adset_id}</div>
                   <div><strong>Ad ID:</strong> {createResult.ad_id}</div>
                   {createResult.final_url_is_placeholder && (
-                    <div style={{ color: '#BE123C', marginTop: '4px' }}>
+                    <div style={{ color: RED, marginTop: '4px' }}>
                       ⚠ No landing page URL found in memory — used a placeholder (example.com). Fix the link before enabling.
                     </div>
                   )}
@@ -254,30 +248,30 @@ export default function MetaAdsTest() {
                   target="_blank" rel="noreferrer"
                   style={{
                     marginTop: '10px', display: 'inline-flex', alignItems: 'center', gap: '6px',
-                    fontSize: '12px', fontWeight: '700', color: '#171717', textDecoration: 'none',
+                    fontSize: '12px', fontWeight: '700', color: BONE, textDecoration: 'none',
                   }}
                 >
                   Open in Meta Ads Manager <ExternalLink size={12} />
                 </a>
               </div>
             ) : (
-              <div style={{ marginTop: '16px', background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '6px', padding: '12px 14px' }}>
+              <div style={{ marginTop: '16px', background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '6px', padding: '12px 14px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                   <AlertCircle size={14} color="#BE123C" />
-                  <p style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: '#BE123C' }}>Creation Failed</p>
+                  <p style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: RED }}>Creation Failed</p>
                 </div>
-                <p style={{ margin: 0, fontSize: '13px', color: '#BE123C', wordBreak: 'break-word' }}>
+                <p style={{ margin: 0, fontSize: '13px', color: RED, wordBreak: 'break-word' }}>
                   {createResult.error || 'Unknown error — see raw response below.'}
                 </p>
                 {(createResult.error_code != null || createResult.error_subcode != null) && (
-                  <p style={{ margin: '6px 0 0', fontSize: '12px', color: '#BE123C' }}>
+                  <p style={{ margin: '6px 0 0', fontSize: '12px', color: RED }}>
                     {createResult.error_type ? `type: ${createResult.error_type}` : ''}
                     {createResult.error_code != null ? ` · code: ${createResult.error_code}` : ''}
                     {createResult.error_subcode != null ? ` · subcode: ${createResult.error_subcode}` : ''}
                   </p>
                 )}
                 {createResult.partial && Object.keys(createResult.partial).length > 0 && (
-                  <p style={{ margin: '6px 0 0', fontSize: '12px', color: '#BE123C' }}>
+                  <p style={{ margin: '6px 0 0', fontSize: '12px', color: RED }}>
                     Partially created before failure: {JSON.stringify(createResult.partial)} — check Ads Manager, these are PAUSED but may need manual cleanup.
                   </p>
                 )}

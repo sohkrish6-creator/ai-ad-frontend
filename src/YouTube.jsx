@@ -3,12 +3,10 @@ import CityInput, { getLastCity } from './CityInput'
 
 const LS_KEY_YT = 'adsoh_youtube_result'
 import { Copy, Check, Video, ExternalLink } from 'lucide-react'
+import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
-const GOLD    = '#D4AF37'
-const card    = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
-const inputSt = { width: '100%', padding: '10px 13px', borderRadius: '7px', border: '1px solid #E5E5E5', background: '#FAFAFA', color: '#171717', fontSize: '14px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
-const lbl     = { display: 'block', color: '#999', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '7px' }
 
 const INDUSTRIES = [
   'Hospitality (Hotels, Restaurants, Cafes)', 'Schools & Education', 'Healthcare & Clinics',
@@ -79,7 +77,7 @@ export default function YouTube() {
   const resolvedIndustry = industry === 'Other' ? industryOther : industry
 
   const page = {
-    minHeight: '100vh', background: '#FAFAFA',
+    minHeight: '100vh', background: INK,
     padding: isMobile ? '28px 16px' : '40px 36px',
     maxWidth: '820px', width: '100%', boxSizing: 'border-box',
     fontFamily: '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif',
@@ -106,13 +104,13 @@ export default function YouTube() {
       <style>{`@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }`}</style>
 
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>YouTube Intelligence</h1>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 28px' }}>Real top videos → content ideas, viral hooks, competitor patterns — sab ek saath</p>
+      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 28px' }}>Real top videos → content ideas, viral hooks, competitor patterns — sab ek saath</p>
 
       {/* Input card */}
       <div style={{ maxWidth: '600px', width: '100%' }}>
         <div style={{ ...card, padding: isMobile ? '20px 16px' : '28px', marginBottom: '16px' }}>
 
-          {error && <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: '#BE123C', fontSize: '13px' }}>{error}</div>}
+          {error && <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: RED, fontSize: '13px' }}>{error}</div>}
 
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
             <div>
@@ -136,7 +134,7 @@ export default function YouTube() {
           )}
 
           <div style={{ marginBottom: '20px' }}>
-            <label style={lbl}>Topic Focus <span style={{ color: '#BBB', fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
+            <label style={lbl}>Topic Focus <span style={{ color: MUTED, fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
             <input type="text" value={topic} onChange={e => setTopic(e.target.value)} placeholder="e.g. Reels ideas, client testimonials, behind the scenes" style={inputSt} />
           </div>
 
@@ -166,7 +164,7 @@ export default function YouTube() {
                 <span style={{ fontSize: '12px', color: '#FF4444', fontWeight: '700' }}>{i + 1}</span>
               </div>
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: '13px', fontWeight: '500', color: '#171717', margin: '0 0 6px' }}>{label}</p>
+                <p style={{ fontSize: '13px', fontWeight: '500', color: BONE, margin: '0 0 6px' }}>{label}</p>
                 <Shimmer h="9px" w="60%" />
               </div>
             </div>
@@ -176,9 +174,9 @@ export default function YouTube() {
 
       {/* Results */}
       {fromCache && result && !loading && (
-        <div style={{ maxWidth: '600px', width: '100%', background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '7px', padding: '9px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>Showing previous result · Generate new report to refresh</p>
-          <button onClick={() => { localStorage.removeItem(LS_KEY_YT); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
+        <div style={{ maxWidth: '600px', width: '100%', background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '9px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>Showing previous result · Generate new report to refresh</p>
+          <button onClick={() => { localStorage.removeItem(LS_KEY_YT); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: MUTED, textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
         </div>
       )}
 
@@ -198,7 +196,7 @@ export default function YouTube() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
               <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FF0000' }} />
               <h3 style={{ fontSize: '15px', fontWeight: '600', margin: 0 }}>Top Performing Videos</h3>
-              <span style={{ fontSize: '12px', color: '#999', marginLeft: '4px' }}>Real data from YouTube</span>
+              <span style={{ fontSize: '12px', color: MUTED, marginLeft: '4px' }}>Real data from YouTube</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {result.top_videos.map((v, i) => (
@@ -211,7 +209,7 @@ export default function YouTube() {
                 >
                   <div style={{
                     display: 'flex', alignItems: 'center', gap: '12px',
-                    padding: '12px 14px', borderRadius: '8px', background: '#FAFAFA',
+                    padding: '12px 14px', borderRadius: '8px', background: INK,
                     border: '1px solid #F0F0F0', cursor: 'pointer',
                     transition: 'border-color 0.15s',
                   }}>
@@ -224,16 +222,16 @@ export default function YouTube() {
                       <span style={{ fontSize: '11px', fontWeight: '700', color: i < 3 ? '#FF0000' : '#999' }}>#{i + 1}</span>
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: '13px', fontWeight: '500', color: '#171717', margin: '0 0 3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <p style={{ fontSize: '13px', fontWeight: '500', color: BONE, margin: '0 0 3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {v.title}
                       </p>
-                      <p style={{ fontSize: '11px', color: '#999', margin: 0 }}>{v.channel} · {v.publishedAt}</p>
+                      <p style={{ fontSize: '11px', color: MUTED, margin: 0 }}>{v.channel} · {v.publishedAt}</p>
                     </div>
                     <div style={{ textAlign: 'right', flexShrink: 0 }}>
                       <p style={{ fontSize: '13px', fontWeight: '700', color: v.views > 500000 ? '#16A34A' : '#171717', margin: '0 0 2px' }}>
                         {formatViews(v.views)}
                       </p>
-                      <p style={{ fontSize: '10px', color: '#BBB', margin: 0 }}>views</p>
+                      <p style={{ fontSize: '10px', color: MUTED, margin: 0 }}>views</p>
                     </div>
                     <ExternalLink size={13} color="#CCC" style={{ flexShrink: 0 }} />
                   </div>
@@ -247,7 +245,7 @@ export default function YouTube() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <div>
                 <h3 style={{ fontSize: '15px', fontWeight: '600', margin: '0 0 3px' }}>Trending Content Ideas</h3>
-                <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>8 ideas based on what's actually working in this niche</p>
+                <p style={{ fontSize: '12px', color: MUTED, margin: 0 }}>8 ideas based on what's actually working in this niche</p>
               </div>
               <CopyBtn text={result.content_ideas} />
             </div>
@@ -258,7 +256,7 @@ export default function YouTube() {
           <div style={{ ...card, padding: '24px', marginBottom: '12px' }}>
             <div style={{ marginBottom: '16px' }}>
               <h3 style={{ fontSize: '15px', fontWeight: '600', margin: '0 0 3px' }}>Viral Hooks & Titles</h3>
-              <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>Ready-to-use — paste as YouTube title or Reel opening line</p>
+              <p style={{ fontSize: '12px', color: MUTED, margin: 0 }}>Ready-to-use — paste as YouTube title or Reel opening line</p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {result.viral_hooks
@@ -270,12 +268,12 @@ export default function YouTube() {
                   return (
                     <div key={i} style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px',
-                      padding: '11px 14px', background: '#FAFAFA', borderRadius: '7px',
+                      padding: '11px 14px', background: INK, borderRadius: '7px',
                       border: '1px solid #F0F0F0',
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
                         <span style={{ fontSize: '11px', fontWeight: '700', color: GOLD, flexShrink: 0, minWidth: '18px' }}>{i + 1}</span>
-                        <p style={{ margin: 0, fontSize: '13px', color: '#171717', lineHeight: '1.4' }}>{text}</p>
+                        <p style={{ margin: 0, fontSize: '13px', color: BONE, lineHeight: '1.4' }}>{text}</p>
                       </div>
                       <CopyBtn text={text} />
                     </div>
@@ -294,7 +292,7 @@ export default function YouTube() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <div>
                 <h3 style={{ fontSize: '15px', fontWeight: '600', margin: '0 0 3px', color: GOLD }}>Competitor Insights</h3>
-                <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>Patterns, formats, topics driving views — and what to do about it</p>
+                <p style={{ fontSize: '12px', color: MUTED, margin: 0 }}>Patterns, formats, topics driving views — and what to do about it</p>
               </div>
               <CopyBtn text={result.competitor_insights} />
             </div>

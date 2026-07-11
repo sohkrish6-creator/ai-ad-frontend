@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react'
 
 const LS_KEY_BI = 'adsoh_bi_result'
 import { Copy, Check, Search, Dna, TrendingUp, Sword, Target, Zap, Download, ArrowLeft, AlertTriangle, ShieldCheck } from 'lucide-react'
+import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
 
-const FONT = '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif'
+
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 
@@ -24,18 +25,18 @@ function ScoreRing({ score, label, inverse = false }) {
           transform="rotate(-90 44 44)" />
         <text x="44" y="50" textAnchor="middle" fill={color} fontSize="17" fontWeight="800" fontFamily="system-ui, sans-serif">{s}</text>
       </svg>
-      <p style={{ color: '#666', fontSize: '11px', margin: 0, lineHeight: '1.4' }}>{label}</p>
+      <p style={{ color: MUTED, fontSize: '11px', margin: 0, lineHeight: '1.4' }}>{label}</p>
     </div>
   )
 }
 
 function Badge({ label, type = 'default' }) {
   const styles = {
-    default: { background: '#F5F5F5', color: '#666' },
+    default: { background: SLATE_M, color: MUTED },
     green:   { background: '#10B98118', color: '#10B981' },
     yellow:  { background: '#F59E0B18', color: '#F59E0B' },
     red:     { background: '#F43F5E18', color: '#F43F5E' },
-    blue:    { background: '#D4AF3712', color: '#D4AF37' },
+    blue:    { background: GOLD_DIM, color: GOLD },
   }
   const s = styles[type] || styles.default
   return (
@@ -50,7 +51,7 @@ function CopyBtn({ onClick, copied }) {
     <button onClick={onClick} style={{
       display: 'flex', alignItems: 'center', gap: '5px',
       padding: '5px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '500',
-      border: '1px solid #E5E5E5', flexShrink: 0,
+      border: `1px solid ${SLATE_L}`, flexShrink: 0,
       background: copied ? '#F0FDF4' : '#F9F9F9',
       color: copied ? '#16A34A' : '#666',
       transition: 'all 0.15s ease',
@@ -63,12 +64,12 @@ function CopyBtn({ onClick, copied }) {
 
 function SectionCard({ title, subtitle, accent = '#D4AF37', copyKey, onCopy, copied, children }) {
   return (
-    <div style={{ background: '#FFFFFF', border: '1px solid #EAEAEA', borderRadius: '16px', padding: '26px', marginBottom: '20px' }}>
+    <div style={{ background: SLATE, border: `1px solid ${SLATE_L}`, borderRadius: '16px', padding: '26px', marginBottom: '20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
         <h2 style={{ fontSize: '16px', fontWeight: '700', margin: 0, color: accent }}>{title}</h2>
         {onCopy && <CopyBtn onClick={onCopy} copied={copied} />}
       </div>
-      {subtitle && <p style={{ fontSize: '12px', color: '#888', margin: '4px 0 20px 0' }}>{subtitle}</p>}
+      {subtitle && <p style={{ fontSize: '12px', color: MUTED, margin: '4px 0 20px 0' }}>{subtitle}</p>}
       {!subtitle && <div style={{ marginBottom: '20px' }} />}
       {children}
     </div>
@@ -79,8 +80,8 @@ function InfoRow({ label, value }) {
   if (!value) return null
   return (
     <div style={{ display: 'flex', gap: '12px', padding: '9px 0', borderBottom: '1px solid #EAEAEA30' }}>
-      <span style={{ color: '#888', fontSize: '13px', minWidth: '110px', flexShrink: 0 }}>{label}</span>
-      <span style={{ color: '#171717', fontSize: '13px', fontWeight: '500', lineHeight: '1.5' }}>{value}</span>
+      <span style={{ color: MUTED, fontSize: '13px', minWidth: '110px', flexShrink: 0 }}>{label}</span>
+      <span style={{ color: BONE, fontSize: '13px', fontWeight: '500', lineHeight: '1.5' }}>{value}</span>
     </div>
   )
 }
@@ -94,13 +95,13 @@ function ScoreBar({ label, score, inverse = false, reason }) {
   return (
     <div style={{ marginBottom: '16px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '7px' }}>
-        <span style={{ color: '#666', fontSize: '13px' }}>{label}</span>
+        <span style={{ color: MUTED, fontSize: '13px' }}>{label}</span>
         <span style={{ color: barColor, fontSize: '13px', fontWeight: '700' }}>{s} / 100</span>
       </div>
       <div style={{ height: '6px', background: '#EAEAEA', borderRadius: '3px', overflow: 'hidden' }}>
         <div style={{ height: '100%', width: `${s}%`, background: barColor, borderRadius: '3px' }} />
       </div>
-      {reason && <p style={{ color: '#888', fontSize: '12px', margin: '6px 0 0', lineHeight: '1.5' }}>{reason}</p>}
+      {reason && <p style={{ color: MUTED, fontSize: '12px', margin: '6px 0 0', lineHeight: '1.5' }}>{reason}</p>}
     </div>
   )
 }
@@ -156,7 +157,7 @@ function Intelligence() {
 
   const inputStyle = {
     width: '100%', padding: '11px 14px', borderRadius: '8px',
-    border: '1px solid #EAEAEA', background: '#F9F9F9', color: '#171717',
+    border: `1px solid ${SLATE_L}`, background: SLATE_M, color: BONE,
     fontSize: '14px', boxSizing: 'border-box', outline: 'none',
   }
 
@@ -171,25 +172,25 @@ function Intelligence() {
   ]
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#FAFAFA', fontFamily: FONT, padding: isMobile ? '28px 16px' : '40px 36px', width: '100%', boxSizing: 'border-box' }}>
+      <div style={{ minHeight: '100vh', background: INK, fontFamily: FONT, padding: isMobile ? '28px 16px' : '40px 36px', width: '100%', boxSizing: 'border-box' }}>
         <style>{`@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }`}</style>
-        <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px', color: '#171717' }}>Business Intelligence</h1>
-        <p style={{ color: '#999', fontSize: '13px', margin: '0 0 24px' }}>6 engines running — 30–60 seconds</p>
+        <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px', color: BONE }}>Business Intelligence</h1>
+        <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 24px' }}>6 engines running — 30–60 seconds</p>
         <div style={{ maxWidth: '480px', width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {LOAD_STEPS.map(({ Icon, title, sub }) => (
-            <div key={title} style={{ background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#F9F9F9', border: '1px solid #EAEAEA', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div key={title} style={{ background: SLATE, border: `1px solid ${SLATE_L}`, borderRadius: '8px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: SLATE_M, border: `1px solid ${SLATE_L}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <Icon size={14} color="#D4AF37" strokeWidth={1.5} />
               </div>
               <div style={{ flex: 1 }}>
-                <p style={{ color: '#171717', fontSize: '13px', fontWeight: '500', margin: '0 0 5px' }}>{title}</p>
+                <p style={{ color: BONE, fontSize: '13px', fontWeight: '500', margin: '0 0 5px' }}>{title}</p>
                 <div style={{ height: '8px', borderRadius: '4px', background: 'linear-gradient(90deg, #F5F5F5 25%, #EBEBEB 50%, #F5F5F5 75%)', backgroundSize: '800px 100%', animation: 'shimmer 1.5s ease-in-out infinite', width: '65%' }} />
               </div>
               <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#D4AF37', opacity: 0.5, flexShrink: 0 }} />
             </div>
           ))}
         </div>
-        <p style={{ color: '#BBB', fontSize: '12px', marginTop: '16px' }}>30–60 seconds · structured JSON output</p>
+        <p style={{ color: MUTED, fontSize: '12px', marginTop: '16px' }}>30–60 seconds · structured JSON output</p>
       </div>
     )
   }
@@ -518,39 +519,39 @@ function Intelligence() {
     }
 
     return (
-      <div style={{ minHeight: '100vh', background: '#FAFAFA', fontFamily: FONT, color: '#171717', width: '100%', boxSizing: 'border-box', overflowX: 'hidden' }}>
+      <div style={{ minHeight: '100vh', background: INK, fontFamily: FONT, color: BONE, width: '100%', boxSizing: 'border-box', overflowX: 'hidden' }}>
 
         {/* Sticky Header */}
-        <div style={{ background: '#FFFFFF', borderBottom: '1px solid #EAEAEA', padding: '0 24px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: isMobile ? '48px' : 0, zIndex: 10 }}>
+        <div style={{ background: SLATE, borderBottom: '1px solid #EAEAEA', padding: '0 24px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: isMobile ? '48px' : 0, zIndex: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Dna size={15} color="#D4AF37" strokeWidth={1.5} />
-            <span style={{ fontWeight: '600', fontSize: '15px', color: '#171717' }}>Business Intelligence</span>
+            <span style={{ fontWeight: '600', fontSize: '15px', color: BONE }}>Business Intelligence</span>
           </div>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            {!isMobile && <span style={{ color: '#999', fontSize: '12px', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{result.url}</span>}
-            <button onClick={downloadPDF} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#D4AF3712', border: '1px solid #D4AF3730', color: '#D4AF37', padding: '6px 14px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer', fontWeight: '600' }}>
+            {!isMobile && <span style={{ color: MUTED, fontSize: '12px', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{result.url}</span>}
+            <button onClick={downloadPDF} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: GOLD_DIM, border: '1px solid #D4AF3730', color: GOLD, padding: '6px 14px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer', fontWeight: '600' }}>
               <Download size={12} /> PDF
             </button>
-            <button onClick={() => { localStorage.removeItem(LS_KEY_BI); setResult(null); setFromCache(false) }} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'transparent', border: '1px solid #EAEAEA', color: '#888', padding: '6px 14px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
+            <button onClick={() => { localStorage.removeItem(LS_KEY_BI); setResult(null); setFromCache(false) }} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'transparent', border: `1px solid ${SLATE_L}`, color: MUTED, padding: '6px 14px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
               <ArrowLeft size={12} /> New
             </button>
           </div>
         </div>
 
         {fromCache && (
-          <div style={{ background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '7px', padding: '9px 16px', margin: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>Showing previous result · Generate new report to refresh</p>
-            <button onClick={() => { localStorage.removeItem(LS_KEY_BI); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
+          <div style={{ background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '9px 16px', margin: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>Showing previous result · Generate new report to refresh</p>
+            <button onClick={() => { localStorage.removeItem(LS_KEY_BI); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: MUTED, textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
           </div>
         )}
 
         <div style={{ maxWidth: '860px', margin: '0 auto', padding: isMobile ? '20px 16px' : '28px 20px' }}>
 
           {/* Success Banner */}
-          <div style={{ background: '#F0FDF4', border: '1px solid #D4AF3535', borderRadius: '14px', padding: '16px 20px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
+          <div style={{ background: 'rgba(63,166,107,0.1)', border: '1px solid #D4AF3535', borderRadius: '14px', padding: '16px 20px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
             <div>
               <p style={{ margin: 0, fontWeight: '700', fontSize: '15px', color: '#10B981' }}>✅ Intelligence Report Ready</p>
-              <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#888' }}>
+              <p style={{ margin: '4px 0 0', fontSize: '13px', color: MUTED }}>
                 {ev.pages_fetched || ev.pages_crawled || 0} pages fetched · {ev.pages_with_evidence || 0} with content · {ev.evidence_points || 0} evidence points · {Math.round((ev.avg_confidence || 0) * 100)}% avg confidence{ev.sitemap_crawled ? ' · sitemap ✓' : ''}
               </p>
             </div>
@@ -558,11 +559,11 @@ function Intelligence() {
           </div>
 
           {/* ── 1. SCORE DASHBOARD ── */}
-          <div style={{ background: '#FAFAFA', border: '1px solid #D4AF3535', borderRadius: '16px', padding: '26px', marginBottom: '20px' }}>
+          <div style={{ background: INK, border: '1px solid #D4AF3535', borderRadius: '16px', padding: '26px', marginBottom: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <div>
-                <h2 style={{ fontSize: '16px', fontWeight: '700', margin: 0, color: '#D4AF37' }}>⚡ Score Dashboard</h2>
-                <p style={{ color: '#888', fontSize: '12px', margin: '4px 0 0' }}>6 intelligence scores — Threat: lower is better</p>
+                <h2 style={{ fontSize: '16px', fontWeight: '700', margin: 0, color: GOLD }}>⚡ Score Dashboard</h2>
+                <p style={{ color: MUTED, fontSize: '12px', margin: '4px 0 0' }}>6 intelligence scores — Threat: lower is better</p>
               </div>
               <CopyBtn onClick={() => handleCopy('scores', scores)} copied={copied.scores} />
             </div>
@@ -599,19 +600,19 @@ function Intelligence() {
             </div>
 
             {dna.dna_score_reason && (
-              <p style={{ color: '#888', fontSize: '12px', margin: '0 0 16px', lineHeight: '1.5' }}>{dna.dna_score_reason}</p>
+              <p style={{ color: MUTED, fontSize: '12px', margin: '0 0 16px', lineHeight: '1.5' }}>{dna.dna_score_reason}</p>
             )}
 
             {dna.unique_value_prop && (
-              <div style={{ background: '#F9F9F9', border: '1px solid #6366F118', borderRadius: '10px', padding: '14px', marginBottom: '14px' }}>
-                <p style={{ color: '#D4AF37', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 6px' }}>Unique Value Proposition</p>
-                <p style={{ color: '#171717', fontSize: '14px', margin: 0, lineHeight: '1.6' }}>{dna.unique_value_prop}</p>
+              <div style={{ background: SLATE_M, border: '1px solid #6366F118', borderRadius: '10px', padding: '14px', marginBottom: '14px' }}>
+                <p style={{ color: GOLD, fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 6px' }}>Unique Value Proposition</p>
+                <p style={{ color: BONE, fontSize: '14px', margin: 0, lineHeight: '1.6' }}>{dna.unique_value_prop}</p>
               </div>
             )}
 
             {(dna.core_products || []).length > 0 && (
               <div style={{ marginBottom: '14px' }}>
-                <p style={{ color: '#888', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>Core Products / Services</p>
+                <p style={{ color: MUTED, fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>Core Products / Services</p>
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                   {dna.core_products.map((p, i) => <Badge key={i} label={p} type="blue" />)}
                 </div>
@@ -620,7 +621,7 @@ function Intelligence() {
 
             {(dna.trust_signals || []).length > 0 && (
               <div style={{ marginBottom: '14px' }}>
-                <p style={{ color: '#888', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>Trust Signals Found</p>
+                <p style={{ color: MUTED, fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>Trust Signals Found</p>
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                   {dna.trust_signals.map((s, i) => <Badge key={i} label={s} type="green" />)}
                 </div>
@@ -628,7 +629,7 @@ function Intelligence() {
             )}
 
             {(dna.evidence_used || []).length > 0 && (
-              <div style={{ background: '#F9F9F9', borderRadius: '8px', padding: '12px 14px' }}>
+              <div style={{ background: SLATE_M, borderRadius: '8px', padding: '12px 14px' }}>
                 <p style={{ color: '#475569', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>Evidence Used for Classification</p>
                 {dna.evidence_used.map((e, i) => (
                   <p key={i} style={{ color: '#475569', fontSize: '12px', margin: '4px 0', fontStyle: 'italic', lineHeight: '1.5' }}>"{e}"</p>
@@ -651,24 +652,24 @@ function Intelligence() {
 
             <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : '1fr 1fr 1fr', gap: '10px', marginTop: '20px' }}>
               {[
-                { label: 'Market Size',      value: opp.market_size,      color: '#171717' },
-                { label: 'Best Platform',    value: opp.best_platform,    color: '#D4AF37' },
+                { label: 'Market Size',      value: opp.market_size,      color: BONE },
+                { label: 'Best Platform',    value: opp.best_platform,    color: GOLD },
                 { label: 'Budget Efficiency', value: opp.budget_efficiency, color: opp.budget_efficiency === 'High' ? '#10B981' : opp.budget_efficiency === 'Medium' ? '#F59E0B' : '#F43F5E' },
               ].map(({ label, value, color }) => (
-                <div key={label} style={{ background: '#F9F9F9', borderRadius: '10px', padding: '14px', textAlign: 'center' }}>
-                  <p style={{ color: '#888', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 6px' }}>{label}</p>
+                <div key={label} style={{ background: SLATE_M, borderRadius: '10px', padding: '14px', textAlign: 'center' }}>
+                  <p style={{ color: MUTED, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 6px' }}>{label}</p>
                   <p style={{ color, fontSize: '14px', fontWeight: '700', margin: 0 }}>{value || '—'}</p>
                 </div>
               ))}
             </div>
 
             {opp.best_platform_reason && (
-              <p style={{ color: '#888', fontSize: '13px', margin: '14px 0 0', lineHeight: '1.6' }}>{opp.best_platform_reason}</p>
+              <p style={{ color: MUTED, fontSize: '13px', margin: '14px 0 0', lineHeight: '1.6' }}>{opp.best_platform_reason}</p>
             )}
 
             {(opp.seasonal_factors || []).length > 0 && (
               <div style={{ marginTop: '14px' }}>
-                <p style={{ color: '#888', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>Seasonal Factors</p>
+                <p style={{ color: MUTED, fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>Seasonal Factors</p>
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                   {opp.seasonal_factors.map((f, i) => <Badge key={i} label={f} />)}
                 </div>
@@ -691,8 +692,8 @@ function Intelligence() {
                 { label: 'Audience Overlap', value: `${threat.audience_overlap_pct || 0}%`,         color: '#F59E0B' },
                 { label: 'Pricing Overlap',  value: `${threat.pricing_overlap_pct || 0}%`,          color: '#F59E0B' },
               ].map(({ label, value, color }) => (
-                <div key={label} style={{ background: '#F9F9F9', borderRadius: '10px', padding: '14px', textAlign: 'center' }}>
-                  <p style={{ color: '#888', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 6px' }}>{label}</p>
+                <div key={label} style={{ background: SLATE_M, borderRadius: '10px', padding: '14px', textAlign: 'center' }}>
+                  <p style={{ color: MUTED, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 6px' }}>{label}</p>
                   <p style={{ color, fontSize: '14px', fontWeight: '700', margin: 0 }}>{value}</p>
                 </div>
               ))}
@@ -704,7 +705,7 @@ function Intelligence() {
                 {(threat.key_threats || []).map((t, i) => (
                   <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '8px', alignItems: 'flex-start' }}>
                     <span style={{ color: '#F43F5E', fontSize: '12px', marginTop: '2px', flexShrink: 0 }}>▸</span>
-                    <p style={{ color: '#171717', fontSize: '13px', margin: 0, lineHeight: '1.5' }}>{t}</p>
+                    <p style={{ color: BONE, fontSize: '13px', margin: 0, lineHeight: '1.5' }}>{t}</p>
                   </div>
                 ))}
               </div>
@@ -713,18 +714,18 @@ function Intelligence() {
                 {(threat.differentiators || []).map((d, i) => (
                   <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '8px', alignItems: 'flex-start' }}>
                     <span style={{ color: '#10B981', fontSize: '12px', marginTop: '2px', flexShrink: 0 }}>✓</span>
-                    <p style={{ color: '#171717', fontSize: '13px', margin: 0, lineHeight: '1.5' }}>{d}</p>
+                    <p style={{ color: BONE, fontSize: '13px', margin: 0, lineHeight: '1.5' }}>{d}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div style={{ background: '#F9F9F9', borderRadius: '10px', padding: '14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
+            <div style={{ background: SLATE_M, borderRadius: '10px', padding: '14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
               <div>
-                <p style={{ color: '#888', fontSize: '12px', margin: '0 0 3px' }}>
-                  Moat Strength: <span style={{ color: '#171717', fontWeight: '600' }}>{threat.moat_strength || '—'}</span>
+                <p style={{ color: MUTED, fontSize: '12px', margin: '0 0 3px' }}>
+                  Moat Strength: <span style={{ color: BONE, fontWeight: '600' }}>{threat.moat_strength || '—'}</span>
                 </p>
-                {threat.moat_reason && <p style={{ color: '#888', fontSize: '12px', margin: 0 }}>{threat.moat_reason}</p>}
+                {threat.moat_reason && <p style={{ color: MUTED, fontSize: '12px', margin: 0 }}>{threat.moat_reason}</p>}
               </div>
               <Badge label={threat.estimated_competitors || '—'} />
             </div>
@@ -742,7 +743,7 @@ function Intelligence() {
             {pos.winning_position && (
               <div style={{ background: '#F0F9FF', border: '1px solid #38BDF840', borderRadius: '12px', padding: '18px 20px', marginBottom: '20px', borderLeft: '4px solid #38BDF8' }}>
                 <p style={{ color: '#38BDF8', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>Winning Position</p>
-                <p style={{ color: '#171717', fontSize: '16px', fontWeight: '700', margin: '0 0 8px', lineHeight: '1.4' }}>{pos.winning_position}</p>
+                <p style={{ color: BONE, fontSize: '16px', fontWeight: '700', margin: '0 0 8px', lineHeight: '1.4' }}>{pos.winning_position}</p>
                 {pos.category_ownership_opportunity && (
                   <div style={{ display: 'inline-block', background: '#38BDF820', border: '1px solid #38BDF840', borderRadius: '20px', padding: '4px 14px', marginTop: '4px' }}>
                     <span style={{ color: '#7DD3FC', fontSize: '13px', fontWeight: '600' }}>🏆 {pos.category_ownership_opportunity}</span>
@@ -754,9 +755,9 @@ function Intelligence() {
             {/* Current Positioning */}
             {pos.current_positioning && (
               <div style={{ marginBottom: '16px' }}>
-                <p style={{ color: '#888', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>Current Positioning</p>
-                <div style={{ background: '#F9F9F9', borderRadius: '10px', padding: '14px' }}>
-                  <p style={{ color: '#171717', fontSize: '13px', margin: 0, lineHeight: '1.6' }}>{pos.current_positioning}</p>
+                <p style={{ color: MUTED, fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>Current Positioning</p>
+                <div style={{ background: SLATE_M, borderRadius: '10px', padding: '14px' }}>
+                  <p style={{ color: BONE, fontSize: '13px', margin: 0, lineHeight: '1.6' }}>{pos.current_positioning}</p>
                 </div>
               </div>
             )}
@@ -765,23 +766,23 @@ function Intelligence() {
             {pos.positioning_gap && (
               <div style={{ background: '#10B98110', border: '1px solid #10B98128', borderRadius: '10px', padding: '14px', marginBottom: '16px' }}>
                 <p style={{ color: '#10B981', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 6px' }}>Positioning Gap — Unoccupied Space</p>
-                <p style={{ color: '#171717', fontSize: '13px', margin: 0, lineHeight: '1.6' }}>{pos.positioning_gap}</p>
+                <p style={{ color: BONE, fontSize: '13px', margin: 0, lineHeight: '1.6' }}>{pos.positioning_gap}</p>
               </div>
             )}
 
             {/* Competitor Positioning */}
             {(pos.competitor_positioning || []).length > 0 && (
               <div style={{ marginBottom: '16px' }}>
-                <p style={{ color: '#888', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 10px' }}>Competitor Positioning</p>
+                <p style={{ color: MUTED, fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 10px' }}>Competitor Positioning</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {pos.competitor_positioning.map((comp, i) => (
-                    <div key={i} style={{ background: '#F9F9F9', border: '1px solid #EAEAEA', borderRadius: '10px', padding: '13px 16px', display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+                    <div key={i} style={{ background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '10px', padding: '13px 16px', display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
                       <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#F97316' + '18', border: '1px solid #F9731630', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>
                         <span style={{ color: '#F97316', fontSize: '12px', fontWeight: '800' }}>{i + 1}</span>
                       </div>
                       <div style={{ flex: 1 }}>
-                        <p style={{ color: '#171717', fontSize: '13px', fontWeight: '600', margin: '0 0 3px' }}>{comp.name}</p>
-                        <p style={{ color: '#666', fontSize: '12px', margin: '0 0 6px', lineHeight: '1.5' }}>{comp.position}</p>
+                        <p style={{ color: BONE, fontSize: '13px', fontWeight: '600', margin: '0 0 3px' }}>{comp.name}</p>
+                        <p style={{ color: MUTED, fontSize: '12px', margin: '0 0 6px', lineHeight: '1.5' }}>{comp.position}</p>
                         {comp.owned_category && (
                           <Badge label={comp.owned_category} type="yellow" />
                         )}
@@ -794,24 +795,24 @@ function Intelligence() {
 
             {/* Messaging Shift */}
             {pos.messaging_shift && (
-              <div style={{ background: '#F9F9F9', borderRadius: '10px', padding: '14px', marginBottom: '16px' }}>
-                <p style={{ color: '#888', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 6px' }}>Messaging Shift</p>
-                <p style={{ color: '#666', fontSize: '13px', margin: 0, lineHeight: '1.6' }}>{pos.messaging_shift}</p>
+              <div style={{ background: SLATE_M, borderRadius: '10px', padding: '14px', marginBottom: '16px' }}>
+                <p style={{ color: MUTED, fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 6px' }}>Messaging Shift</p>
+                <p style={{ color: MUTED, fontSize: '13px', margin: 0, lineHeight: '1.6' }}>{pos.messaging_shift}</p>
               </div>
             )}
 
             {/* Reasoning */}
             {pos.reasoning && (
               <div style={{ marginBottom: '16px' }}>
-                <p style={{ color: '#888', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>Reasoning</p>
-                <p style={{ color: '#666', fontSize: '13px', margin: 0, lineHeight: '1.6' }}>{pos.reasoning}</p>
+                <p style={{ color: MUTED, fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>Reasoning</p>
+                <p style={{ color: MUTED, fontSize: '13px', margin: 0, lineHeight: '1.6' }}>{pos.reasoning}</p>
               </div>
             )}
 
             {/* Supporting Evidence + Confidence */}
             <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
               {(pos.supporting_evidence || []).length > 0 && (
-                <div style={{ flex: 1, minWidth: '160px', background: '#F9F9F9', borderRadius: '8px', padding: '12px 14px' }}>
+                <div style={{ flex: 1, minWidth: '160px', background: SLATE_M, borderRadius: '8px', padding: '12px 14px' }}>
                   <p style={{ color: '#475569', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>Supporting Evidence</p>
                   {pos.supporting_evidence.map((e, i) => (
                     <p key={i} style={{ color: '#475569', fontSize: '12px', margin: '4px 0', fontStyle: 'italic', lineHeight: '1.5' }}>"{e}"</p>
@@ -819,9 +820,9 @@ function Intelligence() {
                 </div>
               )}
               {pos.confidence_score != null && (
-                <div style={{ background: '#F9F9F9', borderRadius: '10px', padding: '14px 18px', textAlign: 'center', minWidth: '100px' }}>
+                <div style={{ background: SLATE_M, borderRadius: '10px', padding: '14px 18px', textAlign: 'center', minWidth: '100px' }}>
                   <p style={{ color: pos.confidence_score >= 75 ? '#10B981' : pos.confidence_score >= 50 ? '#F59E0B' : '#F43F5E', fontSize: '26px', fontWeight: '800', margin: '0 0 4px' }}>{pos.confidence_score}</p>
-                  <p style={{ color: '#888', fontSize: '11px', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Confidence</p>
+                  <p style={{ color: MUTED, fontSize: '11px', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Confidence</p>
                 </div>
               )}
             </div>
@@ -836,12 +837,12 @@ function Intelligence() {
             copied={copied.aud}
           >
             {(aud.validated_segments || []).map((seg, i) => (
-              <div key={i} style={{ background: '#F0FDF4', border: '1px solid #10B98135', borderRadius: '12px', padding: '18px', marginBottom: '12px' }}>
+              <div key={i} style={{ background: 'rgba(63,166,107,0.1)', border: '1px solid #10B98135', borderRadius: '12px', padding: '18px', marginBottom: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px', gap: '12px' }}>
                   <div style={{ flex: 1 }}>
                     <p style={{ color: '#10B981', fontSize: '14px', fontWeight: '700', margin: '0 0 8px' }}>
                       {i === (aud.primary_segment_index || 0) ? '★ ' : ''}{seg.segment_name}
-                      {i === (aud.primary_segment_index || 0) && <span style={{ color: '#888', fontSize: '11px', fontWeight: '400', marginLeft: '8px' }}>Primary</span>}
+                      {i === (aud.primary_segment_index || 0) && <span style={{ color: MUTED, fontSize: '11px', fontWeight: '400', marginLeft: '8px' }}>Primary</span>}
                     </p>
                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                       {seg.age_range    && <Badge label={seg.age_range}    type="green" />}
@@ -852,7 +853,7 @@ function Intelligence() {
                   </div>
                   <div style={{ textAlign: 'center', flexShrink: 0 }}>
                     <p style={{ color: '#10B981', fontSize: '20px', fontWeight: '800', margin: 0 }}>{seg.confidence_score}</p>
-                    <p style={{ color: '#888', fontSize: '10px', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>conf.</p>
+                    <p style={{ color: MUTED, fontSize: '10px', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>conf.</p>
                   </div>
                 </div>
 
@@ -890,7 +891,7 @@ function Intelligence() {
                 )}
 
                 {seg.evidence_backing && (
-                  <div style={{ background: '#F0FDF4', borderRadius: '8px', padding: '10px 12px', marginTop: '8px' }}>
+                  <div style={{ background: 'rgba(63,166,107,0.1)', borderRadius: '8px', padding: '10px 12px', marginTop: '8px' }}>
                     <p style={{ color: '#475569', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 4px' }}>Evidence Backing</p>
                     <p style={{ color: '#065F46', fontSize: '12px', margin: 0, fontStyle: 'italic', lineHeight: '1.5' }}>"{seg.evidence_backing}"</p>
                   </div>
@@ -904,16 +905,16 @@ function Intelligence() {
                   Rejected Segments — insufficient evidence
                 </p>
                 {aud.rejected_segments.map((seg, i) => (
-                  <div key={i} style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '8px', padding: '12px 16px', marginBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#BE123C', fontSize: '13px', fontWeight: '600' }}><AlertTriangle size={12} />{seg.segment}</span>
-                    <span style={{ color: '#666', fontSize: '12px' }}>{seg.rejection_reason}</span>
+                  <div key={i} style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '8px', padding: '12px 16px', marginBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: RED, fontSize: '13px', fontWeight: '600' }}><AlertTriangle size={12} />{seg.segment}</span>
+                    <span style={{ color: MUTED, fontSize: '12px' }}>{seg.rejection_reason}</span>
                   </div>
                 ))}
               </div>
             )}
 
             {aud.audience_quality_reason && (
-              <p style={{ color: '#888', fontSize: '12px', margin: '14px 0 0', lineHeight: '1.5' }}>
+              <p style={{ color: MUTED, fontSize: '12px', margin: '14px 0 0', lineHeight: '1.5' }}>
                 Audience Quality Score: <span style={{ color: '#F7B731', fontWeight: '700' }}>{aud.audience_quality_score}/100</span> — {aud.audience_quality_reason}
               </p>
             )}
@@ -930,21 +931,21 @@ function Intelligence() {
             {exec.highest_roi_action && (
               <div style={{ background: '#FFFBEB', border: '1px solid #F59E0B40', borderRadius: '12px', padding: '16px 18px', marginBottom: '20px', borderLeft: '4px solid #F59E0B' }}>
                 <p style={{ color: '#F59E0B', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 6px' }}>⚡ Highest ROI Action</p>
-                <p style={{ color: '#171717', fontSize: '15px', fontWeight: '700', margin: '0 0 6px', lineHeight: '1.4' }}>{exec.highest_roi_action}</p>
-                {exec.highest_roi_reason && <p style={{ color: '#666', fontSize: '13px', margin: 0, lineHeight: '1.5' }}>{exec.highest_roi_reason}</p>}
+                <p style={{ color: BONE, fontSize: '15px', fontWeight: '700', margin: '0 0 6px', lineHeight: '1.4' }}>{exec.highest_roi_action}</p>
+                {exec.highest_roi_reason && <p style={{ color: MUTED, fontSize: '13px', margin: 0, lineHeight: '1.5' }}>{exec.highest_roi_reason}</p>}
               </div>
             )}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
               {(exec.top_5_actions || []).map((action, i) => (
-                <div key={i} style={{ background: '#F9F9F9', border: '1px solid #EAEAEA', borderRadius: '12px', padding: '16px' }}>
+                <div key={i} style={{ background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '12px', padding: '16px' }}>
                   <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
                     <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#D4AF3715', border: '1px solid #D4AF3535', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>
-                      <span style={{ color: '#D4AF37', fontSize: '13px', fontWeight: '800' }}>{action.rank}</span>
+                      <span style={{ color: GOLD, fontSize: '13px', fontWeight: '800' }}>{action.rank}</span>
                     </div>
                     <div style={{ flex: 1 }}>
-                      <p style={{ color: '#171717', fontSize: '14px', fontWeight: '600', margin: '0 0 5px', lineHeight: '1.4' }}>{action.action}</p>
-                      {action.why && <p style={{ color: '#888', fontSize: '13px', margin: '0 0 10px', lineHeight: '1.5' }}>{action.why}</p>}
+                      <p style={{ color: BONE, fontSize: '14px', fontWeight: '600', margin: '0 0 5px', lineHeight: '1.4' }}>{action.action}</p>
+                      {action.why && <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 10px', lineHeight: '1.5' }}>{action.why}</p>}
                       <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                         {action.expected_impact && (
                           <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', background: `${impactColor(action.expected_impact)}18`, color: impactColor(action.expected_impact) }}>
@@ -957,7 +958,7 @@ function Intelligence() {
                           </span>
                         )}
                         {action.timeline && (
-                          <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', background: '#F5F5F5', color: '#666' }}>
+                          <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', background: SLATE_M, color: MUTED }}>
                             {action.timeline}
                           </span>
                         )}
@@ -974,7 +975,7 @@ function Intelligence() {
                 {exec.quick_wins.map((w, i) => (
                   <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '6px', alignItems: 'flex-start' }}>
                     <span style={{ color: '#10B981', flexShrink: 0 }}>✓</span>
-                    <p style={{ color: '#171717', fontSize: '13px', margin: 0, lineHeight: '1.5' }}>{w}</p>
+                    <p style={{ color: BONE, fontSize: '13px', margin: 0, lineHeight: '1.5' }}>{w}</p>
                   </div>
                 ))}
               </div>
@@ -985,11 +986,11 @@ function Intelligence() {
                 {[
                   { label: '30 Days', value: exec.plan_30_day, color: '#10B981' },
                   { label: '60 Days', value: exec.plan_60_day, color: '#F59E0B' },
-                  { label: '90 Days', value: exec.plan_90_day, color: '#D4AF37' },
+                  { label: '90 Days', value: exec.plan_90_day, color: GOLD },
                 ].map(({ label, value, color }) => value ? (
-                  <div key={label} style={{ background: '#F9F9F9', borderRadius: '10px', padding: '14px', borderTop: `3px solid ${color}` }}>
+                  <div key={label} style={{ background: SLATE_M, borderRadius: '10px', padding: '14px', borderTop: `3px solid ${color}` }}>
                     <p style={{ color, fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>{label}</p>
-                    <p style={{ color: '#171717', fontSize: '13px', margin: 0, lineHeight: '1.5' }}>{value}</p>
+                    <p style={{ color: BONE, fontSize: '13px', margin: 0, lineHeight: '1.5' }}>{value}</p>
                   </div>
                 ) : null)}
               </div>
@@ -998,15 +999,15 @@ function Intelligence() {
             {(exec.biggest_risk || exec.biggest_opportunity) && (
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '10px' }}>
                 {exec.biggest_risk && (
-                  <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '10px', padding: '14px' }}>
-                    <p style={{ color: '#BE123C', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 6px' }}>Biggest Risk</p>
-                    <p style={{ color: '#171717', fontSize: '13px', margin: 0, lineHeight: '1.5' }}>{exec.biggest_risk}</p>
+                  <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '10px', padding: '14px' }}>
+                    <p style={{ color: RED, fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 6px' }}>Biggest Risk</p>
+                    <p style={{ color: BONE, fontSize: '13px', margin: 0, lineHeight: '1.5' }}>{exec.biggest_risk}</p>
                   </div>
                 )}
                 {exec.biggest_opportunity && (
-                  <div style={{ background: '#F0FDF4', border: '1px solid #10B98120', borderRadius: '10px', padding: '14px' }}>
+                  <div style={{ background: 'rgba(63,166,107,0.1)', border: '1px solid #10B98120', borderRadius: '10px', padding: '14px' }}>
                     <p style={{ color: '#10B981', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 6px' }}>Biggest Opportunity</p>
-                    <p style={{ color: '#171717', fontSize: '13px', margin: 0, lineHeight: '1.5' }}>{exec.biggest_opportunity}</p>
+                    <p style={{ color: BONE, fontSize: '13px', margin: 0, lineHeight: '1.5' }}>{exec.biggest_opportunity}</p>
                   </div>
                 )}
               </div>
@@ -1020,8 +1021,8 @@ function Intelligence() {
 
   // ── FORM ─────────────────────────────────────────────────────────────────
   return (
-    <div style={{ minHeight: '100vh', background: '#FAFAFA', fontFamily: FONT, color: '#171717', width: '100%', boxSizing: 'border-box', overflowX: 'hidden' }}>
-      <div style={{ background: '#FFFFFF', borderBottom: '1px solid #EAEAEA', padding: '0 16px', height: '56px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+    <div style={{ minHeight: '100vh', background: INK, fontFamily: FONT, color: BONE, width: '100%', boxSizing: 'border-box', overflowX: 'hidden' }}>
+      <div style={{ background: SLATE, borderBottom: '1px solid #EAEAEA', padding: '0 16px', height: '56px', display: 'flex', alignItems: 'center', gap: '8px' }}>
         <Dna size={15} color="#D4AF37" strokeWidth={1.5} />
         <span style={{ fontWeight: '600', fontSize: '15px' }}>Business Intelligence</span>
       </div>
@@ -1029,14 +1030,14 @@ function Intelligence() {
       <div style={{ maxWidth: '560px', margin: isMobile ? '20px auto' : '40px auto', padding: isMobile ? '0 16px' : '0 24px' }}>
 
         <div style={{ marginBottom: '28px' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#D4AF3712', border: '1px solid #D4AF3530', borderRadius: '20px', padding: '4px 14px', marginBottom: '14px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: GOLD_DIM, border: '1px solid #D4AF3530', borderRadius: '20px', padding: '4px 14px', marginBottom: '14px' }}>
             <Dna size={11} color="#D4AF37" strokeWidth={1.5} />
-            <span style={{ color: '#D4AF37', fontSize: '12px', fontWeight: '600' }}>Flagship Feature</span>
+            <span style={{ color: GOLD, fontSize: '12px', fontWeight: '600' }}>Flagship Feature</span>
           </div>
           <h1 style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: '800', margin: '0 0 10px', letterSpacing: '-0.4px' }}>
             Business Intelligence Platform
           </h1>
-          <p style={{ color: '#888', fontSize: '14px', margin: 0, lineHeight: '1.7' }}>
+          <p style={{ color: MUTED, fontSize: '14px', margin: 0, lineHeight: '1.7' }}>
             6 AI engines. Evidence-only analysis. DNA score, opportunity score, threat score, audience quality, readiness — sab ek saath.
           </p>
         </div>
@@ -1047,29 +1048,29 @@ function Intelligence() {
             [Dna,        'DNA Scoring',    'Evidence-only'],
             [Zap,        '5 BI Scores',    'Real-time output'],
           ].map(([Icon, title, sub]) => (
-            <div key={title} style={{ background: '#FFFFFF', border: '1px solid #EAEAEA', borderRadius: '10px', padding: '14px', textAlign: 'center' }}>
+            <div key={title} style={{ background: SLATE, border: `1px solid ${SLATE_L}`, borderRadius: '10px', padding: '14px', textAlign: 'center' }}>
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
                 <Icon size={18} color="#D4AF37" strokeWidth={1.5} />
               </div>
-              <p style={{ color: '#171717', fontSize: '12px', fontWeight: '600', margin: '0 0 3px' }}>{title}</p>
-              <p style={{ color: '#888', fontSize: '11px', margin: 0 }}>{sub}</p>
+              <p style={{ color: BONE, fontSize: '12px', fontWeight: '600', margin: '0 0 3px' }}>{title}</p>
+              <p style={{ color: MUTED, fontSize: '11px', margin: 0 }}>{sub}</p>
             </div>
           ))}
         </div>
 
-        <div style={{ background: '#FFFFFF', border: '1px solid #EAEAEA', borderRadius: '16px', padding: '28px' }}>
+        <div style={{ background: SLATE, border: `1px solid ${SLATE_L}`, borderRadius: '16px', padding: '28px' }}>
           {error && (
             <div style={{ background: '#F43F5E15', border: '1px solid #F43F5E40', borderRadius: '8px', padding: '12px 16px', marginBottom: '20px', color: '#F43F5E', fontSize: '13px' }}>
               ⚠️ {error}
             </div>
           )}
 
-          <p style={{ fontSize: '11px', color: '#D4AF37', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 16px' }}>
+          <p style={{ fontSize: '11px', color: GOLD, fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 16px' }}>
             Business Info
           </p>
 
           <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', color: '#666', fontSize: '12px', fontWeight: '600', marginBottom: '7px' }}>Website URL *</label>
+            <label style={{ display: 'block', color: MUTED, fontSize: '12px', fontWeight: '600', marginBottom: '7px' }}>Website URL *</label>
             <input
               type="url" value={url} onChange={e => setUrl(e.target.value)}
               placeholder="https://aapkibusiness.com"
@@ -1079,7 +1080,7 @@ function Intelligence() {
           </div>
 
           <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', color: '#666', fontSize: '12px', fontWeight: '600', marginBottom: '7px' }}>Business Type <span style={{ color: '#475569', fontWeight: '400' }}>(optional — AI verify karega)</span></label>
+            <label style={{ display: 'block', color: MUTED, fontSize: '12px', fontWeight: '600', marginBottom: '7px' }}>Business Type <span style={{ color: '#475569', fontWeight: '400' }}>(optional — AI verify karega)</span></label>
             <select value={businessType} onChange={e => setBusinessType(e.target.value)}
               style={{ ...inputStyle, color: businessType ? '#171717' : '#999' }}>
               <option value="">Select karo...</option>
@@ -1100,7 +1101,7 @@ function Intelligence() {
 
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
             <div>
-              <label style={{ display: 'block', color: '#666', fontSize: '12px', fontWeight: '600', marginBottom: '7px' }}>
+              <label style={{ display: 'block', color: MUTED, fontSize: '12px', fontWeight: '600', marginBottom: '7px' }}>
                 Competitor URL <span style={{ color: '#475569', fontWeight: '400' }}>(optional)</span>
               </label>
               <input type="url" value={competitorUrl} onChange={e => setCompetitorUrl(e.target.value)}
@@ -1108,7 +1109,7 @@ function Intelligence() {
                 style={inputStyle} />
             </div>
             <div>
-              <label style={{ display: 'block', color: '#666', fontSize: '12px', fontWeight: '600', marginBottom: '7px' }}>Language</label>
+              <label style={{ display: 'block', color: MUTED, fontSize: '12px', fontWeight: '600', marginBottom: '7px' }}>Language</label>
               <select value={language} onChange={e => setLanguage(e.target.value)} style={inputStyle}>
                 <option value="Hinglish">Hinglish</option>
                 <option value="English">English</option>

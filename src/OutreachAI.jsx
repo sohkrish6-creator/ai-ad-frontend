@@ -3,13 +3,11 @@ import CityInput, { getLastCity } from './CityInput'
 
 const LS_KEY_OUTREACH = 'adsoh_outreach_result'
 import { MessageSquare, Copy, Check, ChevronRight } from 'lucide-react'
+import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
-const GOLD    = '#D4AF37'
 
-const card = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
-const lbl  = { display: 'block', color: '#999', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '7px' }
-const inp  = { width: '100%', padding: '10px 13px', borderRadius: '7px', border: '1px solid #E5E5E5', background: '#FAFAFA', color: '#171717', fontSize: '14px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
 
 const INDUSTRIES = [
   'Hospitality (Hotels, Restaurants, Cafes)', 'Schools & Education', 'Healthcare & Clinics',
@@ -172,7 +170,7 @@ export default function OutreachAI() {
   const resolvedIndustry = industry === 'Other' ? industryOther : industry
 
   const page = {
-    minHeight: '100vh', background: '#FAFAFA',
+    minHeight: '100vh', background: INK,
     padding: isMobile ? '28px 16px' : '40px 36px',
     maxWidth: '880px', width: '100%', boxSizing: 'border-box',
     fontFamily: '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif',
@@ -257,7 +255,7 @@ export default function OutreachAI() {
           { key: 'opener_10sec',   label: 'Opener',         sub: '10 seconds',       color: '#6366F1' },
           { key: 'pain_question',  label: 'Pain Question',  sub: 'Discovery',        color: '#DC2626' },
           { key: 'value_statement',label: 'Value Statement',sub: '30 seconds',       color: GOLD },
-          { key: 'close',          label: 'Close',          sub: 'Book the meeting', color: '#16A34A' },
+          { key: 'close',          label: 'Close',          sub: 'Book the meeting', color: GREEN },
         ]
         return (
           <div>
@@ -272,12 +270,12 @@ export default function OutreachAI() {
                 <div style={{ flex: 1, paddingBottom: '4px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
                     <div>
-                      <span style={{ fontSize: '13px', fontWeight: '600', color: '#171717' }}>{step.label}</span>
-                      <span style={{ fontSize: '11px', color: '#999', marginLeft: '7px' }}>{step.sub}</span>
+                      <span style={{ fontSize: '13px', fontWeight: '600', color: BONE }}>{step.label}</span>
+                      <span style={{ fontSize: '11px', color: MUTED, marginLeft: '7px' }}>{step.sub}</span>
                     </div>
                     <CopyBtn text={c[step.key]} small />
                   </div>
-                  <div style={{ background: '#F9F9F9', border: '1px solid #EAEAEA', borderRadius: '7px', padding: '11px 13px', fontSize: '13.5px', color: '#222', lineHeight: '1.65' }}>
+                  <div style={{ background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '11px 13px', fontSize: '13.5px', color: '#222', lineHeight: '1.65' }}>
                     {c[step.key]}
                   </div>
                 </div>
@@ -297,13 +295,13 @@ export default function OutreachAI() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ padding: '3px 9px', borderRadius: '20px', background: '#FEF2F2', color: '#DC2626', fontSize: '11px', fontWeight: '700', border: '1px solid #FECACA' }}>Objection</span>
-                    <p style={{ margin: 0, fontSize: '13.5px', fontWeight: '600', color: '#171717' }}>{ob.objection}</p>
+                    <p style={{ margin: 0, fontSize: '13.5px', fontWeight: '600', color: BONE }}>{ob.objection}</p>
                   </div>
                   <CopyBtn text={`Objection: "${ob.objection}"\nResponse: ${ob.response}`} small />
                 </div>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
                   <ChevronRight size={14} color={GOLD} style={{ marginTop: '3px', flexShrink: 0 }} />
-                  <p style={{ margin: 0, fontSize: '13.5px', color: '#333', lineHeight: '1.65' }}>{ob.response}</p>
+                  <p style={{ margin: 0, fontSize: '13.5px', color: BONE, lineHeight: '1.65' }}>{ob.response}</p>
                 </div>
               </div>
             ))}
@@ -313,7 +311,7 @@ export default function OutreachAI() {
       case 'followup': {
         const f = o.follow_up_sequence || {}
         const days = [
-          { key: 'day1',  label: 'Day 1',  sub: 'Same day',      color: '#16A34A' },
+          { key: 'day1',  label: 'Day 1',  sub: 'Same day',      color: GREEN },
           { key: 'day3',  label: 'Day 3',  sub: 'Different angle', color: GOLD },
           { key: 'day7',  label: 'Day 7',  sub: 'Add value',     color: '#6366F1' },
           { key: 'day14', label: 'Day 14', sub: 'Final attempt', color: '#DC2626' },
@@ -331,7 +329,7 @@ export default function OutreachAI() {
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
-                      <p style={{ margin: 0, fontSize: '13.5px', color: '#333', lineHeight: '1.65' }}>{f[d.key]}</p>
+                      <p style={{ margin: 0, fontSize: '13.5px', color: BONE, lineHeight: '1.65' }}>{f[d.key]}</p>
                       <CopyBtn text={f[d.key]} small />
                     </div>
                   </div>
@@ -364,17 +362,17 @@ export default function OutreachAI() {
         <MessageSquare size={20} color={GOLD} />
         <h1 style={{ fontSize: '22px', fontWeight: '600', margin: 0, letterSpacing: '-0.4px' }}>Outreach AI</h1>
       </div>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 28px' }}>Personalized outreach kit built from memory — cold email, WhatsApp, LinkedIn, call script, objections, and follow-up sequence.</p>
+      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 28px' }}>Personalized outreach kit built from memory — cold email, WhatsApp, LinkedIn, call script, objections, and follow-up sequence.</p>
 
       {/* Input */}
       <div style={{ maxWidth: '640px', width: '100%' }}>
         <div style={{ ...card, padding: isMobile ? '20px 16px' : '26px', marginBottom: '10px' }}>
-          {error && <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: '#BE123C', fontSize: '13px' }}>{error}</div>}
+          {error && <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: RED, fontSize: '13px' }}>{error}</div>}
 
           <div style={{ marginBottom: '14px' }}>
-            <label style={lbl}>Business Website URL <span style={{ color: '#BBB', fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
+            <label style={lbl}>Business Website URL <span style={{ color: MUTED, fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
             <input type="text" value={url} onChange={e => setUrl(e.target.value)} placeholder="e.g. sohscape.com" style={inp} />
-            <p style={{ margin: '5px 0 0', fontSize: '11px', color: '#999' }}>Same URL + Industry as Marketing Brain for memory to load.</p>
+            <p style={{ margin: '5px 0 0', fontSize: '11px', color: MUTED }}>Same URL + Industry as Marketing Brain for memory to load.</p>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
@@ -400,7 +398,7 @@ export default function OutreachAI() {
 
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
             <div>
-              <label style={lbl}>Target Name <span style={{ color: '#BBB', fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
+              <label style={lbl}>Target Name <span style={{ color: MUTED, fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
               <input type="text" value={targetName} onChange={e => setTargetName(e.target.value)} placeholder="e.g. Hotel Raj Palace" style={inp} />
             </div>
             <div>
@@ -437,7 +435,7 @@ export default function OutreachAI() {
                 <span style={{ fontSize: '11px', fontWeight: '700', color: GOLD }}>{i + 1}</span>
               </div>
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: '13px', fontWeight: '500', color: '#171717', margin: '0 0 6px' }}>{label}</p>
+                <p style={{ fontSize: '13px', fontWeight: '500', color: BONE, margin: '0 0 6px' }}>{label}</p>
                 <Shimmer h="9px" w="55%" />
               </div>
             </div>
@@ -447,9 +445,9 @@ export default function OutreachAI() {
 
       {/* Results */}
       {fromCache && result && !loading && (
-        <div style={{ maxWidth: '820px', width: '100%', background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '7px', padding: '9px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>Showing previous result · Generate new report to refresh</p>
-          <button onClick={() => { localStorage.removeItem(LS_KEY_OUTREACH); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
+        <div style={{ maxWidth: '820px', width: '100%', background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '9px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>Showing previous result · Generate new report to refresh</p>
+          <button onClick={() => { localStorage.removeItem(LS_KEY_OUTREACH); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: MUTED, textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
         </div>
       )}
 
@@ -461,8 +459,8 @@ export default function OutreachAI() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <MessageSquare size={16} color={GOLD} />
               <div>
-                <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: '#171717' }}>Outreach Kit Ready</p>
-                <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#999' }}>
+                <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: BONE }}>Outreach Kit Ready</p>
+                <p style={{ margin: '2px 0 0', fontSize: '12px', color: MUTED }}>
                   {resolvedIndustry} · {city}
                   {targetName ? ` · ${targetName}` : ''}
                 </p>

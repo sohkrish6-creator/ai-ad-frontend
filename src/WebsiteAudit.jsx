@@ -3,13 +3,11 @@ import CityInput, { getLastCity } from './CityInput'
 
 const LS_KEY_WEBSITE = 'adsoh_website_result'
 import { Monitor, Copy, Check, ChevronDown, ChevronUp, AlertCircle, CheckCircle, Zap } from 'lucide-react'
+import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
-const GOLD    = '#D4AF37'
 
-const card  = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
-const lbl   = { display: 'block', color: '#999', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '7px' }
-const inp   = { width: '100%', padding: '10px 13px', borderRadius: '7px', border: '1px solid #E5E5E5', background: '#FAFAFA', color: '#171717', fontSize: '14px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
 
 const INDUSTRIES = [
   'Hospitality (Hotels, Restaurants, Cafes)', 'Schools & Education', 'Healthcare & Clinics',
@@ -82,8 +80,8 @@ function ScoreCard({ title, data, scoreKey = 'score', expanded, onToggle }) {
             <span style={{ fontSize: '14px', fontWeight: '700', color: scoreColor(score) }}>{score}</span>
           </div>
           <div>
-            <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: '#171717' }}>{title}</p>
-            <p style={{ margin: '2px 0 0', fontSize: '11px', color: '#999' }}>
+            <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: BONE }}>{title}</p>
+            <p style={{ margin: '2px 0 0', fontSize: '11px', color: MUTED }}>
               {issues.length} issue{issues.length !== 1 ? 's' : ''} · {fixes.length} fix{fixes.length !== 1 ? 'es' : ''}
             </p>
           </div>
@@ -121,7 +119,7 @@ function ScoreCard({ title, data, scoreKey = 'score', expanded, onToggle }) {
           {data.cta_count !== undefined && (
             <span style={{
               display: 'inline-flex', alignItems: 'center', gap: '4px',
-              background: '#F5F5F5', color: '#666',
+              background: SLATE_M, color: MUTED,
               borderRadius: '20px', padding: '3px 9px', fontSize: '11px', fontWeight: '600',
               marginTop: '12px', marginBottom: '4px',
             }}>
@@ -145,7 +143,7 @@ function ScoreCard({ title, data, scoreKey = 'score', expanded, onToggle }) {
 
           {fixes.length > 0 && (
             <div style={{ marginTop: '14px' }}>
-              <p style={{ margin: '0 0 8px', fontSize: '11px', fontWeight: '700', color: '#16A34A', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Fixes</p>
+              <p style={{ margin: '0 0 8px', fontSize: '11px', fontWeight: '700', color: GREEN, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Fixes</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {fixes.map((fix, i) => (
                   <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
@@ -182,7 +180,7 @@ export default function WebsiteAudit() {
   const resolvedIndustry = industry === 'Other' ? industryOther : industry
 
   const page = {
-    minHeight: '100vh', background: '#FAFAFA',
+    minHeight: '100vh', background: INK,
     padding: isMobile ? '28px 16px' : '40px 36px',
     maxWidth: '860px', width: '100%', boxSizing: 'border-box',
     fontFamily: '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif',
@@ -257,13 +255,13 @@ export default function WebsiteAudit() {
         <Monitor size={20} color={GOLD} />
         <h1 style={{ fontSize: '22px', fontWeight: '600', margin: 0, letterSpacing: '-0.4px' }}>Website Intelligence</h1>
       </div>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 28px' }}>Crawls your website and returns a conversion audit — every issue tied to actual content found.</p>
+      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 28px' }}>Crawls your website and returns a conversion audit — every issue tied to actual content found.</p>
 
       {/* Input card */}
       <div style={{ maxWidth: '640px', width: '100%' }}>
         <div style={{ ...card, padding: isMobile ? '20px 16px' : '26px', marginBottom: '16px' }}>
 
-          {error && <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: '#BE123C', fontSize: '13px' }}>{error}</div>}
+          {error && <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: RED, fontSize: '13px' }}>{error}</div>}
 
           <div style={{ marginBottom: '14px' }}>
             <label style={lbl}>Website URL <span style={{ color: '#DC2626' }}>*</span></label>
@@ -277,14 +275,14 @@ export default function WebsiteAudit() {
 
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
             <div>
-              <label style={lbl}>Industry <span style={{ color: '#BBB', fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
+              <label style={lbl}>Industry <span style={{ color: MUTED, fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
               <select value={industry} onChange={e => setIndustry(e.target.value)} style={{ ...inp, color: industry ? '#171717' : '#999' }}>
                 <option value="">— Any industry —</option>
                 {INDUSTRIES.map(o => <option key={o} value={o}>{o}</option>)}
               </select>
             </div>
             <div>
-              <label style={lbl}>Target City <span style={{ color: '#BBB', fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
+              <label style={lbl}>Target City <span style={{ color: MUTED, fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
               <CityInput value={city} onChange={setCity} style={inp} />
             </div>
           </div>
@@ -322,7 +320,7 @@ export default function WebsiteAudit() {
                 <span style={{ fontSize: '11px', fontWeight: '700', color: GOLD }}>{i + 1}</span>
               </div>
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: '13px', fontWeight: '500', color: '#171717', margin: '0 0 6px' }}>{label}</p>
+                <p style={{ fontSize: '13px', fontWeight: '500', color: BONE, margin: '0 0 6px' }}>{label}</p>
                 <Shimmer h="9px" w="55%" />
               </div>
             </div>
@@ -332,9 +330,9 @@ export default function WebsiteAudit() {
 
       {/* Results */}
       {fromCache && result && !loading && (
-        <div style={{ maxWidth: '800px', width: '100%', background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '7px', padding: '9px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>Showing previous result · Generate new report to refresh</p>
-          <button onClick={() => { localStorage.removeItem(LS_KEY_WEBSITE); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
+        <div style={{ maxWidth: '800px', width: '100%', background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '9px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>Showing previous result · Generate new report to refresh</p>
+          <button onClick={() => { localStorage.removeItem(LS_KEY_WEBSITE); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: MUTED, textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
         </div>
       )}
 
@@ -356,11 +354,11 @@ export default function WebsiteAudit() {
                 <span style={{ fontSize: '10px', color: scoreColor(score), fontWeight: '600', marginTop: '2px' }}>/100</span>
               </div>
               <div style={{ flex: 1, minWidth: '180px' }}>
-                <p style={{ margin: '0 0 4px', fontSize: '18px', fontWeight: '700', color: '#171717', letterSpacing: '-0.3px' }}>
+                <p style={{ margin: '0 0 4px', fontSize: '18px', fontWeight: '700', color: BONE, letterSpacing: '-0.3px' }}>
                   {score >= 75 ? 'Good website' : score >= 50 ? 'Needs work' : 'Critical issues'}
                 </p>
                 <p style={{ margin: '0 0 10px', fontSize: '14px', color: '#555', lineHeight: '1.5' }}>{a.overall_verdict}</p>
-                <p style={{ margin: 0, fontSize: '11px', color: '#999' }}>{result.url}{result.memory_used ? ' · Memory context used' : ''}</p>
+                <p style={{ margin: 0, fontSize: '11px', color: MUTED }}>{result.url}{result.memory_used ? ' · Memory context used' : ''}</p>
               </div>
               <CopyBtn text={auditText(result)} />
             </div>
@@ -371,7 +369,7 @@ export default function WebsiteAudit() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
                   <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: GOLD }} />
                   <h3 style={{ fontSize: '15px', fontWeight: '600', margin: 0 }}>Priority Fixes</h3>
-                  <span style={{ fontSize: '12px', color: '#999', marginLeft: '2px' }}>ordered by conversion impact</span>
+                  <span style={{ fontSize: '12px', color: MUTED, marginLeft: '2px' }}>ordered by conversion impact</span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {a.priority_fixes.map((fix, i) => (
@@ -401,7 +399,7 @@ export default function WebsiteAudit() {
                   {a.quick_wins.map((win, i) => (
                     <div key={i} style={{
                       display: 'flex', gap: '10px', alignItems: 'flex-start',
-                      background: '#fff', border: '1px solid #E8DFA8', borderRadius: '7px', padding: '10px 13px',
+                      background: SLATE, border: '1px solid #E8DFA8', borderRadius: '7px', padding: '10px 13px',
                     }}>
                       <div style={{ width: '18px', height: '18px', borderRadius: '4px', border: '1.5px solid #D4AF37', flexShrink: 0, marginTop: '1px' }} />
                       <p style={{ margin: 0, fontSize: '13.5px', color: '#444', lineHeight: '1.5' }}>{win}</p>
@@ -412,7 +410,7 @@ export default function WebsiteAudit() {
             )}
 
             {/* Score cards */}
-            <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#888', margin: '20px 0 10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Section Breakdown</h3>
+            <h3 style={{ fontSize: '14px', fontWeight: '600', color: MUTED, margin: '20px 0 10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Section Breakdown</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {sections.map(({ key, title, data, scoreKey }) => (
                 <ScoreCard

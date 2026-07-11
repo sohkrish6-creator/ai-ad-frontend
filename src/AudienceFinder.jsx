@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react'
 import CityInput, { getLastCity } from './CityInput'
+import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+
 
 const LS_KEY_AUDIENCE = 'adsoh_audience_result'
 const API = 'https://ai-ad-backend-zhpj.onrender.com'
-const GOLD = '#D4AF37'
-const card = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
-const inputSt = { width: '100%', padding: '10px 13px', borderRadius: '7px', border: '1px solid #E5E5E5', background: '#FAFAFA', color: '#171717', fontSize: '14px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
-const lbl = { display: 'block', color: '#999', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '7px' }
 
 const BUSINESS_TYPES = [
   'E-commerce / Online Store','Restaurant / Cafe / Food','Fashion / Apparel / Accessories',
@@ -62,12 +60,12 @@ export default function AudienceFinder() {
 
   const handleCopy = () => { navigator.clipboard.writeText(result); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
-  const page = { minHeight: '100vh', background: '#FAFAFA', padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '820px', width: '100%', boxSizing: 'border-box' }
+  const page = { minHeight: '100vh', background: INK, padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '820px', width: '100%', boxSizing: 'border-box' }
 
   return (
     <div style={page}>
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Audience Finder</h1>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 32px' }}>URL ya Niche do — exact audience, segments aur "where to find them" milega</p>
+      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 32px' }}>URL ya Niche do — exact audience, segments aur "where to find them" milega</p>
 
       <div style={{ maxWidth: '600px', width: '100%' }}>
         <div style={{ ...card, padding: isMobile ? '20px 16px' : '28px', marginBottom: '16px' }}>
@@ -106,17 +104,17 @@ export default function AudienceFinder() {
           <p style={{ fontSize: '11px', color: GOLD, fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 14px' }}>Aapka Business</p>
 
           <div style={{ marginBottom: '16px' }}>
-            <label style={lbl}>Website URL <span style={{ color: '#CCC', fontWeight: '400', textTransform: 'none', letterSpacing: 0 }}>(optional agar Niche doge)</span></label>
+            <label style={lbl}>Website URL <span style={{ color: MUTED, fontWeight: '400', textTransform: 'none', letterSpacing: 0 }}>(optional agar Niche doge)</span></label>
             <input name="url" value={form.url} onChange={handleChange} placeholder="https://example.com" style={inputSt} />
           </div>
 
           <div style={{ marginBottom: '16px' }}>
-            <label style={lbl}>Niche / Industry Focus <span style={{ color: '#CCC', fontWeight: '400', textTransform: 'none', letterSpacing: 0 }}>(optional agar URL doge)</span></label>
+            <label style={lbl}>Niche / Industry Focus <span style={{ color: MUTED, fontWeight: '400', textTransform: 'none', letterSpacing: 0 }}>(optional agar URL doge)</span></label>
             <input name="niche" value={form.niche} onChange={handleChange} placeholder="jaise: fantasy sports app, bridal jewellery, NEET coaching" style={inputSt} />
           </div>
 
           <div style={{ marginBottom: '16px' }}>
-            <label style={lbl}>Business Type <span style={{ color: '#BE123C' }}>*</span></label>
+            <label style={lbl}>Business Type <span style={{ color: RED }}>*</span></label>
             <select name="business_type" value={form.business_type} onChange={handleChange} style={{ ...inputSt, color: form.business_type ? '#171717' : '#999' }}>
               <option value="">-- Select karo --</option>
               {BUSINESS_TYPES.map(b => <option key={b} value={b}>{b}</option>)}
@@ -124,7 +122,7 @@ export default function AudienceFinder() {
           </div>
 
           <div style={{ marginBottom: '16px' }}>
-            <label style={lbl}>Kya promote karna hai? <span style={{ color: '#CCC', fontWeight: '400', textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
+            <label style={lbl}>Kya promote karna hai? <span style={{ color: MUTED, fontWeight: '400', textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
             <input name="offer" value={form.offer} onChange={handleChange} placeholder="jaise: app download, product sale, lead generation" style={inputSt} />
           </div>
 
@@ -145,7 +143,7 @@ export default function AudienceFinder() {
             </div>
           </div>
 
-          {error && <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '10px 14px', color: '#BE123C', fontSize: '13px', marginBottom: '16px' }}>{error}</div>}
+          {error && <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '7px', padding: '10px 14px', color: RED, fontSize: '13px', marginBottom: '16px' }}>{error}</div>}
 
           <button onClick={handleSubmit} disabled={loading} style={{ width: '100%', padding: '13px', borderRadius: '8px', border: 'none', background: loading ? '#999' : '#171717', color: '#fff', fontWeight: '600', fontSize: '14px', cursor: loading ? 'not-allowed' : 'pointer' }}>
             {loading ? 'Audience dhundh raha hoon...' : resolvedIndustry ? `Find ${resolvedIndustry} Business Owners` : 'Find My Audience'}
@@ -153,9 +151,9 @@ export default function AudienceFinder() {
         </div>
 
         {result && fromCache && (
-          <div style={{ background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '7px', padding: '9px 16px', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>Showing previous result · Generate new report to refresh</p>
-            <button onClick={() => { localStorage.removeItem(LS_KEY_AUDIENCE); setResult(''); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
+          <div style={{ background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '9px 16px', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>Showing previous result · Generate new report to refresh</p>
+            <button onClick={() => { localStorage.removeItem(LS_KEY_AUDIENCE); setResult(''); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: MUTED, textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
           </div>
         )}
 
@@ -163,11 +161,11 @@ export default function AudienceFinder() {
           <div style={{ ...card, padding: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h2 style={{ fontSize: '14px', fontWeight: '600', color: GOLD, margin: 0 }}>Audience Report</h2>
-              <button onClick={handleCopy} style={{ padding: '6px 14px', borderRadius: '7px', background: copied ? '#22C55E' : '#F5F5F5', color: copied ? '#fff' : '#666', border: '1px solid #E5E5E5', cursor: 'pointer', fontSize: '12px', fontWeight: '600' }}>
+              <button onClick={handleCopy} style={{ padding: '6px 14px', borderRadius: '7px', background: copied ? '#22C55E' : '#F5F5F5', color: copied ? '#fff' : '#666', border: `1px solid ${SLATE_L}`, cursor: 'pointer', fontSize: '12px', fontWeight: '600' }}>
                 {copied ? '✓ Copied' : 'Copy'}
               </button>
             </div>
-            <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '14px', lineHeight: '1.7', color: '#333', margin: 0, fontFamily: 'inherit' }}>{result}</pre>
+            <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '14px', lineHeight: '1.7', color: BONE, margin: 0, fontFamily: 'inherit' }}>{result}</pre>
           </div>
         )}
       </div>

@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Activity, Copy, Check, TrendingUp, TrendingDown, Minus, AlertCircle, Zap } from 'lucide-react'
 import CityInput, { getLastCity } from './CityInput'
+import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
-const GOLD    = '#D4AF37'
 const LS_KEY  = 'adsoh_performance_result'
 
-const card = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
-const lbl  = { display: 'block', color: '#999', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '7px' }
-const inp  = { width: '100%', padding: '10px 13px', borderRadius: '7px', border: '1px solid #E5E5E5', background: '#FAFAFA', color: '#171717', fontSize: '14px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
 
 const INDUSTRIES = [
   'Hospitality (Hotels, Restaurants, Cafes)', 'Schools & Education', 'Healthcare & Clinics',
@@ -44,9 +42,9 @@ function CopyBtn({ text }) {
 
 function StatusBadge({ status }) {
   const map = {
-    above:    { bg: '#F0FDF4', color: '#16A34A', border: '#BBF7D0', label: 'Above Target' },
+    above:    { bg: '#F0FDF4', color: GREEN, border: '#BBF7D0', label: 'Above Target' },
     on_track: { bg: '#FFFBEB', color: '#D97706', border: '#FDE68A', label: 'On Track' },
-    below:    { bg: '#FFF1F2', color: '#BE123C', border: '#FECDD3', label: 'Below Target' },
+    below:    { bg: '#FFF1F2', color: RED, border: '#FECDD3', label: 'Below Target' },
   }
   const s = map[status] || map.on_track
   return (
@@ -58,9 +56,9 @@ function StatusBadge({ status }) {
 
 function RatingBadge({ rating }) {
   const map = {
-    good:    { bg: '#F0FDF4', color: '#16A34A', border: '#BBF7D0' },
+    good:    { bg: '#F0FDF4', color: GREEN, border: '#BBF7D0' },
     average: { bg: '#FFFBEB', color: '#D97706', border: '#FDE68A' },
-    poor:    { bg: '#FFF1F2', color: '#BE123C', border: '#FECDD3' },
+    poor:    { bg: '#FFF1F2', color: RED, border: '#FECDD3' },
   }
   const s = map[rating] || map.average
   return (
@@ -136,7 +134,7 @@ export default function PerformanceIntelligence() {
   const resolvedIndustry = industry === 'Other' ? industryOther : industry
 
   const page = {
-    minHeight: '100vh', background: '#FAFAFA',
+    minHeight: '100vh', background: INK,
     padding: isMobile ? '28px 16px' : '40px 36px',
     maxWidth: '960px', width: '100%', boxSizing: 'border-box',
     fontFamily: '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif',
@@ -179,9 +177,9 @@ export default function PerformanceIntelligence() {
     { label: 'CTR',         value: am.ctr,         color: GOLD },
     { label: 'CPC',         value: am.cpc,         color: '#D97706' },
     { label: 'Cost',        value: am.cost,        color: '#DC2626' },
-    { label: 'Conversions', value: am.conversions, color: '#16A34A' },
+    { label: 'Conversions', value: am.conversions, color: GREEN },
     { label: 'CPA',         value: am.cpa,         color: '#D97706' },
-    { label: 'ROAS',        value: am.roas,        color: '#16A34A' },
+    { label: 'ROAS',        value: am.roas,        color: GREEN },
   ]
 
   return (
@@ -192,15 +190,15 @@ export default function PerformanceIntelligence() {
         <Activity size={20} color={GOLD} />
         <h1 style={{ fontSize: '22px', fontWeight: '600', margin: 0, letterSpacing: '-0.4px' }}>Performance Intelligence</h1>
       </div>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 28px' }}>Live Google Ads performance analysis — actual vs expected KPIs, campaign breakdown, and AI-generated insights.</p>
+      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 28px' }}>Live Google Ads performance analysis — actual vs expected KPIs, campaign breakdown, and AI-generated insights.</p>
 
       {/* Form */}
       <div style={{ maxWidth: '640px', width: '100%' }}>
         <div style={{ ...card, padding: isMobile ? '20px 16px' : '26px', marginBottom: '16px' }}>
-          {error && <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: '#BE123C', fontSize: '13px' }}>{error}</div>}
+          {error && <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: RED, fontSize: '13px' }}>{error}</div>}
 
           <div style={{ marginBottom: '14px' }}>
-            <label style={lbl}>Business URL <span style={{ color: '#BBB', fontWeight: '400', textTransform: 'none' }}>(optional — for memory)</span></label>
+            <label style={lbl}>Business URL <span style={{ color: MUTED, fontWeight: '400', textTransform: 'none' }}>(optional — for memory)</span></label>
             <input type="text" value={url} onChange={e => setUrl(e.target.value)} placeholder="e.g. sohscape.com" style={inp} />
           </div>
 
@@ -255,7 +253,7 @@ export default function PerformanceIntelligence() {
                 <span style={{ fontSize: '11px', fontWeight: '700', color: GOLD }}>{i + 1}</span>
               </div>
               <div style={{ flex: 1 }}>
-                <p style={{ margin: '0 0 5px', fontSize: '13px', fontWeight: '500', color: '#171717' }}>{label}</p>
+                <p style={{ margin: '0 0 5px', fontSize: '13px', fontWeight: '500', color: BONE }}>{label}</p>
                 <Shimmer h="8px" w="50%" />
               </div>
             </div>
@@ -265,9 +263,9 @@ export default function PerformanceIntelligence() {
 
       {/* Cache banner */}
       {fromCache && result && !loading && (
-        <div style={{ maxWidth: '960px', width: '100%', background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '7px', padding: '9px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>Showing previous result · Analyse again to refresh</p>
-          <button onClick={() => { localStorage.removeItem(LS_KEY); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
+        <div style={{ maxWidth: '960px', width: '100%', background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '9px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>Showing previous result · Analyse again to refresh</p>
+          <button onClick={() => { localStorage.removeItem(LS_KEY); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: MUTED, textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
         </div>
       )}
 
@@ -278,8 +276,8 @@ export default function PerformanceIntelligence() {
           {/* Report header */}
           <div style={{ ...card, padding: '14px 20px', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
             <div>
-              <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: '#171717' }}>Google Ads Performance — {p.date_range}</p>
-              <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#999' }}>
+              <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: BONE }}>Google Ads Performance — {p.date_range}</p>
+              <p style={{ margin: '2px 0 0', fontSize: '12px', color: MUTED }}>
                 {result.google_ads_connected ? '✓ Connected to Google Ads' : '⚠ Google Ads not connected or no data'}
                 {result.memory_used ? ' · memory used' : ''}
               </p>
@@ -292,13 +290,13 @@ export default function PerformanceIntelligence() {
 
             {/* Health score */}
             <div style={{ ...card, padding: '20px', background: healthBg, border: `1px solid ${healthColor}30`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-              <p style={{ margin: 0, fontSize: '11px', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Health Score</p>
+              <p style={{ margin: 0, fontSize: '11px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Health Score</p>
               <p style={{ margin: 0, fontSize: '44px', fontWeight: '700', color: healthColor, lineHeight: 1 }}>
                 {healthScore ?? '—'}
               </p>
-              <p style={{ margin: 0, fontSize: '11px', color: '#888' }}>/100</p>
+              <p style={{ margin: 0, fontSize: '11px', color: MUTED }}>/100</p>
               {p.trend && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '20px', background: '#fff', border: '1px solid #EAEAEA' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '20px', background: SLATE, border: `1px solid ${SLATE_L}` }}>
                   <TrendIcon trend={p.trend} />
                   <span style={{ fontSize: '11px', fontWeight: '600', color: '#555', textTransform: 'capitalize' }}>{p.trend}</span>
                 </div>
@@ -331,7 +329,7 @@ export default function PerformanceIntelligence() {
             <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: '8px' }}>
               {METRIC_CARDS.map(m => (
                 <div key={m.label} style={{ ...card, padding: '14px 16px' }}>
-                  <p style={{ margin: '0 0 4px', fontSize: '10px', fontWeight: '700', color: '#999', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{m.label}</p>
+                  <p style={{ margin: '0 0 4px', fontSize: '10px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{m.label}</p>
                   <p style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: m.color, letterSpacing: '-0.3px', lineHeight: 1.1 }}>{m.value ?? '—'}</p>
                 </div>
               ))}
@@ -346,16 +344,16 @@ export default function PerformanceIntelligence() {
                 <thead>
                   <tr>
                     {['Metric', 'Expected', 'Actual', 'Status', 'Gap', 'Action'].map(h => (
-                      <th key={h} style={{ textAlign: 'left', padding: '7px 10px', fontSize: '10px', fontWeight: '700', color: '#999', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid #F0F0F0', whiteSpace: 'nowrap' }}>{h}</th>
+                      <th key={h} style={{ textAlign: 'left', padding: '7px 10px', fontSize: '10px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid #F0F0F0', whiteSpace: 'nowrap' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {eva.map((row, i) => (
                     <tr key={i} style={{ borderBottom: '1px solid #F7F7F7' }}>
-                      <td style={{ padding: '9px 10px', fontSize: '13px', fontWeight: '600', color: '#171717', whiteSpace: 'nowrap' }}>{row.metric}</td>
-                      <td style={{ padding: '9px 10px', fontSize: '13px', color: '#888' }}>{row.expected}</td>
-                      <td style={{ padding: '9px 10px', fontSize: '13px', fontWeight: '600', color: '#171717' }}>{row.actual}</td>
+                      <td style={{ padding: '9px 10px', fontSize: '13px', fontWeight: '600', color: BONE, whiteSpace: 'nowrap' }}>{row.metric}</td>
+                      <td style={{ padding: '9px 10px', fontSize: '13px', color: MUTED }}>{row.expected}</td>
+                      <td style={{ padding: '9px 10px', fontSize: '13px', fontWeight: '600', color: BONE }}>{row.actual}</td>
                       <td style={{ padding: '9px 10px' }}><StatusBadge status={row.status} /></td>
                       <td style={{ padding: '9px 10px', fontSize: '12px', color: row.status === 'below' ? '#DC2626' : row.status === 'above' ? '#16A34A' : '#D97706', fontWeight: '600', whiteSpace: 'nowrap' }}>{row.gap}</td>
                       <td style={{ padding: '9px 10px', fontSize: '12px', color: '#555', lineHeight: '1.4', maxWidth: '240px' }}>{row.action}</td>
@@ -374,20 +372,20 @@ export default function PerformanceIntelligence() {
                 <thead>
                   <tr>
                     {['Campaign', 'Status', 'Impressions', 'Clicks', 'Cost', 'Conv.', 'CTR', 'Rating'].map(h => (
-                      <th key={h} style={{ textAlign: 'left', padding: '7px 10px', fontSize: '10px', fontWeight: '700', color: '#999', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid #F0F0F0', whiteSpace: 'nowrap' }}>{h}</th>
+                      <th key={h} style={{ textAlign: 'left', padding: '7px 10px', fontSize: '10px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid #F0F0F0', whiteSpace: 'nowrap' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {cb.map((c, i) => (
                     <tr key={i} style={{ borderBottom: '1px solid #F7F7F7' }}>
-                      <td style={{ padding: '9px 10px', fontSize: '12.5px', fontWeight: '500', color: '#171717', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.campaign_name}</td>
+                      <td style={{ padding: '9px 10px', fontSize: '12.5px', fontWeight: '500', color: BONE, maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.campaign_name}</td>
                       <td style={{ padding: '9px 10px' }}>
                         <span style={{ padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: '700', background: c.status === 'ENABLED' ? '#F0FDF4' : '#F5F5F5', color: c.status === 'ENABLED' ? '#16A34A' : '#888', border: `1px solid ${c.status === 'ENABLED' ? '#BBF7D0' : '#E5E5E5'}` }}>{c.status}</span>
                       </td>
                       <td style={{ padding: '9px 10px', fontSize: '12.5px', color: '#444' }}>{typeof c.impressions === 'number' ? c.impressions.toLocaleString() : c.impressions}</td>
                       <td style={{ padding: '9px 10px', fontSize: '12.5px', color: '#444' }}>{c.clicks}</td>
-                      <td style={{ padding: '9px 10px', fontSize: '12.5px', fontWeight: '600', color: '#171717' }}>{c.cost}</td>
+                      <td style={{ padding: '9px 10px', fontSize: '12.5px', fontWeight: '600', color: BONE }}>{c.cost}</td>
                       <td style={{ padding: '9px 10px', fontSize: '12.5px', color: '#444' }}>{c.conversions}</td>
                       <td style={{ padding: '9px 10px', fontSize: '12.5px', color: '#444' }}>{c.ctr}</td>
                       <td style={{ padding: '9px 10px' }}><RatingBadge rating={c.performance_rating} /></td>
@@ -412,7 +410,7 @@ export default function PerformanceIntelligence() {
                       <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: GOLD + '20', border: `1.5px solid ${GOLD}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>
                         <span style={{ fontSize: '10px', fontWeight: '700', color: GOLD }}>{i + 1}</span>
                       </div>
-                      <p style={{ margin: 0, fontSize: '12.5px', color: '#333', lineHeight: '1.5' }}>{w}</p>
+                      <p style={{ margin: 0, fontSize: '12.5px', color: BONE, lineHeight: '1.5' }}>{w}</p>
                     </div>
                   </div>
                 ))}
@@ -428,7 +426,7 @@ export default function PerformanceIntelligence() {
                 <p style={{ margin: 0, fontSize: '13px', fontWeight: '600', color: '#555' }}>AI Analysis</p>
               </div>
               {p.ai_analysis.split('\n').filter(Boolean).map((para, i) => (
-                <p key={i} style={{ margin: i > 0 ? '10px 0 0' : '0', fontSize: '13.5px', color: '#333', lineHeight: '1.65' }}>{para}</p>
+                <p key={i} style={{ margin: i > 0 ? '10px 0 0' : '0', fontSize: '13.5px', color: BONE, lineHeight: '1.65' }}>{para}</p>
               ))}
             </div>
           )}

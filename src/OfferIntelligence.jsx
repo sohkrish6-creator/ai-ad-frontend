@@ -5,13 +5,11 @@ const LS_KEY_OFFER = 'adsoh_offer_result'
 import { Copy, Check, Gift, Zap, Tag, Star, ShieldCheck, MessageSquare, TrendingUp } from 'lucide-react'
 import { useToast } from './ToastContext'
 import { TrustBadge, ValidationWarningBanner } from './TrustLayer'
+import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
-const GOLD    = '#D4AF37'
 
-const card  = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
-const lbl   = { display: 'block', color: '#999', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '7px' }
-const inp   = { width: '100%', padding: '10px 13px', borderRadius: '7px', border: '1px solid #E5E5E5', background: '#FAFAFA', color: '#171717', fontSize: '14px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
 
 const INDUSTRIES = [
   'Hospitality (Hotels, Restaurants, Cafes)', 'Schools & Education', 'Healthcare & Clinics',
@@ -64,7 +62,7 @@ function MiniCard({ icon: Icon, label, title, body, badge, badgeColor }) {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
           <Icon size={14} color="#888" />
-          <span style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', color: '#888' }}>{label}</span>
+          <span style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', color: MUTED }}>{label}</span>
         </div>
         {badge && (
           <span style={{ fontSize: '11px', fontWeight: '700', borderRadius: '12px', padding: '2px 8px', color: badgeColor || '#666', background: (badgeColor || '#666') + '15', border: `1px solid ${badgeColor || '#666'}40` }}>
@@ -72,7 +70,7 @@ function MiniCard({ icon: Icon, label, title, body, badge, badgeColor }) {
           </span>
         )}
       </div>
-      {title && <p style={{ margin: '0 0 6px', fontSize: '14px', fontWeight: '600', color: '#171717' }}>{title}</p>}
+      {title && <p style={{ margin: '0 0 6px', fontSize: '14px', fontWeight: '600', color: BONE }}>{title}</p>}
       {body  && <p style={{ margin: 0, fontSize: '12.5px', color: '#555', lineHeight: '1.6' }}>{body}</p>}
     </div>
   )
@@ -159,7 +157,7 @@ export default function OfferIntelligence() {
   }
 
   const page = {
-    minHeight: '100vh', background: '#FAFAFA',
+    minHeight: '100vh', background: INK,
     padding: isMobile ? '28px 16px' : '40px 36px',
     maxWidth: '860px', width: '100%', boxSizing: 'border-box',
     fontFamily: '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif',
@@ -173,7 +171,7 @@ export default function OfferIntelligence() {
         <Gift size={20} color={GOLD} />
         <h1 style={{ fontSize: '22px', fontWeight: '600', margin: 0, letterSpacing: '-0.4px' }}>Offer Intelligence</h1>
       </div>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 24px 30px' }}>
+      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 24px 30px' }}>
         Reads stored business memory and designs the most irresistible offer to convert your target audience.
       </p>
 
@@ -190,7 +188,7 @@ export default function OfferIntelligence() {
         <div style={{ ...card, padding: isMobile ? '20px 16px' : '26px 28px', marginBottom: '16px' }}>
 
           {error && (
-            <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: '#BE123C', fontSize: '13px' }}>
+            <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: RED, fontSize: '13px' }}>
               {error}
             </div>
           )}
@@ -213,7 +211,7 @@ export default function OfferIntelligence() {
             <div>
               <label style={lbl}>Target City</label>
               <CityInput value={city} onChange={setCity} style={inp} />
-              <p style={{ margin: '5px 0 0', fontSize: '11px', color: '#999' }}>Same city as Marketing Brain B2B target</p>
+              <p style={{ margin: '5px 0 0', fontSize: '11px', color: MUTED }}>Same city as Marketing Brain B2B target</p>
             </div>
           </div>
 
@@ -251,7 +249,7 @@ export default function OfferIntelligence() {
                 <span style={{ fontSize: '11px', fontWeight: '700', color: GOLD }}>{i + 1}</span>
               </div>
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: '13px', fontWeight: '500', color: '#171717', margin: '0 0 6px' }}>{label}</p>
+                <p style={{ fontSize: '13px', fontWeight: '500', color: BONE, margin: '0 0 6px' }}>{label}</p>
                 <Shimmer h="8px" w="55%" />
               </div>
             </div>
@@ -261,9 +259,9 @@ export default function OfferIntelligence() {
 
       {/* Results */}
       {fromCache && result && !loading && (
-        <div style={{ maxWidth: '760px', width: '100%', background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '7px', padding: '9px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>Showing previous result · Generate new report to refresh</p>
-          <button onClick={() => { localStorage.removeItem(LS_KEY_OFFER); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
+        <div style={{ maxWidth: '760px', width: '100%', background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '9px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>Showing previous result · Generate new report to refresh</p>
+          <button onClick={() => { localStorage.removeItem(LS_KEY_OFFER); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: MUTED, textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
         </div>
       )}
 
@@ -297,14 +295,14 @@ export default function OfferIntelligence() {
                   <ScoreBadge score={offer.recommended_offer.offer_score} label="Offer Score" />
                 )}
               </div>
-              <p style={{ margin: '0 0 8px', fontSize: '17px', fontWeight: '700', color: '#171717', letterSpacing: '-0.3px' }}>
+              <p style={{ margin: '0 0 8px', fontSize: '17px', fontWeight: '700', color: BONE, letterSpacing: '-0.3px' }}>
                 {offer.recommended_offer.name}
               </p>
               <p style={{ margin: '0 0 12px', fontSize: '14px', color: '#444', lineHeight: '1.65' }}>
                 {offer.recommended_offer.description}
               </p>
-              <div style={{ background: '#F5F5F5', borderRadius: '7px', padding: '10px 14px' }}>
-                <span style={{ fontSize: '11px', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Why it works: </span>
+              <div style={{ background: SLATE_M, borderRadius: '7px', padding: '10px 14px' }}>
+                <span style={{ fontSize: '11px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Why it works: </span>
                 <span style={{ fontSize: '13px', color: '#444', lineHeight: '1.6' }}>{offer.recommended_offer.why_it_works}</span>
               </div>
             </div>
@@ -315,7 +313,7 @@ export default function OfferIntelligence() {
             <div style={{ ...card, padding: '20px 22px', marginBottom: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
                 <TrendingUp size={15} color="#171717" />
-                <span style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', color: '#888' }}>Irresistible Offer Stack</span>
+                <span style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', color: MUTED }}>Irresistible Offer Stack</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
                 {offer.irresistible_offer_stack.map((el, i) => (
@@ -360,11 +358,11 @@ export default function OfferIntelligence() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
                     <MessageSquare size={14} color="#888" />
-                    <span style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', color: '#888' }}>Best CTA</span>
+                    <span style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', color: MUTED }}>Best CTA</span>
                   </div>
                   <CopyBtn text={offer.cta} />
                 </div>
-                <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: '#171717', lineHeight: '1.5' }}>"{offer.cta}"</p>
+                <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: BONE, lineHeight: '1.5' }}>"{offer.cta}"</p>
               </div>
             )}
           </div>

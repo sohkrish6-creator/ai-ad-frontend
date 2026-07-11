@@ -9,14 +9,11 @@ import { useToast } from './ToastContext'
 import { useLoadingSteps } from './useLoadingSteps'
 import PushToAdsSection from './PushToAdsSection'
 import { TrustBadge, ValidationWarningBanner } from './TrustLayer'
+import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+
 
 const BRAIN_LOADING_STEPS = ['Reading website...', 'Researching market...', 'Analyzing competitors...', 'Building strategy...', 'Almost done...']
 
-const FONT = '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif'
-const GOLD = '#D4AF37'
-const card = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
-const inputSt = { width: '100%', padding: '10px 13px', borderRadius: '7px', border: '1px solid #E5E5E5', background: '#FAFAFA', color: '#171717', fontSize: '14px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
-const lbl = { display: 'block', color: '#999', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '7px' }
 
 const SECTIONS = [
   { key: 'business_understanding', num: 1,  title: 'Business Understanding', sub: 'UVP, trust signals, detected industry, core products from BI',                        fallback: 'strategy',       gold: false },
@@ -68,7 +65,7 @@ function CopyBtn({ onClick, copied }) {
     <button onClick={onClick} style={{
       display: 'flex', alignItems: 'center', gap: '5px',
       padding: '5px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '500',
-      border: '1px solid #E5E5E5', background: copied ? '#F0FDF4' : '#F9F9F9',
+      border: `1px solid ${SLATE_L}`, background: copied ? '#F0FDF4' : '#F9F9F9',
       color: copied ? '#16A34A' : '#666', transition: 'all 0.15s ease', flexShrink: 0,
     }}>
       {copied ? <Check size={11} /> : <Copy size={11} />}
@@ -95,10 +92,10 @@ function renderBlock(text) {
       return <h3 key={i} style={{ color: GOLD, fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: '20px', marginBottom: '9px', paddingBottom: '5px', borderBottom: '1px solid #EAEAEA' }}>{clean}</h3>
     }
     if (clean.match(/^\d+\./)) {
-      return <div key={i} style={{ background: '#F9F9F9', border: '1px solid #EAEAEA', borderRadius: '7px', padding: '9px 13px', marginBottom: '7px', fontSize: '14px', color: '#171717', lineHeight: '1.5' }}>{clean}</div>
+      return <div key={i} style={{ background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '9px 13px', marginBottom: '7px', fontSize: '14px', color: BONE, lineHeight: '1.5' }}>{clean}</div>
     }
     if (clean.trim()) {
-      return <p key={i} style={{ color: '#666', fontSize: '14px', lineHeight: '1.6', margin: '4px 0' }}>{clean}</p>
+      return <p key={i} style={{ color: MUTED, fontSize: '14px', lineHeight: '1.6', margin: '4px 0' }}>{clean}</p>
     }
     return null
   })
@@ -524,9 +521,9 @@ function MarketingBrain() {
     }
   }
 
-  const page    = { minHeight: '100vh', background: '#FAFAFA', padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '900px', fontFamily: FONT, width: '100%', boxSizing: 'border-box' }
-  const inpSt2  = { width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #E5E5E5', background: '#FAFAFA', color: '#171717', fontSize: '13px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
-  const lbl2    = { display: 'block', color: '#888', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '5px' }
+  const page    = { minHeight: '100vh', background: INK, padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '900px', fontFamily: FONT, width: '100%', boxSizing: 'border-box' }
+  const inpSt2  = { width: '100%', padding: '9px 12px', borderRadius: '6px', border: `1px solid ${SLATE_L}`, background: INK, color: BONE, fontSize: '13px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
+  const lbl2    = { display: 'block', color: MUTED, fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '5px' }
 
   if (loading) return (
     <div style={page}>
@@ -536,18 +533,18 @@ function MarketingBrain() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {['Business Intelligence Scan', 'Business & Market Analysis', 'Audience & Outreach', 'Marketing Plan & Ad Assets', 'Media Buying Plan'].map((label, i) => (
           <div key={label} style={{ ...card, padding: '18px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#F5F5F5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <span style={{ fontSize: '12px', color: '#BBB', fontWeight: '700' }}>{i + 1}</span>
+            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: SLATE_M, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ fontSize: '12px', color: MUTED, fontWeight: '700' }}>{i + 1}</span>
             </div>
             <div style={{ flex: 1 }}>
-              <p style={{ fontSize: '13px', fontWeight: '500', color: '#171717', margin: '0 0 6px' }}>{label}</p>
+              <p style={{ fontSize: '13px', fontWeight: '500', color: BONE, margin: '0 0 6px' }}>{label}</p>
               <Shimmer h="9px" w="60%" />
             </div>
             <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: GOLD, opacity: 0.6, animation: `pulse ${1 + i * 0.2}s ease-in-out infinite alternate` }} />
           </div>
         ))}
       </div>
-      <p style={{ color: '#BBB', fontSize: '12px', margin: '16px 0 0', textAlign: 'center' }}>2–3 minutes · BI scan + Adsoh generating</p>
+      <p style={{ color: MUTED, fontSize: '12px', margin: '16px 0 0', textAlign: 'center' }}>2–3 minutes · BI scan + Adsoh generating</p>
     </div>
   )
 
@@ -556,13 +553,13 @@ function MarketingBrain() {
       <style>{`@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }`}</style>
 
       {fromCache && (
-        <div style={{ background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '7px', padding: '9px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>
+        <div style={{ background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '9px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>
             {lastGenerated
               ? `Last generated: ${new Date(lastGenerated.endsWith('Z') || lastGenerated.includes('+') ? lastGenerated : lastGenerated + 'Z').toLocaleString()} · Saved report`
               : 'Showing previous result · Generate new report to refresh'}
           </p>
-          <button onClick={clearBrainReport} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
+          <button onClick={clearBrainReport} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: MUTED, textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
         </div>
       )}
 
@@ -573,7 +570,7 @@ function MarketingBrain() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Marketing Brain</h1>
-          <p style={{ color: '#999', fontSize: '13px', margin: 0 }}>
+          <p style={{ color: MUTED, fontSize: '13px', margin: 0 }}>
             {result.target_industry
               ? `B2B Campaign — ${result.target_industry}${result.target_city ? ` · ${result.target_city}` : ''}${result.url ? ` · ${result.url}` : ''}`
               : `${result.url} — full report`} ready
@@ -585,10 +582,10 @@ function MarketingBrain() {
           </p>
         </div>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <button onClick={downloadPDF} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#D4AF3712', border: '1px solid #D4AF3730', color: GOLD, padding: '7px 14px', borderRadius: '7px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
+          <button onClick={downloadPDF} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: GOLD_DIM, border: '1px solid #D4AF3730', color: GOLD, padding: '7px 14px', borderRadius: '7px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
             <Download size={12} /> PDF
           </button>
-          <button onClick={clearBrainReport} style={{ background: 'transparent', border: '1px solid #E5E5E5', color: '#666', padding: '7px 16px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
+          <button onClick={clearBrainReport} style={{ background: 'transparent', border: `1px solid ${SLATE_L}`, color: MUTED, padding: '7px 16px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
             ← New Report
           </button>
         </div>
@@ -609,7 +606,7 @@ function MarketingBrain() {
               </div>
               <CopyBtn onClick={() => handleCopy(key, content)} copied={!!copied[key]} />
             </div>
-            <p style={{ fontSize: '12px', color: '#999', margin: '4px 0 16px 34px' }}>{sub}</p>
+            <p style={{ fontSize: '12px', color: MUTED, margin: '4px 0 16px 34px' }}>{sub}</p>
             <div style={{ marginLeft: '0' }}>{renderBlock(content)}</div>
           </div>
         )
@@ -617,7 +614,7 @@ function MarketingBrain() {
 
       {/* Competitor Ad Links */}
       <div style={{ ...card, padding: '20px', marginBottom: '12px' }}>
-        <h2 style={{ fontSize: '14px', fontWeight: '600', margin: '0 0 12px', color: '#171717' }}>Live Competitor Ads</h2>
+        <h2 style={{ fontSize: '14px', fontWeight: '600', margin: '0 0 12px', color: BONE }}>Live Competitor Ads</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {[
             { href: result.meta_ad_library_link, label: 'Facebook & Instagram Live Ads', color: '#1877F2' },
@@ -639,8 +636,8 @@ function MarketingBrain() {
         <div style={{ ...card, padding: '24px', marginBottom: '12px', borderColor: '#E5DABB', background: '#FFFDF5' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
             <div>
-              <h2 style={{ fontSize: '15px', fontWeight: '600', margin: '0 0 4px', color: '#171717' }}>Media Buying Plan</h2>
-              <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>Detailed 8-section plan — platform priorities, budget split, bid strategy, scaling rules, benchmarks</p>
+              <h2 style={{ fontSize: '15px', fontWeight: '600', margin: '0 0 4px', color: BONE }}>Media Buying Plan</h2>
+              <p style={{ fontSize: '12px', color: MUTED, margin: 0 }}>Detailed 8-section plan — platform priorities, budget split, bid strategy, scaling rules, benchmarks</p>
             </div>
             <button onClick={handleMediaBuyingPlan} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: GOLD, border: 'none', color: '#fff', padding: '10px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', flexShrink: 0 }}>
               <TrendingUp size={14} /> Generate Media Buying Plan
@@ -654,15 +651,15 @@ function MarketingBrain() {
         <div style={{ ...card, padding: '28px', marginBottom: '12px', borderColor: '#E5DABB', textAlign: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: GOLD, animation: 'pulse 1s ease-in-out infinite alternate' }} />
-            <p style={{ color: '#666', fontSize: '14px', margin: 0, fontWeight: '500' }}>Generating Media Buying Plan...</p>
+            <p style={{ color: MUTED, fontSize: '14px', margin: 0, fontWeight: '500' }}>Generating Media Buying Plan...</p>
           </div>
-          <p style={{ color: '#BBB', fontSize: '12px', margin: '8px 0 0' }}>8 sections — budget split, scaling rules, benchmarks</p>
+          <p style={{ color: MUTED, fontSize: '12px', margin: '8px 0 0' }}>8 sections — budget split, scaling rules, benchmarks</p>
         </div>
       )}
 
       {/* Media Buying Plan Error */}
       {mediaError && (
-        <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '8px', padding: '14px 18px', marginBottom: '12px', color: '#BE123C', fontSize: '13px' }}>{mediaError}</div>
+        <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '8px', padding: '14px 18px', marginBottom: '12px', color: RED, fontSize: '13px' }}>{mediaError}</div>
       )}
 
       {/* Media Buying Plan Results */}
@@ -673,13 +670,13 @@ function MarketingBrain() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '28px 0 16px', flexWrap: 'wrap', gap: '10px' }}>
               <div>
                 <h2 style={{ fontSize: '18px', fontWeight: '600', margin: '0 0 3px', color: GOLD, letterSpacing: '-0.3px' }}>Media Buying Plan</h2>
-                <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>13-section plan ready</p>
+                <p style={{ fontSize: '12px', color: MUTED, margin: 0 }}>13-section plan ready</p>
               </div>
               <div style={{ display: 'flex', gap: '8px' }}>
-                <button onClick={downloadMediaPDF} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#D4AF3712', border: '1px solid #D4AF3730', color: GOLD, padding: '7px 14px', borderRadius: '7px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
+                <button onClick={downloadMediaPDF} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: GOLD_DIM, border: '1px solid #D4AF3730', color: GOLD, padding: '7px 14px', borderRadius: '7px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
                   <Download size={12} /> PDF
                 </button>
-                <button onClick={() => { setMediaPlan(null); setMediaError(null) }} style={{ background: 'transparent', border: '1px solid #E5E5E5', color: '#666', padding: '7px 14px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
+                <button onClick={() => { setMediaPlan(null); setMediaError(null) }} style={{ background: 'transparent', border: `1px solid ${SLATE_L}`, color: MUTED, padding: '7px 14px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
                   Regenerate
                 </button>
               </div>
@@ -699,7 +696,7 @@ function MarketingBrain() {
                     </div>
                     <CopyBtn onClick={() => handleCopy(`media_${key}`, content)} copied={!!copied[`media_${key}`]} />
                   </div>
-                  <p style={{ fontSize: '12px', color: '#999', margin: '4px 0 16px 34px' }}>{sub}</p>
+                  <p style={{ fontSize: '12px', color: MUTED, margin: '4px 0 16px 34px' }}>{sub}</p>
                   <div>{renderBlock(content)}</div>
                 </div>
               )
@@ -713,8 +710,8 @@ function MarketingBrain() {
         <div style={{ ...card, padding: '24px', marginBottom: '12px', borderColor: '#E5DABB', background: '#FFFDF5' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
             <div>
-              <h2 style={{ fontSize: '15px', fontWeight: '600', margin: '0 0 4px', color: '#171717' }}>Campaign Launch Kit</h2>
-              <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>Ready-to-paste Meta Ads + Google Ads + Remarketing kit — audiences, copy, keywords, budgets</p>
+              <h2 style={{ fontSize: '15px', fontWeight: '600', margin: '0 0 4px', color: BONE }}>Campaign Launch Kit</h2>
+              <p style={{ fontSize: '12px', color: MUTED, margin: 0 }}>Ready-to-paste Meta Ads + Google Ads + Remarketing kit — audiences, copy, keywords, budgets</p>
             </div>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               <button onClick={handleLaunchKit} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: GOLD, border: 'none', color: '#fff', padding: '10px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', flexShrink: 0 }}>
@@ -738,15 +735,15 @@ function MarketingBrain() {
         <div style={{ ...card, padding: '28px', marginBottom: '12px', borderColor: '#E5DABB', textAlign: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: GOLD, animation: 'pulse 1s ease-in-out infinite alternate' }} />
-            <p style={{ color: '#666', fontSize: '14px', margin: 0, fontWeight: '500' }}>Building Campaign Launch Kit...</p>
+            <p style={{ color: MUTED, fontSize: '14px', margin: 0, fontWeight: '500' }}>Building Campaign Launch Kit...</p>
           </div>
-          <p style={{ color: '#BBB', fontSize: '12px', margin: '8px 0 0' }}>Meta Ads, Google Ads + Remarketing — copy-paste ready</p>
+          <p style={{ color: MUTED, fontSize: '12px', margin: '8px 0 0' }}>Meta Ads, Google Ads + Remarketing — copy-paste ready</p>
         </div>
       )}
 
       {/* Campaign Launch Kit Error */}
       {launchError && (
-        <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '8px', padding: '14px 18px', marginBottom: '12px', color: '#BE123C', fontSize: '13px' }}>{launchError}</div>
+        <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '8px', padding: '14px 18px', marginBottom: '12px', color: RED, fontSize: '13px' }}>{launchError}</div>
       )}
 
       {/* Campaign Launch Kit Results */}
@@ -764,9 +761,9 @@ function MarketingBrain() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '28px 0 16px', flexWrap: 'wrap', gap: '10px' }}>
               <div>
                 <h2 style={{ fontSize: '18px', fontWeight: '600', margin: '0 0 3px', color: GOLD, letterSpacing: '-0.3px' }}>Campaign Launch Kit</h2>
-                <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>Ready to paste into Meta Ads Manager and Google Ads</p>
+                <p style={{ fontSize: '12px', color: MUTED, margin: 0 }}>Ready to paste into Meta Ads Manager and Google Ads</p>
               </div>
-              <button onClick={() => { localStorage.removeItem(LS_KEY_CAMPAIGN_KIT); setLaunchKit(null); setLaunchError(null) }} style={{ background: 'transparent', border: '1px solid #E5E5E5', color: '#666', padding: '7px 14px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
+              <button onClick={() => { localStorage.removeItem(LS_KEY_CAMPAIGN_KIT); setLaunchKit(null); setLaunchError(null) }} style={{ background: 'transparent', border: `1px solid ${SLATE_L}`, color: MUTED, padding: '7px 14px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
                 Regenerate
               </button>
             </div>
@@ -786,22 +783,22 @@ function MarketingBrain() {
 
             {/* Kit Content */}
             <div style={{ ...card, padding: '0', marginBottom: '12px', borderColor: '#E5DABB', overflow: 'hidden' }}>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', padding: '12px 16px', borderBottom: '1px solid #EAEAEA', background: '#FAFAFA' }}>
-                <button onClick={() => handleCopy(`kit_${active.id}`, active.content)} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: copied[`kit_${active.id}`] ? '#16A34A' : '#F5F5F5', border: '1px solid #E5E5E5', color: copied[`kit_${active.id}`] ? '#fff' : '#666', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', padding: '12px 16px', borderBottom: '1px solid #EAEAEA', background: INK }}>
+                <button onClick={() => handleCopy(`kit_${active.id}`, active.content)} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: copied[`kit_${active.id}`] ? '#16A34A' : '#F5F5F5', border: `1px solid ${SLATE_L}`, color: copied[`kit_${active.id}`] ? '#fff' : '#666', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>
                   {copied[`kit_${active.id}`] ? <Check size={11} /> : <Copy size={11} />}
                   {copied[`kit_${active.id}`] ? 'Copied!' : 'Copy'}
                 </button>
-                <button onClick={() => downloadTxt(active.content, active.filename)} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#D4AF3712', border: '1px solid #D4AF3730', color: GOLD, padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>
+                <button onClick={() => downloadTxt(active.content, active.filename)} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: GOLD_DIM, border: '1px solid #D4AF3730', color: GOLD, padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>
                   <Download size={11} /> Download TXT
                 </button>
               </div>
-              <pre style={{ margin: 0, padding: '20px', fontFamily: '"Geist Mono", "JetBrains Mono", "Fira Code", monospace', fontSize: '12.5px', lineHeight: '1.7', color: '#171717', whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: '#fff', maxHeight: '600px', overflowY: 'auto' }}>
+              <pre style={{ margin: 0, padding: '20px', fontFamily: '"Geist Mono", "JetBrains Mono", "Fira Code", monospace', fontSize: '12.5px', lineHeight: '1.7', color: BONE, whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: SLATE, maxHeight: '600px', overflowY: 'auto' }}>
                 {active.content}
               </pre>
             </div>
 
             {/* Launch on Google Ads */}
-            <div style={{ background: '#F0FDF4', border: '1.5px solid #BBF7D0', borderRadius: '8px', padding: '18px 20px', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ background: 'rgba(63,166,107,0.1)', border: '1.5px solid #BBF7D0', borderRadius: '8px', padding: '18px 20px', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
                   <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#34A853', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '800', color: '#fff', flexShrink: 0 }}>G</span>
@@ -837,11 +834,11 @@ function MarketingBrain() {
       <style>{`@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }`}</style>
 
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Marketing Brain</h1>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 32px' }}>Ek baar daalo — BI scan + Adsoh report (11 sections), sab ek saath</p>
+      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 32px' }}>Ek baar daalo — BI scan + Adsoh report (11 sections), sab ek saath</p>
 
       <div style={{ maxWidth: '560px', width: '100%' }}>
         <div style={{ ...card, padding: '28px' }}>
-          {error && <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '20px', color: '#BE123C', fontSize: '13px' }}>{error}</div>}
+          {error && <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '20px', color: RED, fontSize: '13px' }}>{error}</div>}
 
           <p style={{ fontSize: '11px', color: GOLD, fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 14px' }}>B2B Industry Campaign (Optional)</p>
 
@@ -880,7 +877,7 @@ function MarketingBrain() {
             <label style={lbl}>Website URL</label>
             <input type="url" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://aapkibusiness.com" style={inputSt} />
             {targetIndustry && (
-              <div style={{ fontSize: '12px', color: '#888', fontStyle: 'italic', marginTop: '4px' }}>
+              <div style={{ fontSize: '12px', color: MUTED, fontStyle: 'italic', marginTop: '4px' }}>
                 URL optional in B2B mode — leave blank for pure industry analysis
               </div>
             )}

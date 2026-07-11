@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react'
+import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+
 
 const LS_KEY_ADINTEL = 'adsoh_adintel_result'
-const GOLD = '#D4AF37'
-const card = { background: '#fff', border: '1px solid #EAEAEA', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
-const inputSt = { width: '100%', padding: '10px 13px', borderRadius: '7px', border: '1px solid #E5E5E5', background: '#FAFAFA', color: '#171717', fontSize: '14px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
-const lbl = { display: 'block', color: '#999', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '7px' }
 
 function renderLines(text) {
   return text.split('\n').map((line, i) => {
@@ -12,10 +10,10 @@ function renderLines(text) {
       return <h3 key={i} style={{ color: GOLD, fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: '22px', marginBottom: '10px', paddingBottom: '6px', borderBottom: '1px solid #EAEAEA' }}>{line}</h3>
     }
     if (line.match(/^\d+\./)) {
-      return <div key={i} style={{ background: '#F9F9F9', border: '1px solid #EAEAEA', borderRadius: '7px', padding: '10px 14px', marginBottom: '7px', fontSize: '14px', color: '#171717', lineHeight: '1.5' }}>{line}</div>
+      return <div key={i} style={{ background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '10px 14px', marginBottom: '7px', fontSize: '14px', color: BONE, lineHeight: '1.5' }}>{line}</div>
     }
     if (line.trim()) {
-      return <p key={i} style={{ color: '#666', fontSize: '14px', lineHeight: '1.6', margin: '4px 0' }}>{line}</p>
+      return <p key={i} style={{ color: MUTED, fontSize: '14px', lineHeight: '1.6', margin: '4px 0' }}>{line}</p>
     }
     return null
   })
@@ -52,15 +50,15 @@ function AdIntel() {
   }
 
   const isMobile = window.innerWidth < 768
-  const page = { minHeight: '100vh', background: '#FAFAFA', padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '820px', width: '100%', boxSizing: 'border-box' }
+  const page = { minHeight: '100vh', background: INK, padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '820px', width: '100%', boxSizing: 'border-box' }
 
   if (loading) return (
     <div style={page}>
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Ad Intelligence</h1>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 32px' }}>Fetching ad data...</p>
+      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 32px' }}>Fetching ad data...</p>
       <div style={{ ...card, padding: '40px', textAlign: 'center' }}>
-        <p style={{ color: '#666', fontSize: '14px', margin: '0 0 6px' }}>Ad intelligence tayyaar ho rahi hai...</p>
-        <p style={{ color: '#999', fontSize: '13px', margin: 0 }}>15–30 seconds lagenge</p>
+        <p style={{ color: MUTED, fontSize: '14px', margin: '0 0 6px' }}>Ad intelligence tayyaar ho rahi hai...</p>
+        <p style={{ color: MUTED, fontSize: '13px', margin: 0 }}>15–30 seconds lagenge</p>
       </div>
     </div>
   )
@@ -68,24 +66,24 @@ function AdIntel() {
   if (result) return (
     <div style={page}>
       {fromCache && (
-        <div style={{ background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: '7px', padding: '9px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>Showing previous result · Generate new report to refresh</p>
-          <button onClick={() => { localStorage.removeItem(LS_KEY_ADINTEL); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#888', textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
+        <div style={{ background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '9px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>Showing previous result · Generate new report to refresh</p>
+          <button onClick={() => { localStorage.removeItem(LS_KEY_ADINTEL); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: MUTED, textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
         </div>
       )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Ad Intelligence</h1>
-          <p style={{ color: '#999', fontSize: '13px', margin: 0 }}>{result.business_name}</p>
+          <p style={{ color: MUTED, fontSize: '13px', margin: 0 }}>{result.business_name}</p>
         </div>
-        <button onClick={() => { localStorage.removeItem(LS_KEY_ADINTEL); setResult(null); setFromCache(false) }} style={{ background: 'transparent', border: '1px solid #E5E5E5', color: '#666', padding: '7px 16px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
+        <button onClick={() => { localStorage.removeItem(LS_KEY_ADINTEL); setResult(null); setFromCache(false) }} style={{ background: 'transparent', border: `1px solid ${SLATE_L}`, color: MUTED, padding: '7px 16px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
           ← New Search
         </button>
       </div>
 
       <div style={{ ...card, padding: '24px', marginBottom: '12px' }}>
-        <h2 style={{ fontSize: '14px', fontWeight: '600', margin: '0 0 6px', color: '#171717' }}>Live Ads — {result.business_name}</h2>
-        <p style={{ color: '#999', fontSize: '13px', margin: '0 0 18px' }}>Yeh buttons competitor ke abhi chal rahe real ads kholenge</p>
+        <h2 style={{ fontSize: '14px', fontWeight: '600', margin: '0 0 6px', color: BONE }}>Live Ads — {result.business_name}</h2>
+        <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 18px' }}>Yeh buttons competitor ke abhi chal rahe real ads kholenge</p>
         <a href={result.meta_ad_library_link} target="_blank" rel="noopener noreferrer" style={{ display: 'block', background: '#1877F2', color: '#fff', padding: '13px', borderRadius: '8px', textDecoration: 'none', fontWeight: '600', fontSize: '14px', textAlign: 'center', marginBottom: '10px' }}>
           Facebook &amp; Instagram Ads →
         </a>
@@ -104,11 +102,11 @@ function AdIntel() {
   return (
     <div style={page}>
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Ad Intelligence</h1>
-      <p style={{ color: '#999', fontSize: '13px', margin: '0 0 32px' }}>Competitor ke LIVE ads dekho aur AI se analysis guide pao</p>
+      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 32px' }}>Competitor ke LIVE ads dekho aur AI se analysis guide pao</p>
 
       <div style={{ maxWidth: '560px', width: '100%' }}>
         <div style={{ ...card, padding: '28px' }}>
-          {error && <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '20px', color: '#BE123C', fontSize: '13px' }}>{error}</div>}
+          {error && <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '20px', color: RED, fontSize: '13px' }}>{error}</div>}
 
           <div style={{ marginBottom: '16px' }}>
             <label style={lbl}>Competitor ka Naam</label>
