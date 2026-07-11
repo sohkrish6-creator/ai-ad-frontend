@@ -1,15 +1,17 @@
 import { useState, useEffect, useRef } from 'react'
 import CityInput, { getLastCity } from './CityInput'
-
-const LS_KEY_BRAIN      = 'adsoh_brain_result'
-const LS_KEY_CAMPAIGN_KIT = 'adsoh_campaign_kit_result'
-const LS_KEY_MEDIA_PLAN   = 'adsoh_media_plan_result'
 import { Copy, Check, ExternalLink, Download, TrendingUp, Rocket, X, AlertTriangle } from 'lucide-react'
 import { useToast } from './ToastContext'
 import { useLoadingSteps } from './useLoadingSteps'
 import PushToAdsSection from './PushToAdsSection'
 import { TrustBadge, ValidationWarningBanner } from './TrustLayer'
 import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+import PageShell from './PageShell'
+import PageHeader from './PageHeader'
+
+const LS_KEY_BRAIN      = 'adsoh_brain_result'
+const LS_KEY_CAMPAIGN_KIT = 'adsoh_campaign_kit_result'
+const LS_KEY_MEDIA_PLAN   = 'adsoh_media_plan_result'
 
 
 const BRAIN_LOADING_STEPS = ['Reading website...', 'Researching market...', 'Analyzing competitors...', 'Building strategy...', 'Almost done...']
@@ -521,15 +523,13 @@ function MarketingBrain() {
     }
   }
 
-  const page    = { minHeight: '100vh', background: INK, padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '900px', fontFamily: FONT, width: '100%', boxSizing: 'border-box' }
   const inpSt2  = { width: '100%', padding: '9px 12px', borderRadius: '6px', border: `1px solid ${SLATE_L}`, background: INK, color: BONE, fontSize: '13px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
   const lbl2    = { display: 'block', color: MUTED, fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '5px' }
 
   if (loading) return (
-    <div style={page}>
+    <PageShell maxWidth="900px">
       <style>{`@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }`}</style>
-      <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Marketing Brain</h1>
-      <p style={{ color: GOLD, fontSize: '13px', fontWeight: '600', margin: '0 0 24px' }}>{loadingStep}</p>
+      <PageHeader title="Marketing Brain" sub={loadingStep} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {['Business Intelligence Scan', 'Business & Market Analysis', 'Audience & Outreach', 'Marketing Plan & Ad Assets', 'Media Buying Plan'].map((label, i) => (
           <div key={label} style={{ ...card, padding: '18px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
@@ -545,11 +545,11 @@ function MarketingBrain() {
         ))}
       </div>
       <p style={{ color: MUTED, fontSize: '12px', margin: '16px 0 0', textAlign: 'center' }}>2–3 minutes · BI scan + Adsoh generating</p>
-    </div>
+    </PageShell>
   )
 
   if (result) return (
-    <div style={page}>
+    <PageShell maxWidth="900px">
       <style>{`@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }`}</style>
 
       {fromCache && (
@@ -826,15 +826,13 @@ function MarketingBrain() {
           </>
         )
       })()}
-    </div>
+    </PageShell>
   )
 
   return (
-    <div style={page}>
+    <PageShell maxWidth="900px">
       <style>{`@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }`}</style>
-
-      <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Marketing Brain</h1>
-      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 32px' }}>Ek baar daalo — BI scan + Adsoh report (11 sections), sab ek saath</p>
+      <PageHeader title="Marketing Brain" sub="Ek baar daalo — BI scan + Adsoh report (11 sections), sab ek saath" />
 
       <div style={{ maxWidth: '560px', width: '100%' }}>
         <div style={{ ...card, padding: '28px' }}>
@@ -929,7 +927,7 @@ function MarketingBrain() {
           </button>
         </div>
       </div>
-    </div>
+    </PageShell>
   )
 }
 

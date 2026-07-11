@@ -8,6 +8,8 @@ import { useLoadingSteps } from './useLoadingSteps'
 import CityInput, { getLastCity } from './CityInput'
 import { TrustBadge, ValidationWarningBanner, NeedsMarketingBrainNotice } from './TrustLayer'
 import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+import PageShell from './PageShell'
+import PageHeader from './PageHeader'
 
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
@@ -239,20 +241,9 @@ export default function CreativeStudio() {
   const concepts = c.concepts || []
   const ds = c.data_sources_used || {}
 
-  const page = {
-    minHeight: '100vh', background: INK,
-    padding: isMobile ? '28px 16px' : '40px 36px',
-    maxWidth: '900px', width: '100%', boxSizing: 'border-box',
-    fontFamily: '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif',
-  }
-
   return (
-    <div style={page}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-        <Wand2 size={20} color={GOLD} />
-        <h1 style={{ fontSize: '22px', fontWeight: '600', margin: 0, letterSpacing: '-0.4px' }}>Creative Studio</h1>
-      </div>
-      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 8px' }}>Complete creative strategy + production-ready image prompts, built from your real business & campaign intelligence.</p>
+    <PageShell maxWidth="900px">
+      <PageHeader title="Creative Studio" sub="Complete creative strategy + production-ready image prompts, built from your real business & campaign intelligence." />
       <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '7px', padding: '9px 13px', marginBottom: '24px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
         <Info size={14} color="#1E40AF" style={{ flexShrink: 0, marginTop: '1px' }} />
         <p style={{ margin: 0, fontSize: '12px', color: '#1E40AF', lineHeight: 1.5 }}>
@@ -508,6 +499,6 @@ export default function CreativeStudio() {
           </div>
         </div>
       )}
-    </div>
+    </PageShell>
   )
 }

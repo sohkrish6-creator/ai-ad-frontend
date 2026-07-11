@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import CityInput, { getLastCity } from './CityInput'
 import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+import PageShell from './PageShell'
+import PageHeader from './PageHeader'
 
 
 const LS_KEY_AUDIENCE = 'adsoh_audience_result'
@@ -60,12 +62,9 @@ export default function AudienceFinder() {
 
   const handleCopy = () => { navigator.clipboard.writeText(result); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
-  const page = { minHeight: '100vh', background: INK, padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '820px', width: '100%', boxSizing: 'border-box' }
-
   return (
-    <div style={page}>
-      <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Audience Finder</h1>
-      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 32px' }}>URL ya Niche do — exact audience, segments aur "where to find them" milega</p>
+    <PageShell maxWidth="820px">
+      <PageHeader title="Audience Finder" sub='URL ya Niche do — exact audience, segments aur "where to find them" milega' />
 
       <div style={{ maxWidth: '600px', width: '100%' }}>
         <div style={{ ...card, padding: isMobile ? '20px 16px' : '28px', marginBottom: '16px' }}>
@@ -169,6 +168,6 @@ export default function AudienceFinder() {
           </div>
         )}
       </div>
-    </div>
+    </PageShell>
   )
 }

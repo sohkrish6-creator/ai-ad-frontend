@@ -6,6 +6,8 @@ import PushToAdsSection from './PushToAdsSection'
 import CityInput, { getLastCity } from './CityInput'
 import { TrustBadge, ValidationWarningBanner } from './TrustLayer'
 import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+import PageShell from './PageShell'
+import PageHeader from './PageHeader'
 
 
 const LS_KEY_SMART = 'adsoh_smart_analysis_result'
@@ -250,19 +252,10 @@ export default function SmartAnalysis() {
     setResult(null); setFromCache(false)
   }
 
-  const page = { minHeight: '100vh', background: INK, padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '900px', width: '100%', boxSizing: 'border-box', fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif' }
-
   return (
-    <div style={page}>
+    <PageShell maxWidth="900px">
       <style>{`@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }`}</style>
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-        <Sparkles size={20} color={GOLD} />
-        <h1 style={{ fontSize: '22px', fontWeight: '600', margin: 0, letterSpacing: '-0.4px' }}>Smart Full Analysis</h1>
-      </div>
-      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 28px' }}>
-        Marketing Brain runs first, then AI decides which other modules are actually worth running — and runs only those, in parallel.
-      </p>
+      <PageHeader title="Smart Full Analysis" sub="Marketing Brain runs first, then AI decides which other modules are actually worth running — and runs only those, in parallel." />
 
       {!result && !loading && !planning && !plan && history.length > 0 && (
         <div style={{ ...card, padding: '16px 20px', marginBottom: '20px', maxWidth: '600px' }}>
@@ -556,6 +549,6 @@ export default function SmartAnalysis() {
           </div>
         </div>
       )}
-    </div>
+    </PageShell>
   )
 }

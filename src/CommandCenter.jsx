@@ -7,6 +7,8 @@ import { GoogleCampaignSuccessCard } from './PushToAdsSection'
 import { extractInsights } from './SmartAnalysis'
 import { TrustBadge, ValidationWarningBanner } from './TrustLayer'
 import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+import PageShell from './PageShell'
+import PageHeader from './PageHeader'
 
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
@@ -512,22 +514,9 @@ export default function CommandCenter() {
 
   const busy = asking || (activeTask && activeTask.status === 'running')
 
-  const page = {
-    minHeight: '100vh', background: INK,
-    padding: isMobile ? '28px 16px' : '40px 36px',
-    maxWidth: activeTask ? '1160px' : '820px', width: '100%', boxSizing: 'border-box',
-    fontFamily: '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif',
-  }
-
   const mainColumn = (
     <div style={{ maxWidth: '820px', width: '100%' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-        <MessageSquare size={20} color={GOLD} />
-        <h1 style={{ fontSize: '22px', fontWeight: '600', margin: 0, letterSpacing: '-0.4px' }}>Command Center</h1>
-      </div>
-      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 24px' }}>
-        Tell it what you need in plain language — it figures out which engine to run.
-      </p>
+      <PageHeader title="Command Center" sub="Tell it what you need in plain language — it figures out which engine to run." />
 
       <div style={{ ...card, padding: isMobile ? '16px' : '20px', marginBottom: '14px' }}>
         <textarea
@@ -576,7 +565,7 @@ export default function CommandCenter() {
   )
 
   return (
-    <div style={page}>
+    <PageShell maxWidth={activeTask ? '1160px' : '820px'}>
       <style>{`@keyframes pulse { from { opacity: 0.4; } to { opacity: 1; } }`}</style>
       {activeTask && !isMobile ? (
         <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
@@ -586,6 +575,6 @@ export default function CommandCenter() {
           </div>
         </div>
       ) : mainColumn}
-    </div>
+    </PageShell>
   )
 }
