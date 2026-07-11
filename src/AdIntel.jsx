@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react'
 import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+import PageShell from './PageShell'
+import PageHeader from './PageHeader'
+
 
 
 const LS_KEY_ADINTEL = 'adsoh_adintel_result'
@@ -50,21 +53,20 @@ function AdIntel() {
   }
 
   const isMobile = window.innerWidth < 768
-  const page = { minHeight: '100vh', background: INK, padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '820px', width: '100%', boxSizing: 'border-box' }
 
   if (loading) return (
-    <div style={page}>
+    <PageShell maxWidth="820px">
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Ad Intelligence</h1>
       <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 32px' }}>Fetching ad data...</p>
       <div style={{ ...card, padding: '40px', textAlign: 'center' }}>
         <p style={{ color: MUTED, fontSize: '14px', margin: '0 0 6px' }}>Ad intelligence tayyaar ho rahi hai...</p>
         <p style={{ color: MUTED, fontSize: '13px', margin: 0 }}>15–30 seconds lagenge</p>
       </div>
-    </div>
+    </PageShell>
   )
 
   if (result) return (
-    <div style={page}>
+    <PageShell maxWidth="820px">
       {fromCache && (
         <div style={{ background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '9px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>Showing previous result · Generate new report to refresh</p>
@@ -96,13 +98,12 @@ function AdIntel() {
         <h2 style={{ fontSize: '14px', fontWeight: '600', margin: '0 0 20px', color: GOLD }}>Ad Analysis Guide</h2>
         {renderLines(result.guide)}
       </div>
-    </div>
+    </PageShell>
   )
 
   return (
-    <div style={page}>
-      <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Ad Intelligence</h1>
-      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 32px' }}>Competitor ke LIVE ads dekho aur AI se analysis guide pao</p>
+    <PageShell maxWidth="820px">
+      <PageHeader title="Ad Intelligence" sub="Competitor ke LIVE ads dekho aur AI se analysis guide pao" />
 
       <div style={{ maxWidth: '560px', width: '100%' }}>
         <div style={{ ...card, padding: '28px' }}>
@@ -131,7 +132,7 @@ function AdIntel() {
           </button>
         </div>
       </div>
-    </div>
+    </PageShell>
   )
 }
 

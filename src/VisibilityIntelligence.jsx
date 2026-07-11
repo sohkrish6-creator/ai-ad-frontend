@@ -4,6 +4,8 @@ import CityInput, { getLastCity } from './CityInput'
 const LS_KEY_VIS = 'adsoh_visibility_result'
 import { Eye, Copy, Check, ChevronDown, ChevronUp, Zap, Search, Bot, MapPin, FileText } from 'lucide-react'
 import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+import PageShell from './PageShell'
+import PageHeader from './PageHeader'
 
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
@@ -178,12 +180,6 @@ export default function VisibilityIntelligence() {
 
   const resolvedIndustry = industry === 'Other' ? industryOther : industry
 
-  const page = {
-    minHeight: '100vh', background: INK,
-    padding: isMobile ? '28px 16px' : '40px 36px',
-    maxWidth: '880px', width: '100%', boxSizing: 'border-box',
-    fontFamily: '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif',
-  }
 
   async function handleAnalyse() {
     if (!url.trim()) { setError('Website URL daalo.'); return }
@@ -204,14 +200,9 @@ export default function VisibilityIntelligence() {
   const toggle = key => setExpanded(e => e === key ? null : key)
 
   return (
-    <div style={page}>
+    <PageShell maxWidth="880px">
       <style>{`@keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }`}</style>
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-        <Eye size={20} color={GOLD} />
-        <h1 style={{ fontSize: '22px', fontWeight: '600', margin: 0, letterSpacing: '-0.4px' }}>Visibility Intelligence</h1>
-      </div>
-      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 28px' }}>SEO · AEO · GEO — full-spectrum visibility audit grounded in your actual site content + live keyword data.</p>
+      <PageHeader title="Visibility Intelligence" sub="SEO · AEO · GEO — full-spectrum visibility audit grounded in your actual site content + live keyword data." />
 
       {/* Input */}
       <div style={{ maxWidth: '640px', width: '100%' }}>
@@ -508,6 +499,6 @@ export default function VisibilityIntelligence() {
           </div>
         )
       })()}
-    </div>
+    </PageShell>
   )
 }

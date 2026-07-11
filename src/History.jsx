@@ -5,6 +5,8 @@ import {
   RefreshCw, AlertCircle,
 } from 'lucide-react'
 import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+import PageShell from './PageShell'
+import PageHeader from './PageHeader'
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
 const LS_TAB    = 'adsoh_history_tab'
@@ -232,15 +234,9 @@ export default function History() {
   const googleCampaigns = campaigns.filter(c => c.platform === 'google')
   const metaCampaigns    = campaigns.filter(c => c.platform === 'meta')
 
-  const page = { maxWidth: '760px', margin: '0 auto', padding: isMobile ? '20px 16px 60px' : '40px 40px 60px', fontFamily: '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif' }
-
   return (
-    <div style={page}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-        <Clock size={20} color={GOLD} />
-        <h1 style={{ fontSize: '22px', fontWeight: '600', margin: 0, letterSpacing: '-0.4px' }}>History</h1>
-      </div>
-      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 20px' }}>Every report, analysis, and campaign this tool has ever generated — one place to find past work.</p>
+    <PageShell maxWidth="780px">
+      <PageHeader title="History" sub="Every report, analysis, and campaign this tool has ever generated — one place to find past work." />
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: '4px', marginBottom: '18px', borderBottom: '1px solid #EAEAEA' }}>
@@ -335,6 +331,6 @@ export default function History() {
           )}
         </>
       )}
-    </div>
+    </PageShell>
   )
 }

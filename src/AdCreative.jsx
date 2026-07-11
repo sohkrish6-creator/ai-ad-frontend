@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react'
 import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+import PageShell from './PageShell'
+import PageHeader from './PageHeader'
+
 
 
 const LS_KEY_ADCREATIVE = 'adsoh_adcreative_result'
@@ -43,23 +46,22 @@ function AdCreative() {
     return text.split(/CREATIVE \d+:/).filter(b => b.trim()).map(b => b.trim())
   }
 
-  const page = { minHeight: '100vh', background: INK, padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '820px', width: '100%', boxSizing: 'border-box' }
 
   if (loading) return (
-    <div style={page}>
+    <PageShell maxWidth="820px">
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Ad Creative</h1>
       <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 32px' }}>Generating creatives...</p>
       <div style={{ ...card, padding: '40px', textAlign: 'center' }}>
         <p style={{ color: MUTED, fontSize: '14px', margin: '0 0 6px' }}>3 alag-alag creatives ban rahe hain...</p>
         <p style={{ color: MUTED, fontSize: '13px', margin: 0 }}>20–40 seconds lagenge</p>
       </div>
-    </div>
+    </PageShell>
   )
 
   if (result) {
     const creatives = parseCreatives(result.creative)
     return (
-      <div style={page}>
+      <PageShell maxWidth="820px">
         {fromCache && (
           <div style={{ background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '9px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>Showing previous result · Generate new report to refresh</p>
@@ -101,14 +103,13 @@ function AdCreative() {
             })}
           </div>
         ))}
-      </div>
+      </PageShell>
     )
   }
 
   return (
-    <div style={page}>
-      <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Ad Creative</h1>
-      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 32px' }}>Offer daalo — AI poori ad creative banayega (copy + image idea + layout)</p>
+    <PageShell maxWidth="820px">
+      <PageHeader title="Ad Creative" sub="Offer daalo — AI poori ad creative banayega (copy + image idea + layout)" />
 
       <div style={{ maxWidth: '560px', width: '100%' }}>
         <div style={{ ...card, padding: '28px' }}>
@@ -152,7 +153,7 @@ function AdCreative() {
           </button>
         </div>
       </div>
-    </div>
+    </PageShell>
   )
 }
 

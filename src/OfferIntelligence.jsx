@@ -6,6 +6,9 @@ import { Copy, Check, Gift, Zap, Tag, Star, ShieldCheck, MessageSquare, Trending
 import { useToast } from './ToastContext'
 import { TrustBadge, ValidationWarningBanner } from './TrustLayer'
 import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+import PageShell from './PageShell'
+import PageHeader from './PageHeader'
+
 
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
@@ -156,24 +159,12 @@ export default function OfferIntelligence() {
     ].join('\n')
   }
 
-  const page = {
-    minHeight: '100vh', background: INK,
-    padding: isMobile ? '28px 16px' : '40px 36px',
-    maxWidth: '860px', width: '100%', boxSizing: 'border-box',
-    fontFamily: '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif',
-  }
 
   return (
-    <div style={page}>
+    <PageShell maxWidth="860px">
       <style>{`@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }`}</style>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-        <Gift size={20} color={GOLD} />
-        <h1 style={{ fontSize: '22px', fontWeight: '600', margin: 0, letterSpacing: '-0.4px' }}>Offer Intelligence</h1>
-      </div>
-      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 24px 30px' }}>
-        Reads stored business memory and designs the most irresistible offer to convert your target audience.
-      </p>
+      <PageHeader title="Offer Intelligence" sub="Reads stored business memory and designs the most irresistible offer to convert your target audience." />
 
       {/* Notice */}
       <div style={{ maxWidth: '620px', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '8px', padding: '11px 14px', marginBottom: '20px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
@@ -380,6 +371,6 @@ export default function OfferIntelligence() {
 
         </div>
       )}
-    </div>
+    </PageShell>
   )
 }

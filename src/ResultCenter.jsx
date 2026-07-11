@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react'
 import { Trophy, Copy, Check, ChevronDown, ChevronUp, TrendingUp, TrendingDown, Minus, Star, ArrowRight, Zap } from 'lucide-react'
 import CityInput, { getLastCity } from './CityInput'
 import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+import PageShell from './PageShell'
+import PageHeader from './PageHeader'
+
 
 
 const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
@@ -128,12 +131,6 @@ export default function ResultCenter() {
 
   const resolvedIndustry = industry === 'Other' ? industryOther : industry
 
-  const page = {
-    minHeight: '100vh', background: INK,
-    padding: isMobile ? '28px 16px' : '40px 36px',
-    maxWidth: '960px', width: '100%', boxSizing: 'border-box',
-    fontFamily: '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif',
-  }
 
   async function handleGenerate() {
     setError(''); setLoading(true); setResult(null)
@@ -204,14 +201,10 @@ export default function ResultCenter() {
   ]
 
   return (
-    <div style={page}>
+    <PageShell maxWidth="960px">
       <style>{`@keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }`}</style>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-        <Trophy size={20} color={GOLD} />
-        <h1 style={{ fontSize: '22px', fontWeight: '600', margin: 0, letterSpacing: '-0.4px' }}>Result Center</h1>
-      </div>
-      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 28px' }}>Final campaign summary — prediction vs actual, what worked, what failed, and your next moves.</p>
+      <PageHeader title="Result Center" sub="Final campaign summary — prediction vs actual, what worked, what failed, and your next moves." />
 
       {/* Form */}
       <div style={{ maxWidth: '640px', width: '100%' }}>
@@ -506,6 +499,6 @@ export default function ResultCenter() {
 
         </div>
       )}
-    </div>
+    </PageShell>
   )
 }

@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react'
 import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+import PageShell from './PageShell'
+import PageHeader from './PageHeader'
+
 
 
 const LS_KEY_ANALYZE = 'adsoh_analyze_result'
@@ -113,7 +116,6 @@ function UrlInput() {
   }
 
   const isMobile = window.innerWidth < 768
-  const page = { minHeight: '100vh', background: INK, padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '820px', width: '100%', boxSizing: 'border-box' }
 
   // Password Screen
   if (!unlocked) return (
@@ -135,19 +137,19 @@ function UrlInput() {
 
   // Loading
   if (loading) return (
-    <div style={page}>
+    <PageShell maxWidth="820px">
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>AI Analyzer</h1>
       <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 32px' }}>Analyzing website...</p>
       <div style={{ ...card, padding: '40px', textAlign: 'center' }}>
         <p style={{ color: MUTED, fontSize: '14px', margin: '0 0 6px' }}>Website crawl ho rahi hai, strategy ban rahi hai...</p>
         <p style={{ color: MUTED, fontSize: '13px', margin: 0 }}>30–60 seconds lagenge</p>
       </div>
-    </div>
+    </PageShell>
   )
 
   // Mismatch
   if (mismatch) return (
-    <div style={page}>
+    <PageShell maxWidth="820px">
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>AI Analyzer</h1>
       <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 32px' }}>Category confirmation needed</p>
       <div style={{ maxWidth: '600px', width: '100%' }}>
@@ -189,14 +191,14 @@ function UrlInput() {
           </button>
         </div>
       </div>
-    </div>
+    </PageShell>
   )
 
   // Result
   if (result) {
     const lines = result.analysis.split('\n')
     return (
-      <div style={page}>
+      <PageShell maxWidth="820px">
         {fromCache && (
           <div style={{ background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '9px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>Showing previous result · Generate new report to refresh</p>
@@ -239,13 +241,13 @@ function UrlInput() {
             return null
           })}
         </div>
-      </div>
+      </PageShell>
     )
   }
 
   // Main form
   return (
-    <div style={page}>
+    <PageShell maxWidth="820px">
       <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>AI Analyzer</h1>
       <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 32px' }}>Apni website URL daalo — AI real strategy banayega</p>
 
@@ -288,7 +290,7 @@ function UrlInput() {
           </button>
         </div>
       </div>
-    </div>
+    </PageShell>
   )
 }
 

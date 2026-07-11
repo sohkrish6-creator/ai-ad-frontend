@@ -5,6 +5,9 @@ import CityInput, { getLastCity } from './CityInput'
 import { useLoadingSteps } from './useLoadingSteps'
 import { TrustBadge, ValidationWarningBanner } from './TrustLayer'
 import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+import PageShell from './PageShell'
+import PageHeader from './PageHeader'
+
 
 
 const BACKEND  = 'https://ai-ad-backend-zhpj.onrender.com'
@@ -140,12 +143,6 @@ export default function KPIEngine() {
 
   const resolvedIndustry = industry === 'Other' ? industryOther : industry
 
-  const page = {
-    minHeight: '100vh', background: INK,
-    padding: isMobile ? '28px 16px' : '40px 36px',
-    maxWidth: '900px', width: '100%', boxSizing: 'border-box',
-    fontFamily: '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif',
-  }
 
   async function handleGenerate() {
     if (!resolvedIndustry) { setError('Industry select karo.'); return }
@@ -172,14 +169,10 @@ export default function KPIEngine() {
   const k = result?.kpi || {}
 
   return (
-    <div style={page}>
+    <PageShell maxWidth="900px">
       <style>{`@keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }`}</style>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-        <BarChart2 size={20} color={GOLD} />
-        <h1 style={{ fontSize: '22px', fontWeight: '600', margin: 0, letterSpacing: '-0.4px' }}>KPI Engine</h1>
-      </div>
-      <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 28px' }}>Predict campaign KPIs before launch — CPL, ROAS, CAC, LTV, and success criteria based on your industry + memory.</p>
+      <PageHeader title="KPI Engine" sub="Predict campaign KPIs before launch — CPL, ROAS, CAC, LTV, and success criteria based on your industry + memory." />
 
       {/* Input */}
       <div style={{ maxWidth: '640px', width: '100%' }}>
@@ -459,6 +452,6 @@ export default function KPIEngine() {
 
         </div>
       )}
-    </div>
+    </PageShell>
   )
 }
