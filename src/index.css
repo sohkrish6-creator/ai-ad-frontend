@@ -1,3 +1,23 @@
+/* ── Design Tokens ─────────────────────────────────────────────────────── */
+:root {
+  --ink:          #0B0B0D;
+  --bone:         #EDEAE3;
+  --gold:         #C9A227;
+  --gold-dim:     rgba(201,162,39,0.12);
+  --gold-border:  rgba(201,162,39,0.28);
+  --slate:        #23242B;
+  --slate-light:  #2E2F38;
+  --slate-mid:    #1A1B22;
+  --signal-green: #3FA66B;
+  --signal-red:   #C4453A;
+  --muted:        #8A8A92;
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body:    'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono:    'IBM Plex Mono', 'Menlo', 'Monaco', monospace;
+}
+
+/* ── Base Reset ────────────────────────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
 }
@@ -10,10 +30,10 @@ html {
 html, body {
   margin: 0;
   padding: 0;
-  background: #FAFAFA;
-  color: #171717;
-  color-scheme: light;
-  font-family: "Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
+  background: var(--ink);
+  color: var(--bone);
+  color-scheme: dark;
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -29,17 +49,52 @@ body {
   width: 100%;
 }
 
-p {
-  margin: 0;
-}
+p { margin: 0; }
 
-/* Prevent inputs/selects from overflowing their container */
 input, select, textarea, button {
   max-width: 100%;
 }
 
-/* Prevent long URLs or unbreakable text from overflowing */
 p, span, label, h1, h2, h3, h4 {
   overflow-wrap: break-word;
   word-break: break-word;
+}
+
+/* ── Utility: mono numbers ─────────────────────────────────────────────── */
+.mono { font-family: var(--font-mono); }
+
+/* ── Utility: display heading ──────────────────────────────────────────── */
+.display { font-family: var(--font-display); }
+
+/* ── PulseLedger animation ─────────────────────────────────────────────── */
+@keyframes ledger-pulse {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1;   }
+}
+
+/* ── Toast slide-in ────────────────────────────────────────────────────── */
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── General shimmer ───────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1);   opacity: 1;   }
+  50%       { transform: scale(1.5); opacity: 0.5; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }

@@ -2,7 +2,6 @@ import { createContext, useCallback, useContext, useRef, useState } from 'react'
 import { CheckCircle, XCircle } from 'lucide-react'
 
 const ToastContext = createContext(null)
-const GOLD = '#D4AF37'
 
 let idCounter = 0
 
@@ -30,7 +29,6 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={toast}>
       {children}
-      <style>{`@keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }`}</style>
       <div style={{
         position: 'fixed', top: '20px', right: '20px', zIndex: 100000,
         display: 'flex', flexDirection: 'column', gap: '10px', pointerEvents: 'none',
@@ -39,16 +37,18 @@ export function ToastProvider({ children }) {
           <div key={t.id} style={{
             pointerEvents: 'auto',
             display: 'flex', alignItems: 'center', gap: '10px',
-            background: '#171717', color: '#fff',
-            borderLeft: `3px solid ${GOLD}`,
+            background: '#23242B',
+            color: '#EDEAE3',
+            borderLeft: t.type === 'success' ? '3px solid #C9A227' : '3px solid #C4453A',
             padding: '12px 16px', borderRadius: '8px',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
+            boxShadow: '0 8px 28px rgba(0,0,0,0.5)',
             fontSize: '13px', fontWeight: '500', minWidth: '220px', maxWidth: '360px',
             animation: 'toastIn 0.2s ease-out',
+            fontFamily: "'Inter', -apple-system, system-ui, sans-serif",
           }}>
             {t.type === 'success'
-              ? <CheckCircle size={16} color={GOLD} style={{ flexShrink: 0 }} />
-              : <XCircle size={16} color="#EF4444" style={{ flexShrink: 0 }} />}
+              ? <CheckCircle size={16} color="#C9A227" style={{ flexShrink: 0 }} />
+              : <XCircle size={16} color="#C4453A" style={{ flexShrink: 0 }} />}
             <span style={{ wordBreak: 'break-word' }}>{t.message}</span>
           </div>
         ))}

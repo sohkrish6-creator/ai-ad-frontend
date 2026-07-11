@@ -5,7 +5,16 @@ import {
   Radio, Palette, Target, Users, Menu, X, PlaySquare, TrendingUp, Gift, Monitor, Eye, MessageSquare, BarChart2, Activity, Zap, Trophy, Crosshair, Antenna, Link2, Share2, Sparkles, Radar, Clock, Wand2,
 } from 'lucide-react'
 
-const GOLD = '#D4AF37'
+const INK   = '#0B0B0D'
+const SLATE = '#23242B'
+const SLATE_L = '#2E2F38'
+const BONE  = '#EDEAE3'
+const GOLD  = '#C9A227'
+const MUTED = '#8A8A92'
+const GREEN = '#3FA66B'
+
+const FONT_DISPLAY = "'Fraunces', Georgia, serif"
+const FONT_BODY    = "'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif"
 
 const links = [
   { path: '/dashboard',    label: 'Dashboard',       Icon: LayoutDashboard },
@@ -43,19 +52,18 @@ function Nav() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const isMobile = window.innerWidth < 768
 
-  // ── MOBILE: top bar + slide-in drawer ────────────────────────────────────
   if (isMobile) {
     return (
       <>
         <style>{`
           .nav-drawer-link { text-decoration: none; transition: background 0.12s ease; }
-          .nav-drawer-link:not(.active):hover { background: #F5F5F5 !important; }
+          .nav-drawer-link:not(.active):hover { background: ${SLATE} !important; }
         `}</style>
 
         {/* Fixed top bar */}
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, height: '48px',
-          background: '#fff', borderBottom: '1px solid #EAEAEA',
+          background: INK, borderBottom: `1px solid ${SLATE}`,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '0 16px', zIndex: 1000, boxSizing: 'border-box',
         }}>
@@ -64,20 +72,21 @@ function Nav() {
             aria-label="Open menu"
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', margin: '-6px', display: 'flex', alignItems: 'center' }}
           >
-            <Menu size={20} color="#171717" />
+            <Menu size={20} color={MUTED} />
           </button>
           <span style={{
-            fontSize: '14px', fontWeight: '600', letterSpacing: '-0.3px', color: '#171717',
+            fontSize: '15px', fontWeight: '700', letterSpacing: '-0.3px', color: BONE,
             position: 'absolute', left: '50%', transform: 'translateX(-50%)',
-            pointerEvents: 'none',
+            pointerEvents: 'none', fontFamily: FONT_DISPLAY,
           }}>
-            <span style={{ color: GOLD, marginRight: '5px' }}>✦</span>Adsoh
+            <span style={{ color: GOLD, marginRight: '4px' }}>✦</span>Adsoh
           </span>
           <kbd
             onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
             style={{
-              fontSize: '10px', color: '#999', border: '1px solid #E5E5E5', borderRadius: '4px',
-              padding: '3px 6px', fontWeight: '600', cursor: 'pointer', background: '#FAFAFA',
+              fontSize: '10px', color: MUTED, border: `1px solid ${SLATE_L}`, borderRadius: '4px',
+              padding: '3px 6px', fontWeight: '600', cursor: 'pointer', background: SLATE,
+              fontFamily: FONT_BODY,
             }}
           >
             ⌘K
@@ -90,7 +99,7 @@ function Nav() {
             onClick={() => setDrawerOpen(false)}
             style={{
               position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-              background: 'rgba(0,0,0,0.35)', zIndex: 1500,
+              background: 'rgba(0,0,0,0.65)', zIndex: 1500,
             }}
           />
         )}
@@ -99,17 +108,17 @@ function Nav() {
         <div style={{
           position: 'fixed', top: 0, left: 0,
           width: '260px', height: '100vh',
-          background: '#fff', borderRight: '1px solid #EAEAEA',
+          background: INK, borderRight: `1px solid ${SLATE}`,
           zIndex: 2000, boxSizing: 'border-box',
           transform: drawerOpen ? 'translateX(0)' : 'translateX(-100%)',
           transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
           display: 'flex', flexDirection: 'column',
           padding: '0 12px 20px',
           overflowY: 'auto',
+          fontFamily: FONT_BODY,
         }}>
-          {/* Drawer header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 4px 22px' }}>
-            <span style={{ fontSize: '14px', fontWeight: '600', letterSpacing: '-0.3px', color: '#171717' }}>
+            <span style={{ fontSize: '15px', fontWeight: '700', letterSpacing: '-0.3px', color: BONE, fontFamily: FONT_DISPLAY }}>
               <span style={{ color: GOLD, marginRight: '5px' }}>✦</span>Adsoh
             </span>
             <button
@@ -117,11 +126,10 @@ function Nav() {
               aria-label="Close menu"
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}
             >
-              <X size={18} color="#888" />
+              <X size={18} color={MUTED} />
             </button>
           </div>
 
-          {/* Links */}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1px' }}>
             {links.map(({ path, label, Icon }) => {
               const active = location.pathname === path
@@ -133,25 +141,25 @@ function Nav() {
                   onClick={() => setDrawerOpen(false)}
                   style={{
                     display: 'flex', alignItems: 'center', gap: '10px',
-                    padding: '9px 10px', borderRadius: '6px',
-                    background: active ? '#F0F0F0' : 'transparent',
-                    color: active ? '#171717' : '#888',
-                    fontSize: '14px', fontWeight: active ? '500' : '400',
-                    letterSpacing: '-0.1px',
+                    padding: '8px 10px', borderRadius: '5px',
+                    borderLeft: active ? `3px solid ${GOLD}` : '3px solid transparent',
+                    background: active ? 'rgba(201,162,39,0.07)' : 'transparent',
+                    color: active ? BONE : MUTED,
+                    fontSize: '13px', fontWeight: active ? '500' : '400',
+                    letterSpacing: '-0.1px', textDecoration: 'none',
                   }}
                 >
-                  <Icon size={15} strokeWidth={active ? 2 : 1.5} color={active ? GOLD : '#BBBBBB'} style={{ flexShrink: 0 }} />
+                  <Icon size={14} strokeWidth={active ? 2 : 1.5} color={active ? GOLD : '#3E3F4A'} style={{ flexShrink: 0 }} />
                   {label}
                 </Link>
               )
             })}
           </div>
 
-          {/* Footer */}
-          <div style={{ padding: '16px 10px 0', borderTop: '1px solid #EAEAEA', marginTop: '8px' }}>
+          <div style={{ padding: '14px 10px 0', borderTop: `1px solid ${SLATE}`, marginTop: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-              <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 0 2px #22C55E20', flexShrink: 0 }} />
-              <span style={{ color: '#AAAAAA', fontSize: '11px' }}>Krish · Sohscape</span>
+              <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: GREEN, boxShadow: `0 0 0 2px rgba(63,166,107,0.2)`, flexShrink: 0 }} />
+              <span style={{ color: MUTED, fontSize: '11px', fontFamily: FONT_BODY }}>Krish · Sohscape</span>
             </div>
           </div>
         </div>
@@ -163,36 +171,48 @@ function Nav() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap');
-        .nav-link { transition: background 0.15s ease, color 0.15s ease; }
-        .nav-link:not(.active):hover { background: #F5F5F5 !important; color: #333 !important; }
-        .nav-link:not(.active):hover svg { color: #888 !important; }
+        .nav-link { transition: background 0.12s ease, color 0.12s ease; text-decoration: none; }
+        .nav-link:not(.active):hover { background: ${SLATE} !important; color: ${BONE} !important; }
+        .nav-link:not(.active):hover svg { color: ${MUTED} !important; }
       `}</style>
       <div style={{
         position: 'fixed', left: 0, top: 0,
         width: '220px', height: '100vh',
-        background: '#fff', borderRight: '1px solid #EAEAEA',
+        background: INK, borderRight: `1px solid ${SLATE}`,
         padding: '20px 12px', boxSizing: 'border-box',
         display: 'flex', flexDirection: 'column',
-        fontFamily: '"Geist", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif',
+        fontFamily: FONT_BODY,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 10px 28px' }}>
-          <span style={{ fontSize: '14px', fontWeight: '600', letterSpacing: '-0.3px', color: '#171717' }}>
-            <span style={{ color: GOLD, marginRight: '6px' }}>✦</span>Adsoh
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 10px 24px' }}>
+          <span style={{ fontSize: '15px', fontWeight: '700', letterSpacing: '-0.3px', color: BONE, fontFamily: FONT_DISPLAY }}>
+            <span style={{ color: GOLD, marginRight: '5px' }}>✦</span>Adsoh
           </span>
           <kbd
             onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
             title="Open command palette"
             style={{
-              fontSize: '10px', color: '#999', border: '1px solid #E5E5E5', borderRadius: '4px',
-              padding: '3px 6px', fontWeight: '600', cursor: 'pointer', background: '#FAFAFA',
+              fontSize: '10px', color: MUTED, border: `1px solid ${SLATE_L}`, borderRadius: '4px',
+              padding: '3px 6px', fontWeight: '600', cursor: 'pointer', background: SLATE,
             }}
           >
             ⌘K
           </kbd>
         </div>
 
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1px' }}>
+        {/* Pulse Ledger divider below header */}
+        <div style={{ margin: '0 0 12px', padding: '0 2px' }}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="10" viewBox="0 0 196 10" preserveAspectRatio="none" aria-hidden="true">
+            <line x1="0" y1="5" x2="196" y2="5" stroke={SLATE_L} strokeWidth="1" />
+            {[0,2,5,9,13,16,19].map((tick, i) => {
+              const x = (tick / 19) * 196
+              const isGold = [2, 9, 16].includes(tick)
+              const h = isGold ? 7 : 3
+              return <line key={i} x1={x} y1={5 - h/2} x2={x} y2={5 + h/2} stroke={isGold ? GOLD : '#3A3B46'} strokeWidth={isGold ? 1.5 : 0.8} />
+            })}
+          </svg>
+        </div>
+
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1px', overflowY: 'auto' }}>
           {links.map(({ path, label, Icon }) => {
             const active = location.pathname === path
             return (
@@ -201,26 +221,26 @@ function Nav() {
                 to={path}
                 className={`nav-link${active ? ' active' : ''}`}
                 style={{
-                  textDecoration: 'none',
                   display: 'flex', alignItems: 'center', gap: '8px',
-                  padding: '6px 10px', borderRadius: '6px',
-                  background: active ? '#F0F0F0' : 'transparent',
-                  color: active ? '#171717' : '#888',
+                  padding: '6px 10px', borderRadius: '5px',
+                  borderLeft: active ? `3px solid ${GOLD}` : '3px solid transparent',
+                  background: active ? 'rgba(201,162,39,0.07)' : 'transparent',
+                  color: active ? BONE : MUTED,
                   fontSize: '13px', fontWeight: active ? '500' : '400',
                   letterSpacing: '-0.1px',
                 }}
               >
-                <Icon size={14} strokeWidth={active ? 2 : 1.5} color={active ? GOLD : '#BBBBBB'} style={{ flexShrink: 0 }} />
+                <Icon size={14} strokeWidth={active ? 2 : 1.5} color={active ? GOLD : '#3E3F4A'} style={{ flexShrink: 0 }} />
                 {label}
               </Link>
             )
           })}
         </div>
 
-        <div style={{ padding: '16px 10px 0', borderTop: '1px solid #EAEAEA' }}>
+        <div style={{ padding: '14px 10px 0', borderTop: `1px solid ${SLATE}`, marginTop: '4px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 0 2px #22C55E20', flexShrink: 0 }} />
-            <span style={{ color: '#AAAAAA', fontSize: '11px' }}>Krish · Sohscape</span>
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: GREEN, boxShadow: `0 0 0 2px rgba(63,166,107,0.2)`, flexShrink: 0 }} />
+            <span style={{ color: MUTED, fontSize: '11px' }}>Krish · Sohscape</span>
           </div>
         </div>
       </div>

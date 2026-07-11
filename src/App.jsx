@@ -45,7 +45,7 @@ function Layout() {
         marginLeft: showNav && !isMobile ? '220px' : '0',
         paddingTop: showNav && isMobile ? '48px' : '0',
         minHeight: '100vh',
-        background: '#FAFAFA',
+        background: 'var(--ink)',
         overflowX: 'hidden',
         width: showNav && !isMobile ? 'calc(100% - 220px)' : '100%',
         boxSizing: 'border-box',

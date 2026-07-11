@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search } from 'lucide-react'
 
-const GOLD = '#D4AF37'
+const GOLD = '#C9A227'
 
 export const COMMAND_PALETTE_PAGES = [
   { label: 'Dashboard',          path: '/dashboard' },
@@ -91,14 +91,15 @@ export default function CommandPalette() {
     >
       <style>{`.cmdk-box { transition: box-shadow 0.15s ease; } .cmdk-box:focus-within { box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 0 2px ${GOLD}; }`}</style>
       <div className="cmdk-box" onClick={e => e.stopPropagation()} style={{
-        width: '100%', maxWidth: '560px', margin: '0 16px', background: '#171717', borderRadius: '12px',
-        boxShadow: '0 24px 60px rgba(0,0,0,0.5)', overflow: 'hidden', border: '1px solid #2A2A2A',
+        width: '100%', maxWidth: '560px', margin: '0 16px', background: '#23242B', borderRadius: '12px',
+        boxShadow: '0 28px 64px rgba(0,0,0,0.7)', overflow: 'hidden', border: '1px solid #2E2F38',
+        fontFamily: "'Inter', -apple-system, system-ui, sans-serif",
       }}>
         <div style={{
           display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 18px',
-          borderBottom: '1px solid #2A2A2A',
+          borderBottom: '1px solid #2E2F38',
         }}>
-          <Search size={16} color="#888" />
+          <Search size={16} color="#8A8A92" />
           <input
             ref={inputRef}
             value={query}
@@ -107,15 +108,15 @@ export default function CommandPalette() {
             placeholder="Jump to a page..."
             style={{
               flex: 1, background: 'transparent', border: 'none', outline: 'none',
-              color: '#fff', fontSize: '15px', fontFamily: 'inherit',
+              color: '#EDEAE3', fontSize: '15px', fontFamily: 'inherit',
               boxShadow: 'none',
             }}
           />
-          <kbd style={{ fontSize: '11px', color: '#666', border: '1px solid #333', borderRadius: '4px', padding: '2px 6px' }}>Esc</kbd>
+          <kbd style={{ fontSize: '11px', color: '#8A8A92', border: '1px solid #2E2F38', borderRadius: '4px', padding: '2px 6px', background: '#1A1B22' }}>Esc</kbd>
         </div>
         <div style={{ maxHeight: '360px', overflowY: 'auto', padding: '8px' }}>
           {filtered.length === 0 ? (
-            <p style={{ color: '#666', fontSize: '13px', padding: '16px', textAlign: 'center', margin: 0 }}>No matches</p>
+            <p style={{ color: '#8A8A92', fontSize: '13px', padding: '16px', textAlign: 'center', margin: 0 }}>No matches</p>
           ) : (
             filtered.map((p, i) => (
               <div
@@ -124,9 +125,9 @@ export default function CommandPalette() {
                 onMouseEnter={() => setActiveIndex(i)}
                 style={{
                   padding: '10px 14px', borderRadius: '7px', fontSize: '13.5px', cursor: 'pointer',
-                  color: i === activeIndex ? '#171717' : '#EAEAEA',
+                  color: i === activeIndex ? '#0B0B0D' : '#EDEAE3',
                   background: i === activeIndex ? GOLD : 'transparent',
-                  fontWeight: i === activeIndex ? '600' : '400',
+                  fontWeight: i === activeIndex ? '700' : '400',
                 }}
               >
                 {p.label}
