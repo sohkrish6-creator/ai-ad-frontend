@@ -406,7 +406,7 @@ function MarketingBrain() {
       doc.setFillColor(...C.gold)
       doc.rect(W / 2 - 20, 80, 40, 0.5, 'F')
 
-      const cleanUrl = result.url.replace(/https?:\/\//, '').replace(/\/$/, '')
+      const cleanUrl = (result.url || '').replace(/https?:\/\//, '').replace(/\/$/, '') || (result.target_industry ? `${result.target_industry}${result.target_city ? ` · ${result.target_city}` : ''}` : 'B2B Campaign')
       tt(cleanUrl, W / 2, 92, { sz: 10, col: C.mid, align: 'center' })
       tt(new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }), W / 2, 100, { sz: 8.5, col: C.muted, align: 'center' })
 
@@ -574,7 +574,9 @@ function MarketingBrain() {
         <div>
           <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Marketing Brain</h1>
           <p style={{ color: '#999', fontSize: '13px', margin: 0 }}>
-            {result.url} — {result.target_industry ? `B2B campaign for ${result.target_industry}` : 'full report'} ready
+            {result.target_industry
+              ? `B2B Campaign — ${result.target_industry}${result.target_city ? ` · ${result.target_city}` : ''}${result.url ? ` · ${result.url}` : ''}`
+              : `${result.url} — full report`} ready
             {result.bi_cached != null && (
               <span style={{ marginLeft: '8px', color: result.bi_cached ? '#22C55E' : GOLD, fontSize: '11px', fontWeight: '600' }}>
                 {result.bi_cached ? '· BI cached' : '· fresh BI scan'}
