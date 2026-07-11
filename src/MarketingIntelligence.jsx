@@ -149,26 +149,108 @@ function DNASection({ d }) {
   )
 }
 
-function TimelineSection({ d }) {
-  if (!Array.isArray(d) || !d.length) return <Empty msg="No timeline milestones found in available research." />
+function TimelineSection({ d, revenue, stories }) {
+  const hasMilestones = Array.isArray(d) && d.length > 0
+  const hasRevenue = Array.isArray(revenue) && revenue.length > 0
+  const hasStories = Array.isArray(stories) && stories.length > 0
+
+  if (!hasMilestones && !hasRevenue && !hasStories) {
+    return <Empty msg="No timeline milestones found in available research." />
+  }
+
   return (
     <div>
-      {d.map((item, i) => (
-        <div key={i} style={{ display: 'flex', gap: '16px', marginBottom: '4px' }}>
-          <div style={{ flexShrink: 0, width: '80px', paddingTop: '2px', textAlign: 'right' }}>
-            <span style={{ fontSize: '11px', fontWeight: '700', color: GOLD, background: GOLD_DIM,
-              border: `1px solid ${GOLD_BDR}`, borderRadius: '5px', padding: '3px 7px', display: 'inline-block' }}>
-              {item.year}
-            </span>
+      {/* ── Milestone timeline ── */}
+      {hasMilestones && (
+        <div style={{ marginBottom: '32px' }}>
+          <div style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase',
+            letterSpacing: '0.08em', color: GOLD, marginBottom: '16px' }}>Marketing Timeline</div>
+          {d.map((item, i) => (
+            <div key={i} style={{ display: 'flex', gap: '16px', marginBottom: '4px' }}>
+              <div style={{ flexShrink: 0, width: '80px', paddingTop: '2px', textAlign: 'right' }}>
+                <span style={{ fontSize: '11px', fontWeight: '700', color: GOLD, background: GOLD_DIM,
+                  border: `1px solid ${GOLD_BDR}`, borderRadius: '5px', padding: '3px 7px', display: 'inline-block' }}>
+                  {item.year}
+                </span>
+              </div>
+              <div style={{ flex: 1, paddingLeft: '14px', borderLeft: `2px solid ${SLATE_L}`, paddingBottom: '18px' }}>
+                <div style={{ fontSize: '14px', fontWeight: '600', color: BONE, marginBottom: '4px' }}>{item.milestone}</div>
+                {item.significance && (
+                  <div style={{ fontSize: '12px', color: MUTED, marginBottom: '4px', lineHeight: 1.5 }}>{item.significance}</div>
+                )}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
+                  {item.evidence && (
+                    <span style={{ fontSize: '11px', color: MUTED, opacity: 0.7, fontStyle: 'italic' }}>{item.evidence}</span>
+                  )}
+                  {item.data_source && (
+                    <span style={{ fontSize: '10px', color: MUTED, opacity: 0.5 }}>· {item.data_source}</span>
+                  )}
+                  {item.confidence && <ConfBadge n={item.confidence} />}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── Revenue timeline ── */}
+      {hasRevenue && (
+        <div style={{ marginBottom: '32px' }}>
+          <div style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase',
+            letterSpacing: '0.08em', color: GREEN, marginBottom: '14px' }}>Revenue Timeline (documented figures only)</div>
+          <div style={{ ...cardInner, padding: '4px 0', overflow: 'hidden' }}>
+            {revenue.map((item, i) => (
+              <div key={i} style={{ display: 'flex', gap: '0', borderBottom: i < revenue.length - 1 ? `1px solid ${SLATE_L}` : 'none' }}>
+                <div style={{ flexShrink: 0, width: '100px', padding: '12px 14px',
+                  borderRight: `1px solid ${SLATE_L}`, background: SLATE_M }}>
+                  <div style={{ fontSize: '12px', fontWeight: '700', color: GOLD }}>{item.period}</div>
+                </div>
+                <div style={{ flex: 1, padding: '12px 14px' }}>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: GREEN, marginBottom: '3px' }}>
+                    {item.revenue_or_metric}
+                  </div>
+                  {item.source_context && (
+                    <div style={{ fontSize: '11px', color: MUTED, fontStyle: 'italic' }}>{item.source_context}</div>
+                  )}
+                </div>
+                {item.confidence && (
+                  <div style={{ flexShrink: 0, padding: '12px 14px', display: 'flex', alignItems: 'center' }}>
+                    <ConfBadge n={item.confidence} />
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
-          <div style={{ flex: 1, paddingLeft: '14px', borderLeft: `2px solid ${SLATE_L}`, paddingBottom: '18px' }}>
-            <div style={{ fontSize: '14px', fontWeight: '600', color: BONE, marginBottom: '4px' }}>{item.milestone}</div>
-            {item.significance && <div style={{ fontSize: '12px', color: MUTED, marginBottom: '4px', lineHeight: 1.5 }}>{item.significance}</div>}
-            {item.evidence && <div style={{ fontSize: '11px', color: MUTED, opacity: 0.7, fontStyle: 'italic' }}>{item.evidence}</div>}
-            {item.confidence && <div style={{ marginTop: '6px' }}><ConfBadge n={item.confidence} /></div>}
+          <div style={{ fontSize: '10px', color: MUTED, marginTop: '8px', fontStyle: 'italic' }}>
+            Only years with figures found in research are shown — gaps are real gaps, not omissions.
           </div>
         </div>
-      ))}
+      )}
+
+      {/* ── Unique stories ── */}
+      {hasStories && (
+        <div>
+          <div style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase',
+            letterSpacing: '0.08em', color: GOLD, marginBottom: '14px' }}>Unique Stories & Anecdotes</div>
+          {stories.map((item, i) => (
+            <div key={i} style={{ ...card, padding: '18px', marginBottom: '10px',
+              borderLeft: `3px solid ${GOLD_BDR}` }}>
+              <div style={{ fontSize: '14px', color: BONE, lineHeight: 1.6, marginBottom: '8px' }}>{item.story}</div>
+              {item.significance && (
+                <div style={{ fontSize: '12px', color: GOLD, marginBottom: '6px' }}>
+                  Why it matters: {item.significance}
+                </div>
+              )}
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                {item.source_context && (
+                  <span style={{ fontSize: '11px', color: MUTED, fontStyle: 'italic' }}>{item.source_context}</span>
+                )}
+                {item.confidence && <ConfBadge n={item.confidence} />}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -616,7 +698,7 @@ function SectionRouter({ tabKey, sections }) {
   switch (tabKey) {
     case 'overview':             return <OverviewSection d={s.overview} />
     case 'business_dna':         return <DNASection d={s.business_dna} />
-    case 'timeline':             return <TimelineSection d={s.timeline} />
+    case 'timeline':             return <TimelineSection d={s.timeline} revenue={s.revenue_timeline} stories={s.unique_stories} />
     case 'audience':             return <AudienceSection d={s.audience} />
     case 'channels':             return <ChannelsSection d={s.channels} />
     case 'advertising':          return <AdvertisingSection d={s.advertising} />
