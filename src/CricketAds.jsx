@@ -68,6 +68,34 @@ function PriorityBadge({ priority }) {
   return <span style={{ color: col, fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', border: `1px solid ${col}50`, borderRadius: '4px', padding: '2px 8px' }}>{priority}</span>
 }
 
+function DataLabelBadge({ label }) {
+  const map = {
+    REAL: { bg: '#052e16', color: C.green, border: `${C.green}50` },
+    BENCHMARK: { bg: '#2D1B00', color: C.gold, border: `${C.gold}50` },
+    INSUFFICIENT_DATA: { bg: '#1A1A2E', color: C.muted, border: `${C.muted}40` },
+  }
+  const style = map[label] || map.BENCHMARK
+  return (
+    <span style={{ background: style.bg, color: style.color, border: `1px solid ${style.border}`, borderRadius: '4px', padding: '2px 7px', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+      {(label || 'BENCHMARK').replace(/_/g, ' ')}
+    </span>
+  )
+}
+
+function PlacementIdBadge({ type }) {
+  const map = {
+    EXACT_URL_FOUND: { color: C.green, label: 'Exact URL' },
+    EXACT_PACKAGE_FOUND: { color: C.green, label: 'Exact Package' },
+    NAME_ONLY: { color: C.muted, label: 'Name Only' },
+  }
+  const s = map[type] || map.NAME_ONLY
+  return (
+    <span style={{ color: s.color, fontSize: '10px', fontWeight: '700', border: `1px solid ${s.color}40`, borderRadius: '4px', padding: '2px 6px', textTransform: 'uppercase' }}>
+      {s.label}
+    </span>
+  )
+}
+
 // Structured recommendation: observation / why / evidence / confidence / expected_impact / risk / difficulty / priority / next_action
 function RecCard({ title, rec }) {
   if (!rec || !rec.observation) return null
@@ -558,8 +586,9 @@ export default function CricketAds() {
                       <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: C.accentDk, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '800', color: '#fff', flexShrink: 0 }}>#{i + 1}</span>
                       <p style={{ margin: 0, fontSize: '14px', fontWeight: '600' }}>{seg.name}</p>
                     </div>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                       <IntentBadge intent={seg.intent} />
+                      {seg.data_label && <DataLabelBadge label={seg.data_label} />}
                       <span style={{ fontSize: '12px', color: C.muted }}>Score: <strong style={{ color: C.text }}>{seg.priority_score}</strong></span>
                     </div>
                   </div>
@@ -575,6 +604,38 @@ export default function CricketAds() {
                     <p style={{ margin: '0 0 6px', fontSize: '12px', color: C.accent }}>
                       <strong>Platform targeting:</strong> {seg.platform_match}
                     </p>
+                  )}
+                  {seg.targeting_params && (
+                    <div style={{ background: '#0D1526', border: `1px solid ${C.border}`, borderRadius: '7px', padding: '10px 12px', marginBottom: '8px' }}>
+                      <p style={{ margin: '0 0 7px', fontSize: '10px', color: C.muted, fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Paste-ready targeting params</p>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px 16px' }}>
+                        {[
+                          ['Affinity', seg.targeting_params.google_affinity],
+                          ['In-Market', seg.targeting_params.google_in_market],
+                          ['Age Range', seg.targeting_params.age_range],
+                          ['Device', seg.targeting_params.device_targeting],
+                          ['Geo Radius', seg.targeting_params.geo_radius],
+                          ['Frequency Cap', seg.targeting_params.frequency_cap],
+                        ].filter(([, v]) => v).map(([k, v]) => (
+                          <div key={k}>
+                            <span style={{ fontSize: '10px', color: '#475569', fontWeight: '600', textTransform: 'uppercase' }}>{k}: </span>
+                            <span style={{ fontSize: '11.5px', color: C.text }}>{v}</span>
+                          </div>
+                        ))}
+                      </div>
+                      {seg.targeting_params.contextual_keywords?.length > 0 && (
+                        <div style={{ marginTop: '6px' }}>
+                          <span style={{ fontSize: '10px', color: '#475569', fontWeight: '600', textTransform: 'uppercase' }}>Keywords: </span>
+                          <span style={{ fontSize: '11.5px', color: C.text }}>{seg.targeting_params.contextual_keywords.join(', ')}</span>
+                        </div>
+                      )}
+                      {seg.targeting_params.placement_layer && (
+                        <div style={{ marginTop: '4px' }}>
+                          <span style={{ fontSize: '10px', color: '#475569', fontWeight: '600', textTransform: 'uppercase' }}>Placement Layer: </span>
+                          <span style={{ fontSize: '11.5px', color: C.accent }}>{seg.targeting_params.placement_layer}</span>
+                        </div>
+                      )}
+                    </div>
                   )}
                   <p style={{ margin: '0 0 4px', fontSize: '13px', color: C.muted, lineHeight: '1.5' }}>{seg.reason}</p>
                   {seg.evidence && <p style={{ margin: 0, fontSize: '11.5px', color: '#64748B', lineHeight: '1.5', fontStyle: 'italic' }}>Evidence: {seg.evidence}</p>}
@@ -600,7 +661,7 @@ export default function CricketAds() {
             {/* 5 — Campaign Structure */}
             <div style={s.card}>
               <p style={s.secHead}>Campaign Structure</p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: cs.dayparting_rules?.length ? '14px' : 0 }}>
                 {[
                   ['Campaign Name',    cs.campaign_name],
                   ['Objective',        cs.objective],
@@ -616,6 +677,27 @@ export default function CricketAds() {
                   </div>
                 ))}
               </div>
+              {cs.dayparting_rules?.length > 0 && (
+                <div>
+                  <p style={{ margin: '0 0 10px', fontSize: '11px', color: C.gold, fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em' }}>⏱ Day-Parting Bid Rules</p>
+                  {cs.dayparting_rules.map((rule, i) => (
+                    <div key={i} style={{ background: C.surface, border: `1px solid ${C.gold}30`, borderRadius: '7px', padding: '10px 14px', marginBottom: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px', flexWrap: 'wrap', gap: '6px' }}>
+                        <p style={{ margin: 0, fontSize: '13px', fontWeight: '600', color: C.text }}>{rule.trigger}</p>
+                        <span style={{ background: `${C.gold}20`, color: C.gold, border: `1px solid ${C.gold}40`, borderRadius: '4px', padding: '2px 8px', fontSize: '12px', fontWeight: '700' }}>{rule.bid_adjustment}</span>
+                      </div>
+                      <p style={{ margin: '0 0 3px', fontSize: '11.5px', color: C.muted }}>{rule.schedule}</p>
+                      {rule.specific_dates?.length > 0 && (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '5px' }}>
+                          {rule.specific_dates.map((d, j) => (
+                            <span key={j} style={{ background: C.inpBg, border: `1px solid ${C.border}`, borderRadius: '4px', padding: '2px 7px', fontSize: '11px', color: C.accent }}>{d}</span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* 6 — Creative Assets */}
@@ -822,13 +904,36 @@ export default function CricketAds() {
                 <Collapsible title="📱 Placement Inventory" badge={<span style={{ background: C.accentDk + '40', color: C.accent, fontSize: '10px', fontWeight: '700', padding: '2px 7px', borderRadius: '4px' }}>{pinv.length}</span>}>
                   {pinv.map((p, i) => (
                     <div key={i} style={{ border: `1px solid ${C.border}`, borderRadius: '8px', padding: '12px 14px', marginBottom: '8px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '6px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', flexWrap: 'wrap', gap: '6px' }}>
                         <p style={{ margin: 0, fontSize: '14px', fontWeight: '700' }}>{p.platform}</p>
-                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                          {p.placement_id_type && <PlacementIdBadge type={p.placement_id_type} />}
                           <PriorityBadge priority={p.priority} />
+                          {p.data_label && <DataLabelBadge label={p.data_label} />}
                           <span style={{ fontSize: '11px', color: C.muted }}>Suitability: <strong style={{ color: C.text }}>{p.suitability_score}</strong></span>
                         </div>
                       </div>
+                      {(p.placement_url || p.app_package_name) && (
+                        <div style={{ display: 'flex', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
+                          {p.placement_url && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: C.inpBg, border: `1px solid ${C.border}`, borderRadius: '5px', padding: '3px 8px' }}>
+                              <span style={{ fontSize: '10px', color: C.muted, fontWeight: '600' }}>URL:</span>
+                              <span style={{ fontSize: '11px', color: C.accent, fontFamily: 'monospace' }}>{p.placement_url}</span>
+                              <CopyBtn text={p.placement_url} />
+                            </div>
+                          )}
+                          {p.app_package_name && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: C.inpBg, border: `1px solid ${C.border}`, borderRadius: '5px', padding: '3px 8px' }}>
+                              <span style={{ fontSize: '10px', color: C.muted, fontWeight: '600' }}>pkg:</span>
+                              <span style={{ fontSize: '11px', color: C.green, fontFamily: 'monospace' }}>{p.app_package_name}</span>
+                              <CopyBtn text={p.app_package_name} />
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {p.ad_unit_position && (
+                        <p style={{ margin: '0 0 6px', fontSize: '11.5px', color: C.gold }}>📌 {p.ad_unit_position}</p>
+                      )}
                       <p style={{ margin: '0 0 6px', fontSize: '12px', color: C.muted }}>{p.audience_type}</p>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '8px' }}>
                         {[['CPM', p.estimated_cpm], ['CPC', p.estimated_cpc], ['CTR', p.expected_ctr],
@@ -839,6 +944,14 @@ export default function CricketAds() {
                           </div>
                         ))}
                       </div>
+                      {(p.daily_budget || p.total_allocation || p.expected_joins) && (
+                        <div style={{ display: 'flex', gap: '12px', marginBottom: '6px', flexWrap: 'wrap', padding: '7px 10px', background: `${C.green}08`, border: `1px solid ${C.green}20`, borderRadius: '6px' }}>
+                          {p.daily_budget && <span style={{ fontSize: '11.5px', color: C.muted }}>Daily: <strong style={{ color: C.green }}>{p.daily_budget}</strong></span>}
+                          {p.campaign_days && <span style={{ fontSize: '11.5px', color: C.muted }}>Days: <strong style={{ color: C.text }}>{p.campaign_days}</strong></span>}
+                          {p.total_allocation && <span style={{ fontSize: '11.5px', color: C.muted }}>Total: <strong style={{ color: C.text }}>{p.total_allocation}</strong></span>}
+                          {p.expected_joins && <span style={{ fontSize: '11.5px', color: C.muted }}>Est. joins: <strong style={{ color: C.green }}>{p.expected_joins}</strong></span>}
+                        </div>
+                      )}
                       <p style={{ margin: '0 0 4px', fontSize: '11.5px', color: C.muted }}>Device split: {p.device_split} · Traffic: {p.traffic_quality}</p>
                       <p style={{ margin: '0 0 4px', fontSize: '11.5px', color: C.accent }}>Creative: {p.recommended_creative_type} — {(p.banner_sizes || []).join(', ')}</p>
                     </div>
