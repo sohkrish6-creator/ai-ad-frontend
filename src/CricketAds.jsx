@@ -1189,6 +1189,70 @@ export default function CricketAds() {
               </div>
             )}
 
+            {/* Competitive Edge Score */}
+            {data?.competitive_edge_report && (() => {
+              const cer = data.competitive_edge_report
+              const dims = cer.dimensions_compared || []
+              return (
+                <div style={s.card}>
+                  <Collapsible title="⚔ Competitive Edge Score">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
+                      <span style={{ fontSize: '10px', fontWeight: '700', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>our ad vs real competitor ads · 4 dimensions</span>
+                    </div>
+
+                    {dims.length > 0 && (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '14px' }}>
+                        {dims.map((d, i) => {
+                          const winning = d.our_score > d.competitor_avg
+                          return (
+                            <div key={i} style={{ background: C.surface, borderRadius: '7px', padding: '10px 12px', border: `1px solid ${winning ? C.green + '40' : C.red + '30'}` }}>
+                              <p style={{ margin: '0 0 5px', fontSize: '10px', fontWeight: '700', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{d.dimension}</p>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '4px' }}>
+                                <span style={{ fontSize: '17px', fontWeight: '800', color: winning ? C.green : C.red, lineHeight: 1 }}>{d.our_score}</span>
+                                <span style={{ fontSize: '11px', color: C.muted }}>vs {d.competitor_avg}</span>
+                                <span style={{ marginLeft: 'auto', fontSize: '14px', color: winning ? C.green : C.red }}>{winning ? '↑' : '↓'}</span>
+                              </div>
+                              {d.notes && <p style={{ margin: 0, fontSize: '11px', color: C.muted, lineHeight: 1.4 }}>{d.notes}</p>}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+
+                    {(cer.where_we_win || []).length > 0 && (
+                      <div style={{ marginBottom: '10px' }}>
+                        <p style={{ margin: '0 0 5px', fontSize: '10.5px', fontWeight: '700', color: C.green, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Where We Win</p>
+                        {cer.where_we_win.map((w, i) => (
+                          <div key={i} style={{ display: 'flex', gap: '7px', marginBottom: '3px' }}>
+                            <span style={{ color: C.green, flexShrink: 0 }}>✓</span>
+                            <p style={{ margin: 0, fontSize: '12px', color: '#6EE7B7', lineHeight: 1.4 }}>{w}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {(cer.where_competitors_are_stronger || []).length > 0 && (
+                      <div style={{ marginBottom: '10px' }}>
+                        <p style={{ margin: '0 0 5px', fontSize: '10.5px', fontWeight: '700', color: C.red, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Where Competitors Are Stronger</p>
+                        {cer.where_competitors_are_stronger.map((w, i) => (
+                          <div key={i} style={{ display: 'flex', gap: '7px', marginBottom: '3px' }}>
+                            <span style={{ color: C.red, flexShrink: 0 }}>!</span>
+                            <p style={{ margin: 0, fontSize: '12px', color: '#FCA5A5', lineHeight: 1.4 }}>{w}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {cer.overall_edge_summary && (
+                      <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: '6px', padding: '10px 12px', marginTop: '8px' }}>
+                        <p style={{ margin: 0, fontSize: '12.5px', color: C.muted, lineHeight: 1.5 }}>{cer.overall_edge_summary}</p>
+                      </div>
+                    )}
+                  </Collapsible>
+                </div>
+              )
+            })()}
+
             {/* Business Summary */}
             {d.business_summary && (
               <div style={{ ...s.card, background: C.surface }}>

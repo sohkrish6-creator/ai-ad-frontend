@@ -83,11 +83,14 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
 ) {
   const toast = useToast()
 
-  const [showGAdsModal, setShowGAdsModal] = useState(false)
-  const [gAdsForm, setGAdsForm]           = useState({ campaign_name: '', budget_daily: '', start_date: '', end_date: '', campaign_type: 'SEARCH' })
-  const [gAdsLoading, setGAdsLoading]     = useState(false)
-  const [gAdsResult, setGAdsResult]       = useState(null)
-  const [gAdsError, setGAdsError]         = useState(null)
+  const [showGAdsModal, setShowGAdsModal]     = useState(false)
+  const [gAdsForm, setGAdsForm]               = useState({ campaign_name: '', budget_daily: '', start_date: '', end_date: '', campaign_type: 'SEARCH' })
+  const [gAdsLoading, setGAdsLoading]         = useState(false)
+  const [gAdsResult, setGAdsResult]           = useState(null)
+  const [gAdsError, setGAdsError]             = useState(null)
+  const [preflightLoading, setPreflightLoading] = useState(false)
+  const [preflightData, setPreflightData]     = useState(null)
+  const [showPreflight, setShowPreflight]     = useState(false)
 
   const [showMAdsModal, setShowMAdsModal] = useState(false)
   const [mAdsForm, setMAdsForm]           = useState({ campaign_name: '', budget_daily: '', creative_id: '' })
@@ -122,25 +125,50 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
       setGAdsError('Campaign name and daily budget are required.')
       return
     }
+    // Step 1: run pre-flight check before creating campaign
+    setPreflightLoading(true); setGAdsError(null)
+    try {
+      const pfRes = await fetch(`${BACKEND}/google-ads/preflight`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: url || '', budget_daily: parseFloat(gAdsForm.budget_daily) }),
+      })
+      const pfJson = await pfRes.json()
+      if (pfJson.success) {
+        setPreflightData({ ...pfJson.launch_readiness, _form: { ...gAdsForm } })
+        setShowPreflight(true)
+      } else {
+        setGAdsError(pfJson.error || 'Pre-flight check failed.')
+      }
+    } catch (err) { setGAdsError(`Pre-flight error: ${err.message}`) }
+    setPreflightLoading(false)
+  }
+
+  async function confirmGAdsLaunch(forceOverride = false) {
+    if (!preflightData?._form) return
+    const form = preflightData._form
+    setShowPreflight(false)
     setGAdsLoading(true); setGAdsError(null)
     try {
       const res = await fetch(`${BACKEND}/google-ads/create-campaign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          campaign_name: gAdsForm.campaign_name,
-          budget_daily:  parseFloat(gAdsForm.budget_daily),
-          campaign_type: gAdsForm.campaign_type || 'SEARCH',
-          start_date:    gAdsForm.start_date.replace(/-/g, ''),
-          end_date:      gAdsForm.end_date ? gAdsForm.end_date.replace(/-/g, '') : '',
-          business_key:  businessKey || '',
-          url:           url || '',
-          industry:      industry || '',
-          city:          city || '',
+          campaign_name:  form.campaign_name,
+          budget_daily:   parseFloat(form.budget_daily),
+          campaign_type:  form.campaign_type || 'SEARCH',
+          start_date:     form.start_date.replace(/-/g, ''),
+          end_date:       form.end_date ? form.end_date.replace(/-/g, '') : '',
+          business_key:   businessKey || '',
+          url:            url || '',
+          industry:       industry || '',
+          city:           city || '',
+          force_override: forceOverride,
         }),
       })
       const data = await res.json()
       if (data.success) { setGAdsResult(data); setGAdsError(null); localStorage.setItem(LS_KEY_GADS_PUSH, JSON.stringify(data)); toast.success('Done!') }
+      else if (data.preflight_blocked) { setGAdsError(`Pre-flight blocked: ${data.launch_readiness?.blocking_issues?.map(b => b.message).join(' | ')}`); toast.error('Pre-flight check failed') }
       else if (data.errors && Array.isArray(data.errors)) { setGAdsError(data.errors); toast.error(data.errors[0]?.message || 'Campaign creation failed.') }
       else { setGAdsError(data.error || 'Campaign creation failed.'); toast.error(data.error || 'Campaign creation failed.') }
     } catch (err) { setGAdsError(`Network error: ${err.message}`); toast.error(`Network error: ${err.message}`) }
@@ -270,9 +298,9 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
                       <input type="date" value={gAdsForm.end_date} onChange={e => setGAdsForm(f => ({ ...f, end_date: e.target.value }))} style={inpSt2} />
                     </div>
                   </div>
-                  <button onClick={handleGAdsLaunch} disabled={gAdsLoading} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', background: gAdsLoading ? '#E5E5E5' : '#16A34A', border: 'none', color: gAdsLoading ? '#999' : '#fff', padding: '12px', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: gAdsLoading ? 'not-allowed' : 'pointer' }}>
+                  <button onClick={handleGAdsLaunch} disabled={gAdsLoading || preflightLoading} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', background: gAdsLoading || preflightLoading ? '#E5E5E5' : '#16A34A', border: 'none', color: gAdsLoading || preflightLoading ? '#999' : '#fff', padding: '12px', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: gAdsLoading || preflightLoading ? 'not-allowed' : 'pointer' }}>
                     <Rocket size={15} />
-                    {gAdsLoading ? 'Creating campaign...' : 'Launch Campaign 🚀'}
+                    {preflightLoading ? 'Running pre-flight check…' : gAdsLoading ? 'Creating campaign...' : 'Launch Campaign 🚀'}
                   </button>
                 </>
               ) : (
@@ -382,6 +410,79 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
           </div>
         </div></div>
       )}
+      {/* Zero-Waste Pre-flight Modal */}
+      {showPreflight && preflightData && (() => {
+        const blocking = preflightData.blocking_issues || []
+        const warns    = (preflightData.warnings || []).filter(w => w.severity !== 'info')
+        const infos    = (preflightData.warnings || []).filter(w => w.severity === 'info')
+        const hasBlock = blocking.length > 0
+        return (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+            <div style={{ background: SLATE, border: `1px solid ${SLATE_L}`, borderRadius: '12px', maxWidth: '520px', width: '100%', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 24px 48px rgba(0,0,0,0.5)' }}>
+              <div style={{ padding: '18px 20px 14px', borderBottom: `1px solid ${SLATE_L}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  <p style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: BONE }}>Zero-Waste Launch Guard</p>
+                  <p style={{ margin: '3px 0 0', fontSize: '11.5px', color: MUTED }}>{preflightData.summary}</p>
+                </div>
+                <span style={{ fontSize: '11px', fontWeight: '700', padding: '3px 9px', borderRadius: '4px', background: preflightData.tracking_status === 'NOT_CONVERSION_TRACKED' ? '#3B0000' : 'rgba(63,166,107,0.15)', color: preflightData.tracking_status === 'NOT_CONVERSION_TRACKED' ? RED : GREEN, border: `1px solid ${preflightData.tracking_status === 'NOT_CONVERSION_TRACKED' ? RED + '40' : GREEN + '40'}` }}>
+                  {preflightData.tracking_label || preflightData.tracking_status}
+                </span>
+              </div>
+              <div style={{ padding: '16px 20px' }}>
+                {blocking.length > 0 && (
+                  <div style={{ marginBottom: '12px' }}>
+                    <p style={{ margin: '0 0 7px', fontSize: '10.5px', fontWeight: '700', color: RED, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Blocking Issues ({blocking.length})</p>
+                    {blocking.map((b, i) => (
+                      <div key={i} style={{ display: 'flex', gap: '8px', background: 'rgba(239,68,68,0.08)', border: `1px solid ${RED}30`, borderRadius: '7px', padding: '9px 11px', marginBottom: '5px' }}>
+                        <span style={{ color: RED, flexShrink: 0 }}>✕</span>
+                        <p style={{ margin: 0, fontSize: '12px', color: '#FCA5A5', lineHeight: 1.5 }}>{b.message}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {warns.length > 0 && (
+                  <div style={{ marginBottom: '12px' }}>
+                    <p style={{ margin: '0 0 7px', fontSize: '10.5px', fontWeight: '700', color: GOLD, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Warnings ({warns.length})</p>
+                    {warns.map((w, i) => (
+                      <div key={i} style={{ display: 'flex', gap: '8px', background: 'rgba(201,162,39,0.08)', border: `1px solid ${GOLD}30`, borderRadius: '7px', padding: '8px 11px', marginBottom: '5px' }}>
+                        <span style={{ color: GOLD, flexShrink: 0 }}>⚠</span>
+                        <p style={{ margin: 0, fontSize: '11.5px', color: '#FDE68A', lineHeight: 1.5 }}>{w.message}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {infos.map((inf, i) => (
+                  <div key={i} style={{ display: 'flex', gap: '7px', background: 'rgba(255,255,255,0.03)', border: `1px solid ${SLATE_L}`, borderRadius: '6px', padding: '7px 11px', marginBottom: '4px' }}>
+                    <span style={{ color: MUTED, flexShrink: 0, fontSize: '12px' }}>ℹ</span>
+                    <p style={{ margin: 0, fontSize: '11px', color: MUTED, lineHeight: 1.4 }}>{inf.message}</p>
+                  </div>
+                ))}
+                {!hasBlock && warns.length === 0 && (
+                  <div style={{ display: 'flex', gap: '8px', background: 'rgba(63,166,107,0.1)', border: `1px solid ${GREEN}40`, borderRadius: '7px', padding: '10px 12px', marginBottom: '12px' }}>
+                    <span style={{ color: GREEN, fontSize: '15px' }}>✓</span>
+                    <p style={{ margin: 0, fontSize: '13px', color: '#6EE7B7', fontWeight: '600' }}>All checks passed — ready to launch!</p>
+                  </div>
+                )}
+                <div style={{ display: 'flex', gap: '8px', marginTop: '16px', flexWrap: 'wrap' }}>
+                  {!hasBlock && (
+                    <button onClick={() => confirmGAdsLaunch(false)} style={{ flex: 1, background: '#16A34A', color: '#fff', border: 'none', borderRadius: '7px', padding: '11px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>
+                      Confirm Launch
+                    </button>
+                  )}
+                  {hasBlock && (
+                    <button onClick={() => confirmGAdsLaunch(true)} style={{ flex: 1, background: 'rgba(239,68,68,0.12)', color: RED, border: `1px solid ${RED}40`, borderRadius: '7px', padding: '11px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
+                      Acknowledge Risks &amp; Launch Anyway
+                    </button>
+                  )}
+                  <button onClick={() => { setShowPreflight(false); setPreflightData(null) }} style={{ background: 'transparent', color: MUTED, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '11px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
+                    Fix Issues First
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
     </>
   )
 })
