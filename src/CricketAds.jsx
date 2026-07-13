@@ -166,6 +166,8 @@ export default function CricketAds() {
   const [data, setData]               = useState(null)
   const [memoryReused, setMemoryReused] = useState(false)
   const [warnings, setWarnings] = useState([])
+  const [placementLearningNote, setPlacementLearningNote] = useState('')
+  const [placementTrackCount, setPlacementTrackCount] = useState(0)
 
   // ── Campaign Performance state ─────────────────────────────────────────────
   const [perfCid, setPerfCid]         = useState('')
@@ -236,7 +238,7 @@ export default function CricketAds() {
 
   async function analyze() {
     if (!url.trim()) { setError('Website URL is required.'); return }
-    setLoading(true); setError(''); setData(null); setPushResult(null); setPushError(null); setMemoryReused(false); setWarnings([])
+    setLoading(true); setError(''); setData(null); setPushResult(null); setPushError(null); setMemoryReused(false); setWarnings([]); setPlacementLearningNote(''); setPlacementTrackCount(0)
     try {
       const res  = await fetch(`${BACKEND}/cricket-ads-intelligence`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -247,7 +249,13 @@ export default function CricketAds() {
         }),
       })
       const json = await res.json()
-      if (json.success) { setData(json.data); setMemoryReused(!!json.memory_reused); setWarnings(json.warnings || []) }
+      if (json.success) {
+        setData(json.data)
+        setMemoryReused(!!json.memory_reused)
+        setWarnings(json.warnings || [])
+        setPlacementLearningNote(json.placement_learning_note || '')
+        setPlacementTrackCount(json.placement_track_records || 0)
+      }
       else setError(json.error || 'Analysis failed.')
     } catch (e) { setError(`Network error: ${e.message}`) }
     setLoading(false)
@@ -519,6 +527,15 @@ export default function CricketAds() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: `${C.accent}15`, border: `1px solid ${C.accent}40`, borderRadius: '7px', padding: '9px 14px', marginBottom: '12px' }}>
                 <TrendingUp size={14} color={C.accent} />
                 <p style={{ margin: 0, fontSize: '12px', color: C.accent }}>Reused Marketing Brain intelligence for this business — skipped redundant discovery.</p>
+              </div>
+            )}
+
+            {placementLearningNote && (
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', background: `${C.green}10`, border: `1px solid ${C.green}35`, borderRadius: '7px', padding: '9px 14px', marginBottom: '12px' }}>
+                <span style={{ fontSize: '13px', flexShrink: 0 }}>📊</span>
+                <p style={{ margin: 0, fontSize: '12px', color: '#6EE7B7', lineHeight: '1.5' }}>
+                  <strong style={{ color: C.green }}>Placement learning active</strong> ({placementTrackCount} placement(s) with real history) — {placementLearningNote}
+                </p>
               </div>
             )}
 
@@ -954,6 +971,12 @@ export default function CricketAds() {
                       )}
                       <p style={{ margin: '0 0 4px', fontSize: '11.5px', color: C.muted }}>Device split: {p.device_split} · Traffic: {p.traffic_quality}</p>
                       <p style={{ margin: '0 0 4px', fontSize: '11.5px', color: C.accent }}>Creative: {p.recommended_creative_type} — {(p.banner_sizes || []).join(', ')}</p>
+                      {p.track_record && !p.track_record.startsWith('No prior data') && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '7px', padding: '5px 10px', background: `${C.green}0D`, border: `1px solid ${C.green}30`, borderRadius: '5px' }}>
+                          <span style={{ fontSize: '12px' }}>📊</span>
+                          <span style={{ fontSize: '11.5px', color: '#6EE7B7', lineHeight: '1.4' }}>{p.track_record}</span>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </Collapsible>
