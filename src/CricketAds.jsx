@@ -153,6 +153,104 @@ function ApiError({ err }) {
   return <div style={{ background: '#1F0A0A', border: `1px solid ${C.red}40`, borderRadius: '7px', padding: '10px 14px', marginTop: '12px', color: C.red, fontSize: '13px' }}>{String(err)}</div>
 }
 
+function PreflightModal({ data, onConfirm, onCancel }) {
+  if (!data) return null
+  const blocking = data.blocking_issues || []
+  const warns    = (data.warnings || []).filter(w => w.severity !== 'info')
+  const infos    = (data.warnings || []).filter(w => w.severity === 'info')
+  const hasBlock = blocking.length > 0
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 9000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: '12px', maxWidth: '560px', width: '100%', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 24px 48px rgba(0,0,0,0.6)' }}>
+        {/* Header */}
+        <div style={{ padding: '20px 22px 16px', borderBottom: `1px solid ${C.border}` }}>
+          <p style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: C.text }}>Zero-Waste Launch Guard</p>
+          <p style={{ margin: '4px 0 0', fontSize: '12px', color: C.muted }}>Pre-flight checklist — {data.summary}</p>
+        </div>
+
+        <div style={{ padding: '18px 22px' }}>
+          {/* Tracking status pill */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+            <span style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: C.muted }}>Conversion Tracking</span>
+            <span style={{
+              fontSize: '11px', fontWeight: '700', padding: '2px 8px', borderRadius: '4px',
+              background: data.tracking_status === 'NOT_CONVERSION_TRACKED' ? '#3B0000' : blocking.some(b => b.code === 'NO_CONVERSION_TRACKING') ? '#3B0000' : '#052e16',
+              color: data.tracking_status === 'NOT_CONVERSION_TRACKED' ? C.red : C.green,
+              border: `1px solid ${data.tracking_status === 'NOT_CONVERSION_TRACKED' ? C.red + '40' : C.green + '40'}`,
+            }}>
+              {data.tracking_label || data.tracking_status}
+            </span>
+          </div>
+
+          {/* Blocking issues */}
+          {blocking.length > 0 && (
+            <div style={{ marginBottom: '14px' }}>
+              <p style={{ margin: '0 0 8px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: C.red, letterSpacing: '0.06em' }}>Blocking Issues ({blocking.length})</p>
+              {blocking.map((b, i) => (
+                <div key={i} style={{ display: 'flex', gap: '9px', background: '#1F0A0A', border: `1px solid ${C.red}30`, borderRadius: '7px', padding: '10px 12px', marginBottom: '6px' }}>
+                  <span style={{ color: C.red, flexShrink: 0, fontSize: '14px' }}>✕</span>
+                  <p style={{ margin: 0, fontSize: '12.5px', color: '#FCA5A5', lineHeight: '1.5' }}>{b.message}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Warnings */}
+          {warns.length > 0 && (
+            <div style={{ marginBottom: '14px' }}>
+              <p style={{ margin: '0 0 8px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: C.gold, letterSpacing: '0.06em' }}>Warnings ({warns.length})</p>
+              {warns.map((w, i) => (
+                <div key={i} style={{ display: 'flex', gap: '9px', background: '#2D1B00', border: `1px solid ${C.gold}30`, borderRadius: '7px', padding: '9px 12px', marginBottom: '6px' }}>
+                  <span style={{ color: C.gold, flexShrink: 0, fontSize: '14px' }}>⚠</span>
+                  <p style={{ margin: 0, fontSize: '12px', color: '#FDE68A', lineHeight: '1.5' }}>{w.message}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Info notes */}
+          {infos.length > 0 && (
+            <div style={{ marginBottom: '14px' }}>
+              {infos.map((inf, i) => (
+                <div key={i} style={{ display: 'flex', gap: '9px', background: C.surface, border: `1px solid ${C.border}`, borderRadius: '7px', padding: '8px 12px', marginBottom: '5px' }}>
+                  <span style={{ color: C.muted, flexShrink: 0, fontSize: '13px' }}>ℹ</span>
+                  <p style={{ margin: 0, fontSize: '11.5px', color: C.muted, lineHeight: '1.5' }}>{inf.message}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* All clear */}
+          {!hasBlock && warns.length === 0 && (
+            <div style={{ display: 'flex', gap: '9px', background: '#052e16', border: `1px solid ${C.green}40`, borderRadius: '7px', padding: '10px 12px', marginBottom: '14px' }}>
+              <span style={{ color: C.green, fontSize: '16px' }}>✓</span>
+              <p style={{ margin: 0, fontSize: '13px', color: '#6EE7B7', fontWeight: '600' }}>All checks passed — ready to launch!</p>
+            </div>
+          )}
+
+          {/* Action buttons */}
+          <div style={{ display: 'flex', gap: '10px', marginTop: '18px', flexWrap: 'wrap' }}>
+            {!hasBlock && (
+              <button onClick={() => onConfirm(false)} style={{ flex: 1, background: C.green, color: '#fff', border: 'none', borderRadius: '8px', padding: '11px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>
+                Confirm Launch
+              </button>
+            )}
+            {hasBlock && (
+              <button onClick={() => onConfirm(true)} style={{ flex: 1, background: '#3B0000', color: C.red, border: `1px solid ${C.red}40`, borderRadius: '8px', padding: '11px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
+                Acknowledge Risks &amp; Launch Anyway
+              </button>
+            )}
+            <button onClick={onCancel} style={{ background: C.surface, color: C.muted, border: `1px solid ${C.border}`, borderRadius: '8px', padding: '11px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
+              Fix Issues First
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function CricketAds() {
   // ── Analysis state ─────────────────────────────────────────────────────────
   const [url, setUrl]                 = useState('')
@@ -187,10 +285,13 @@ export default function CricketAds() {
   const [deletingCid, setDeletingCid] = useState(null)
 
   // ── Push-to-Google state ───────────────────────────────────────────────────
-  const [selectedCid, setSelectedCid] = useState('')
-  const [pushLoading, setPushLoading] = useState(false)
-  const [pushResult, setPushResult]   = useState(null)
-  const [pushError, setPushError]     = useState(null)
+  const [selectedCid, setSelectedCid]       = useState('')
+  const [pushLoading, setPushLoading]       = useState(false)
+  const [pushResult, setPushResult]         = useState(null)
+  const [pushError, setPushError]           = useState(null)
+  const [preflightLoading, setPreflightLoading] = useState(false)
+  const [preflightData, setPreflightData]   = useState(null)
+  const [showPreflight, setShowPreflight]   = useState(false)
 
   useEffect(() => { loadAccounts() }, [])
 
@@ -264,28 +365,62 @@ export default function CricketAds() {
   async function handlePush() {
     if (!selectedCid) { setPushError('Select an ad account first.'); return }
     if (!data) return
-    setPushLoading(true); setPushResult(null); setPushError(null)
+    setPushError(null); setPushResult(null)
+
     const cs = data.campaign_structure || {}
     const ca = data.creative_assets   || {}
     const topSeg = [...(data.audience_segments || [])].sort((a, b) => (b.priority_score || 0) - (a.priority_score || 0))[0]
     const budgetNum = parseFloat((cs.budget_daily || '').toString().replace(/[^\d.]/g, '')) || 500
+
+    // Step 1: run pre-flight check
+    setPreflightLoading(true)
     try {
-      const res  = await fetch(`${BACKEND}/cricket-ads/push-to-google`, {
+      const pfRes = await fetch(`${BACKEND}/cricket-ads/preflight`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           customer_id:    selectedCid,
-          campaign_name:  cs.campaign_name || 'Cricket Community Campaign',
+          final_url:      waLink.trim(),
           budget_daily:   budgetNum,
-          headlines:      ca.headlines_15       || [],
-          long_headlines: ca.long_headlines_5   || [],
-          descriptions:   ca.descriptions_10    || [],
+          headlines:      ca.headlines_15    || [],
+          descriptions:   ca.descriptions_10 || [],
+        }),
+      })
+      const pfJson = await pfRes.json()
+      if (pfJson.success) {
+        setPreflightData({ ...pfJson.launch_readiness, _budgetNum: budgetNum, _cs: cs, _ca: ca, _topSeg: topSeg })
+        setShowPreflight(true)
+      } else {
+        setPushError(pfJson.error || 'Pre-flight check failed.')
+      }
+    } catch (e) { setPushError(`Pre-flight error: ${e.message}`) }
+    setPreflightLoading(false)
+  }
+
+  async function confirmPush(forceOverride = false) {
+    if (!preflightData) return
+    const { _budgetNum, _cs, _ca, _topSeg } = preflightData
+    setShowPreflight(false)
+    setPushLoading(true)
+    try {
+      const res = await fetch(`${BACKEND}/cricket-ads/push-to-google`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_id:    selectedCid,
+          campaign_name:  _cs.campaign_name || 'Cricket Community Campaign',
+          budget_daily:   _budgetNum,
+          final_url:      waLink.trim(),
+          headlines:      _ca.headlines_15       || [],
+          long_headlines: _ca.long_headlines_5   || [],
+          descriptions:   _ca.descriptions_10    || [],
           whatsapp_link:  waLink.trim(),
           business_type:  businessType,
-          top_audience:   topSeg?.platform_match || topSeg?.name || '',
+          top_audience:   _topSeg?.platform_match || _topSeg?.name || '',
+          force_override: forceOverride,
         }),
       })
       const json = await res.json()
       if (json.success) setPushResult(json)
+      else if (json.preflight_blocked) setPushError(`Pre-flight blocked: ${json.launch_readiness?.blocking_issues?.map(b => b.message).join(' | ')}`)
       else if (json.errors) setPushError(json.errors)
       else setPushError(json.error || 'Campaign creation failed.')
     } catch (e) { setPushError(`Network error: ${e.message}`) }
@@ -1115,11 +1250,20 @@ export default function CricketAds() {
                   </div>
 
                   <button
-                    onClick={handlePush} disabled={pushLoading || !selectedCid}
-                    style={{ background: pushLoading ? '#166534' : C.green, color: '#fff', border: 'none', borderRadius: '8px', padding: '12px 24px', fontSize: '14px', fontWeight: '700', cursor: pushLoading || !selectedCid ? 'not-allowed' : 'pointer', opacity: !selectedCid ? 0.6 : 1, display: 'flex', alignItems: 'center', gap: '8px' }}
+                    onClick={handlePush} disabled={pushLoading || preflightLoading || !selectedCid}
+                    style={{ background: pushLoading ? '#166534' : C.green, color: '#fff', border: 'none', borderRadius: '8px', padding: '12px 24px', fontSize: '14px', fontWeight: '700', cursor: pushLoading || preflightLoading || !selectedCid ? 'not-allowed' : 'pointer', opacity: !selectedCid ? 0.6 : 1, display: 'flex', alignItems: 'center', gap: '8px' }}
                   >
-                    {pushLoading ? <span className="spin">Creating campaign…</span> : '🏏 Launch Campaign'}
+                    {preflightLoading ? <span className="spin">Running pre-flight…</span> : pushLoading ? <span className="spin">Creating campaign…</span> : '🏏 Launch Campaign'}
                   </button>
+
+                  {/* Pre-flight modal */}
+                  {showPreflight && (
+                    <PreflightModal
+                      data={preflightData}
+                      onConfirm={(force) => confirmPush(force)}
+                      onCancel={() => { setShowPreflight(false); setPreflightData(null) }}
+                    />
+                  )}
 
                   {/* Success */}
                   {pushResult && (

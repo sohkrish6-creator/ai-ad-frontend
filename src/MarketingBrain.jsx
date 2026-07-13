@@ -797,6 +797,74 @@ function MarketingBrain() {
               </pre>
             </div>
 
+            {/* Competitive Edge Score */}
+            {launchKit?.competitive_edge_report && (() => {
+              const cer = launchKit.competitive_edge_report
+              const dims = cer.dimensions_compared || []
+              return (
+                <div style={{ background: '#0B0F1A', border: '1.5px solid #1E3A5F', borderRadius: '8px', padding: '18px 20px', marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+                    <span style={{ fontSize: '15px' }}>⚔</span>
+                    <p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: '#60A5FA' }}>Competitive Edge Score</p>
+                    <span style={{ marginLeft: 'auto', fontSize: '10px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.06em' }}>vs real competitor ads</span>
+                  </div>
+
+                  {/* Dimension scores */}
+                  {dims.length > 0 && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '14px' }}>
+                      {dims.map((d, i) => {
+                        const winning = d.our_score > d.competitor_avg
+                        return (
+                          <div key={i} style={{ background: '#111827', borderRadius: '7px', padding: '10px 12px', border: `1px solid ${winning ? '#1E3A5F' : '#3B1A00'}` }}>
+                            <p style={{ margin: '0 0 6px', fontSize: '11px', fontWeight: '700', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{d.dimension}</p>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '5px' }}>
+                              <span style={{ fontSize: '18px', fontWeight: '800', color: winning ? '#34D399' : '#F87171', lineHeight: 1 }}>{d.our_score}</span>
+                              <span style={{ fontSize: '11px', color: '#475569' }}>vs {d.competitor_avg} competitors</span>
+                              <span style={{ marginLeft: 'auto', fontSize: '14px' }}>{winning ? '↑' : '↓'}</span>
+                            </div>
+                            {d.notes && <p style={{ margin: 0, fontSize: '11px', color: '#64748B', lineHeight: 1.4 }}>{d.notes}</p>}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+
+                  {/* Where we win */}
+                  {(cer.where_we_win || []).length > 0 && (
+                    <div style={{ marginBottom: '10px' }}>
+                      <p style={{ margin: '0 0 5px', fontSize: '11px', fontWeight: '700', color: '#34D399', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Where We Win</p>
+                      {cer.where_we_win.map((w, i) => (
+                        <div key={i} style={{ display: 'flex', gap: '7px', marginBottom: '3px' }}>
+                          <span style={{ color: '#34D399', flexShrink: 0 }}>✓</span>
+                          <p style={{ margin: 0, fontSize: '12px', color: '#A7F3D0', lineHeight: 1.4 }}>{w}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Where competitors are stronger — always shown */}
+                  {(cer.where_competitors_are_stronger || []).length > 0 && (
+                    <div style={{ marginBottom: '10px' }}>
+                      <p style={{ margin: '0 0 5px', fontSize: '11px', fontWeight: '700', color: '#F87171', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Where Competitors Are Stronger</p>
+                      {cer.where_competitors_are_stronger.map((w, i) => (
+                        <div key={i} style={{ display: 'flex', gap: '7px', marginBottom: '3px' }}>
+                          <span style={{ color: '#F87171', flexShrink: 0 }}>!</span>
+                          <p style={{ margin: 0, fontSize: '12px', color: '#FCA5A5', lineHeight: 1.4 }}>{w}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Summary */}
+                  {cer.overall_edge_summary && (
+                    <div style={{ background: '#0F172A', border: '1px solid #1E3A5F', borderRadius: '6px', padding: '10px 12px', marginTop: '8px' }}>
+                      <p style={{ margin: 0, fontSize: '12.5px', color: '#CBD5E1', lineHeight: 1.5 }}>{cer.overall_edge_summary}</p>
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
+
             {/* Launch on Google Ads */}
             <div style={{ background: 'rgba(63,166,107,0.1)', border: '1.5px solid #BBF7D0', borderRadius: '8px', padding: '18px 20px', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
               <div>
