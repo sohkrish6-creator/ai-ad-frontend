@@ -92,11 +92,14 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
   const [preflightData, setPreflightData]     = useState(null)
   const [showPreflight, setShowPreflight]     = useState(false)
 
-  const [showMAdsModal, setShowMAdsModal] = useState(false)
-  const [mAdsForm, setMAdsForm]           = useState({ campaign_name: '', budget_daily: '', creative_id: '' })
-  const [mAdsLoading, setMAdsLoading]     = useState(false)
-  const [mAdsResult, setMAdsResult]       = useState(null)
-  const [mAdsError, setMAdsError]         = useState(null)
+  const [showMAdsModal, setShowMAdsModal]         = useState(false)
+  const [mAdsForm, setMAdsForm]                   = useState({ campaign_name: '', budget_daily: '', creative_id: '' })
+  const [mAdsLoading, setMAdsLoading]             = useState(false)
+  const [mAdsResult, setMAdsResult]               = useState(null)
+  const [mAdsError, setMAdsError]                 = useState(null)
+  const [metaPreflightLoading, setMetaPreflightLoading] = useState(false)
+  const [metaPreflightData, setMetaPreflightData]       = useState(null)
+  const [showMetaPreflight, setShowMetaPreflight]       = useState(false)
 
   useEffect(() => {
     try { const s = localStorage.getItem(LS_KEY_GADS_PUSH); if (s) setGAdsResult(JSON.parse(s)) } catch {}
@@ -192,23 +195,52 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
       setMAdsError('Campaign name and daily budget are required.')
       return
     }
+    // Step 1: run Meta pre-flight check before creating campaign
+    setMetaPreflightLoading(true); setMAdsError(null)
+    try {
+      const pfRes = await fetch(`${BACKEND}/meta-ads/preflight`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url:          url || '',
+          budget_daily: parseFloat(mAdsForm.budget_daily),
+          creative_id:  mAdsForm.creative_id.trim() || '',
+        }),
+      })
+      const pfJson = await pfRes.json()
+      if (pfJson.success) {
+        setMetaPreflightData({ ...pfJson.launch_readiness, _form: { ...mAdsForm } })
+        setShowMetaPreflight(true)
+      } else {
+        setMAdsError({ error: pfJson.error || 'Pre-flight check failed.' })
+      }
+    } catch (err) { setMAdsError({ error: `Pre-flight error: ${err.message}` }) }
+    setMetaPreflightLoading(false)
+  }
+
+  async function confirmMAdsLaunch(forceOverride = false) {
+    if (!metaPreflightData?._form) return
+    const form = metaPreflightData._form
+    setShowMetaPreflight(false)
     setMAdsLoading(true); setMAdsError(null)
     try {
       const res = await fetch(`${BACKEND}/meta-ads/create-campaign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          campaign_name: mAdsForm.campaign_name,
-          daily_budget:  parseFloat(mAdsForm.budget_daily),
-          creative_id:   mAdsForm.creative_id.trim() || null,
-          business_key:  businessKey || '',
-          url:           url || '',
-          industry:      industry || '',
-          city:          city || '',
+          campaign_name:  form.campaign_name,
+          daily_budget:   parseFloat(form.budget_daily),
+          creative_id:    form.creative_id.trim() || null,
+          business_key:   businessKey || '',
+          url:            url || '',
+          industry:       industry || '',
+          city:           city || '',
+          force_override: forceOverride,
         }),
       })
       const data = await res.json()
       if (data.success) { setMAdsResult(data); setMAdsError(null); localStorage.setItem(LS_KEY_MADS_PUSH, JSON.stringify(data)); toast.success('Done!') }
+      else if (data.preflight_blocked) { setMAdsError({ error: `Pre-flight blocked: ${data.launch_readiness?.blocking_issues?.map(b => b.message).join(' | ')}` }); toast.error('Meta pre-flight check failed') }
       else { setMAdsError(data); toast.error(data.error || 'Campaign creation failed.') }
     } catch (err) { setMAdsError({ error: `Network error: ${err.message}` }); toast.error(`Network error: ${err.message}`) }
     setMAdsLoading(false)
@@ -365,9 +397,9 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
                       Optional — leave blank to create Campaign + Ad Set only (PAUSED), then add the ad manually in Meta Ads Manager.
                     </p>
                   </div>
-                  <button onClick={handleMAdsLaunch} disabled={mAdsLoading} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', background: mAdsLoading ? '#E5E5E5' : '#1877F2', border: 'none', color: mAdsLoading ? '#999' : '#fff', padding: '12px', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: mAdsLoading ? 'not-allowed' : 'pointer' }}>
+                  <button onClick={handleMAdsLaunch} disabled={mAdsLoading || metaPreflightLoading} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', background: mAdsLoading || metaPreflightLoading ? '#E5E5E5' : '#1877F2', border: 'none', color: mAdsLoading || metaPreflightLoading ? '#999' : '#fff', padding: '12px', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: mAdsLoading || metaPreflightLoading ? 'not-allowed' : 'pointer' }}>
                     <Rocket size={15} />
-                    {mAdsLoading ? 'Creating campaign...' : 'Launch on Meta Ads 🚀'}
+                    {metaPreflightLoading ? 'Running pre-flight…' : mAdsLoading ? 'Creating campaign...' : 'Launch on Meta Ads 🚀'}
                   </button>
                 </>
               ) : mAdsResult.action_needed ? (
@@ -410,7 +442,7 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
           </div>
         </div></div>
       )}
-      {/* Zero-Waste Pre-flight Modal */}
+      {/* Zero-Waste Pre-flight Modal — Google Ads */}
       {showPreflight && preflightData && (() => {
         const blocking = preflightData.blocking_issues || []
         const warns    = (preflightData.warnings || []).filter(w => w.severity !== 'info')
@@ -475,6 +507,83 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
                     </button>
                   )}
                   <button onClick={() => { setShowPreflight(false); setPreflightData(null) }} style={{ background: 'transparent', color: MUTED, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '11px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
+                    Fix Issues First
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+
+      {/* Zero-Waste Pre-flight Modal — Meta Ads */}
+      {showMetaPreflight && metaPreflightData && (() => {
+        const blocking = metaPreflightData.blocking_issues || []
+        const warns    = (metaPreflightData.warnings || []).filter(w => w.severity !== 'info')
+        const infos    = (metaPreflightData.warnings || []).filter(w => w.severity === 'info')
+        const hasBlock = blocking.length > 0
+        return (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+            <div style={{ background: SLATE, border: `1px solid ${SLATE_L}`, borderRadius: '12px', maxWidth: '520px', width: '100%', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 24px 48px rgba(0,0,0,0.5)' }}>
+              <div style={{ padding: '18px 20px 14px', borderBottom: `1px solid ${SLATE_L}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#1877F2', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '800', color: '#fff', flexShrink: 0 }}>f</span>
+                  <div>
+                    <p style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: BONE }}>Meta Launch Guard</p>
+                    <p style={{ margin: '3px 0 0', fontSize: '11.5px', color: MUTED }}>{metaPreflightData.summary}</p>
+                  </div>
+                </div>
+                <span style={{ fontSize: '11px', fontWeight: '700', padding: '3px 9px', borderRadius: '4px', background: hasBlock ? '#1A0A0A' : 'rgba(24,119,242,0.12)', color: hasBlock ? RED : '#60A5FA', border: `1px solid ${hasBlock ? RED + '40' : '#1877F240'}` }}>
+                  {hasBlock ? 'Blocked' : 'Ready'}
+                </span>
+              </div>
+              <div style={{ padding: '16px 20px' }}>
+                {blocking.length > 0 && (
+                  <div style={{ marginBottom: '12px' }}>
+                    <p style={{ margin: '0 0 7px', fontSize: '10.5px', fontWeight: '700', color: RED, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Blocking Issues ({blocking.length})</p>
+                    {blocking.map((b, i) => (
+                      <div key={i} style={{ display: 'flex', gap: '8px', background: 'rgba(239,68,68,0.08)', border: `1px solid ${RED}30`, borderRadius: '7px', padding: '9px 11px', marginBottom: '5px' }}>
+                        <span style={{ color: RED, flexShrink: 0 }}>✕</span>
+                        <p style={{ margin: 0, fontSize: '12px', color: '#FCA5A5', lineHeight: 1.5 }}>{b.message}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {warns.length > 0 && (
+                  <div style={{ marginBottom: '12px' }}>
+                    <p style={{ margin: '0 0 7px', fontSize: '10.5px', fontWeight: '700', color: GOLD, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Warnings ({warns.length})</p>
+                    {warns.map((w, i) => (
+                      <div key={i} style={{ display: 'flex', gap: '8px', background: 'rgba(201,162,39,0.08)', border: `1px solid ${GOLD}30`, borderRadius: '7px', padding: '8px 11px', marginBottom: '5px' }}>
+                        <span style={{ color: GOLD, flexShrink: 0 }}>⚠</span>
+                        <p style={{ margin: 0, fontSize: '11.5px', color: '#FDE68A', lineHeight: 1.5 }}>{w.message}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {infos.map((inf, i) => (
+                  <div key={i} style={{ display: 'flex', gap: '7px', background: 'rgba(255,255,255,0.03)', border: `1px solid ${SLATE_L}`, borderRadius: '6px', padding: '7px 11px', marginBottom: '4px' }}>
+                    <span style={{ color: MUTED, flexShrink: 0, fontSize: '12px' }}>ℹ</span>
+                    <p style={{ margin: 0, fontSize: '11px', color: MUTED, lineHeight: 1.4 }}>{inf.message}</p>
+                  </div>
+                ))}
+                {!hasBlock && warns.length === 0 && (
+                  <div style={{ display: 'flex', gap: '8px', background: 'rgba(24,119,242,0.1)', border: '1px solid #1877F240', borderRadius: '7px', padding: '10px 12px', marginBottom: '12px' }}>
+                    <span style={{ color: '#60A5FA', fontSize: '15px' }}>✓</span>
+                    <p style={{ margin: 0, fontSize: '13px', color: '#93C5FD', fontWeight: '600' }}>All checks passed — ready to launch on Meta!</p>
+                  </div>
+                )}
+                <div style={{ display: 'flex', gap: '8px', marginTop: '16px', flexWrap: 'wrap' }}>
+                  {!hasBlock && (
+                    <button onClick={() => confirmMAdsLaunch(false)} style={{ flex: 1, background: '#1877F2', color: '#fff', border: 'none', borderRadius: '7px', padding: '11px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>
+                      Confirm Launch
+                    </button>
+                  )}
+                  {hasBlock && (
+                    <button onClick={() => confirmMAdsLaunch(true)} style={{ flex: 1, background: 'rgba(239,68,68,0.12)', color: RED, border: `1px solid ${RED}40`, borderRadius: '7px', padding: '11px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
+                      Acknowledge Risks &amp; Launch Anyway
+                    </button>
+                  )}
+                  <button onClick={() => { setShowMetaPreflight(false); setMetaPreflightData(null) }} style={{ background: 'transparent', color: MUTED, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '11px 20px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
                     Fix Issues First
                   </button>
                 </div>

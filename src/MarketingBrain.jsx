@@ -865,6 +865,70 @@ function MarketingBrain() {
               )
             })()}
 
+            {/* Meta Competitive Edge Score */}
+            {launchKit?.meta_competitive_edge_report && (() => {
+              const mcer = launchKit.meta_competitive_edge_report
+              const mdims = mcer.dimensions_compared || []
+              return (
+                <div style={{ background: '#0B0A1A', border: '1.5px solid #2E1F5E', borderRadius: '8px', padding: '18px 20px', marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+                    <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#1877F2', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '800', color: '#fff', flexShrink: 0 }}>f</span>
+                    <p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: '#818CF8' }}>Meta Competitive Edge</p>
+                    <span style={{ marginLeft: 'auto', fontSize: '10px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.06em' }}>vs real Facebook/Instagram ads</span>
+                  </div>
+
+                  {mdims.length > 0 && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '14px' }}>
+                      {mdims.map((d, i) => {
+                        const winning = d.our_score > d.competitor_avg
+                        return (
+                          <div key={i} style={{ background: '#0F0D1F', borderRadius: '7px', padding: '10px 12px', border: `1px solid ${winning ? '#2E1F5E' : '#3B1A00'}` }}>
+                            <p style={{ margin: '0 0 6px', fontSize: '11px', fontWeight: '700', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{d.dimension}</p>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '5px' }}>
+                              <span style={{ fontSize: '18px', fontWeight: '800', color: winning ? '#34D399' : '#F87171', lineHeight: 1 }}>{d.our_score}</span>
+                              <span style={{ fontSize: '11px', color: '#475569' }}>vs {d.competitor_avg} competitors</span>
+                              <span style={{ marginLeft: 'auto', fontSize: '14px' }}>{winning ? '↑' : '↓'}</span>
+                            </div>
+                            {d.notes && <p style={{ margin: 0, fontSize: '11px', color: '#64748B', lineHeight: 1.4 }}>{d.notes}</p>}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+
+                  {(mcer.where_we_win || []).length > 0 && (
+                    <div style={{ marginBottom: '10px' }}>
+                      <p style={{ margin: '0 0 5px', fontSize: '11px', fontWeight: '700', color: '#34D399', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Where We Win</p>
+                      {mcer.where_we_win.map((w, i) => (
+                        <div key={i} style={{ display: 'flex', gap: '7px', marginBottom: '3px' }}>
+                          <span style={{ color: '#34D399', flexShrink: 0 }}>✓</span>
+                          <p style={{ margin: 0, fontSize: '12px', color: '#A7F3D0', lineHeight: 1.4 }}>{w}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {(mcer.where_competitors_are_stronger || []).length > 0 && (
+                    <div style={{ marginBottom: '10px' }}>
+                      <p style={{ margin: '0 0 5px', fontSize: '11px', fontWeight: '700', color: '#F87171', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Where Competitors Are Stronger</p>
+                      {mcer.where_competitors_are_stronger.map((w, i) => (
+                        <div key={i} style={{ display: 'flex', gap: '7px', marginBottom: '3px' }}>
+                          <span style={{ color: '#F87171', flexShrink: 0 }}>!</span>
+                          <p style={{ margin: 0, fontSize: '12px', color: '#FCA5A5', lineHeight: 1.4 }}>{w}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {mcer.overall_edge_summary && (
+                    <div style={{ background: '#07060F', border: '1px solid #2E1F5E', borderRadius: '6px', padding: '10px 12px', marginTop: '8px' }}>
+                      <p style={{ margin: 0, fontSize: '12.5px', color: '#CBD5E1', lineHeight: 1.5 }}>{mcer.overall_edge_summary}</p>
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
+
             {/* Launch on Google Ads */}
             <div style={{ background: 'rgba(63,166,107,0.1)', border: '1.5px solid #BBF7D0', borderRadius: '8px', padding: '18px 20px', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
               <div>
