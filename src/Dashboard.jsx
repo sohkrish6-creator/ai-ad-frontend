@@ -120,6 +120,7 @@ function Dashboard() {
   const [gAdsDaily, setGAdsDaily]     = useState(null)
   const [gAdsLoading, setGAdsLoading] = useState(true)
   const [gAdsError, setGAdsError]     = useState(false)
+  const [gAdsUnauth, setGAdsUnauth]   = useState(false)
   const [gAdsWaking, setGAdsWaking]   = useState(false)
   const [gAdsRefreshing, setGAdsRefreshing] = useState(false)
   const [gAdsTick, setGAdsTick]             = useState(0)
@@ -171,12 +172,16 @@ function Dashboard() {
     const timeout = setTimeout(() => ctrl.abort(), 70000)
 
     async function run() {
+      setGAdsUnauth(false)
+      const _apiKey = import.meta.env.VITE_ADSOH_API_KEY || ''
+      const _authH  = _apiKey ? { 'X-API-Key': _apiKey } : {}
       try {
         const [perfRes, campRes, dailyRes] = await Promise.all([
-          fetch(`${BACKEND}/google-ads/performance?days=${gAdsDays}`, { signal: ctrl.signal }),
-          fetch(`${BACKEND}/google-ads/campaigns?days=${gAdsDays}`,   { signal: ctrl.signal }),
-          fetch(`${BACKEND}/google-ads/daily?days=${gAdsDays}`,       { signal: ctrl.signal }),
+          fetch(`${BACKEND}/google-ads/performance?days=${gAdsDays}`, { signal: ctrl.signal, headers: _authH }),
+          fetch(`${BACKEND}/google-ads/campaigns?days=${gAdsDays}`,   { signal: ctrl.signal, headers: _authH }),
+          fetch(`${BACKEND}/google-ads/daily?days=${gAdsDays}`,       { signal: ctrl.signal, headers: _authH }),
         ])
+        if (perfRes.status === 401) { setGAdsUnauth(true); setGAdsError(true); return }
         const [perf, camp, daily] = await Promise.all([perfRes.json(), campRes.json(), dailyRes.json()])
         if (perf.success) { setGAds(perf); setGAdsError(false) } else setGAdsError(true)
         if (camp.success)  setGAdsCampaigns(camp.campaigns)
@@ -531,7 +536,11 @@ function Dashboard() {
               ) : gAdsError ? (
                 <div style={{ background: 'rgba(196,69,58,0.1)', border: `1px solid rgba(196,69,58,0.3)`, borderRadius: '6px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <TrendingUp size={13} color={RED} />
-                  <p style={{ fontSize: '13px', color: RED, margin: 0, fontFamily: FONT_BODY }}>Google Ads data unavailable — check API credentials</p>
+                  <p style={{ fontSize: '13px', color: RED, margin: 0, fontFamily: FONT_BODY }}>
+                    {gAdsUnauth
+                      ? 'Google Ads blocked — VITE_ADSOH_API_KEY not set in Vercel. Add it and redeploy.'
+                      : 'Google Ads data unavailable — check API credentials'}
+                  </p>
                 </div>
               ) : (
                 <>
