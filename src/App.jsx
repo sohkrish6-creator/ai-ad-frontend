@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import ErrorBoundary from './ErrorBoundary'
 import Dashboard from './Dashboard'
 import UrlInput from './UrlInput'
 import Leads from './Leads'
@@ -33,6 +35,12 @@ import Nav from './Nav'
 import { ToastProvider } from './ToastContext'
 import CommandPalette from './CommandPalette'
 
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => { window.scrollTo(0, 0) }, [pathname])
+  return null
+}
+
 function Layout() {
   const location = useLocation()
   const showNav = location.pathname !== '/'
@@ -40,6 +48,7 @@ function Layout() {
 
   return (
     <div>
+      <ScrollToTop />
       {showNav && <Nav />}
       <CommandPalette />
       <div style={{
@@ -51,6 +60,7 @@ function Layout() {
         width: showNav && !isMobile ? 'calc(100% - 220px)' : '100%',
         boxSizing: 'border-box',
       }}>
+        <ErrorBoundary>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
@@ -86,6 +96,7 @@ function Layout() {
           <Route path="/creative-director" element={<Navigate to="/creative-studio" replace />} />
           <Route path="/ad-to-creative" element={<Navigate to="/creative-studio" replace />} />
         </Routes>
+        </ErrorBoundary>
       </div>
     </div>
   )

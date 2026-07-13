@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, Dna, Brain, Globe, Search,
@@ -52,6 +52,10 @@ function Nav() {
   const location = useLocation()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const isMobile = window.innerWidth < 768
+
+  // Close drawer whenever route changes — Nav stays mounted between pages
+  // so drawerOpen state would otherwise persist across navigations
+  useEffect(() => { setDrawerOpen(false) }, [location.pathname])
 
   if (isMobile) {
     return (

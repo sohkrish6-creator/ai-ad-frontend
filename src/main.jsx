@@ -12,7 +12,7 @@ import App from './App.jsx'
     if (typeof url === 'string' && url.startsWith(BACKEND_ORIGIN) && API_KEY) {
       opts = { ...opts, headers: { 'X-API-Key': API_KEY, ...(opts.headers || {}) } }
     }
-    return _orig.call(this, url, opts)
+    return _orig.call(window, url, opts)
   }
 })()
 
