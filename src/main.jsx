@@ -7,7 +7,7 @@ import App from './App.jsx'
 ;(function patchFetch() {
   const _orig = window.fetch
   const BACKEND_ORIGIN = 'https://ai-ad-backend-zhpj.onrender.com'
-  const API_KEY = import.meta.env.VITE_BACKEND_API_KEY || ''
+  const API_KEY = import.meta.env.VITE_ADSOH_API_KEY || ''
   window.fetch = function (url, opts = {}) {
     if (typeof url === 'string' && url.startsWith(BACKEND_ORIGIN) && API_KEY) {
       opts = { ...opts, headers: { 'X-API-Key': API_KEY, ...(opts.headers || {}) } }
