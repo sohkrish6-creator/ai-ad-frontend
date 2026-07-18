@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
 import PageShell from './PageShell'
@@ -35,13 +36,13 @@ function AdIntel() {
     try { const s = localStorage.getItem(LS_KEY_ADINTEL); if (s) { setResult(JSON.parse(s)); setFromCache(true) } } catch {}
   }, [])
 
-  const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+  
 
   async function handleAnalyze() {
     if (!businessName || !businessType) { alert('Competitor ka naam aur business type bharo!'); return }
     setLoading(true); setError(null); setResult(null)
     try {
-      const res = await fetch(`${BACKEND}/ad-intelligence`, {
+      const res = await apiFetch(`${BACKEND}/ad-intelligence`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ business_name: businessName, business_type: businessType, website, country: 'IN' })

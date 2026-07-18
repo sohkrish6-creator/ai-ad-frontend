@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import { Zap, Copy, Check, TrendingUp, TrendingDown, Minus, ArrowRight, PauseCircle, PlayCircle, Users, Palette, DollarSign, Search, FlaskConical } from 'lucide-react'
 import CityInput, { getLastCity } from './CityInput'
@@ -7,7 +8,7 @@ import PageHeader from './PageHeader'
 
 
 
-const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+
 const LS_KEY  = 'adsoh_optimizer_result'
 
 
@@ -144,7 +145,7 @@ export default function AIOptimizer() {
   async function handleOptimise() {
     setError(''); setLoading(true); setResult(null)
     try {
-      const res  = await fetch(`${BACKEND}/ai-optimizer`, {
+      const res  = await apiFetch(`${BACKEND}/ai-optimizer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: url.trim(), industry: resolvedIndustry, city }),

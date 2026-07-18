@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect, useRef } from 'react'
 import CityInput, { getLastCity } from './CityInput'
 import { Copy, Check, ExternalLink, Download, TrendingUp, Rocket, X, AlertTriangle } from 'lucide-react'
@@ -132,14 +133,14 @@ function MarketingBrain() {
   const [lastGenerated, setLastGenerated] = useState(null)
   const pushAdsRef = useRef(null)
 
-  const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+  
 
   useEffect(() => {
     // Arriving from the History page with a business_key takes priority over
     // whatever this browser's own localStorage happens to have cached.
     const businessKey = new URLSearchParams(window.location.search).get('business_key')
     if (businessKey) {
-      fetch(`${BACKEND}/report-snapshot?module=marketing_brain&business_key=${encodeURIComponent(businessKey)}`)
+      apiFetch(`${BACKEND}/report-snapshot?module=marketing_brain&business_key=${encodeURIComponent(businessKey)}`)
         .then(r => r.json())
         .then(data => {
           if (data.success) {
@@ -163,7 +164,7 @@ function MarketingBrain() {
     if ((!url && !resolvedIndustry) || !businessType || !budget || !goal) { alert(resolvedIndustry ? 'Business type, budget aur goal bharo!' : 'Website, business type, budget aur goal bharo!'); return }
     setLoading(true); setError(null); setResult(null)
     try {
-      const res = await fetch(`${BACKEND}/full-report`, {
+      const res = await apiFetch(`${BACKEND}/full-report`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url, business_type: businessType, budget: parseInt(budget), goal, competitor_name: compName, competitor_website: compWebsite, language, target_industry: resolvedIndustry, target_city: targetCity })
@@ -190,7 +191,7 @@ function MarketingBrain() {
       return content ? `${s.title}:\n${content.slice(0, 300)}` : ''
     }).filter(Boolean).join('\n\n')
     try {
-      const res = await fetch(`${BACKEND}/media-buying-plan`, {
+      const res = await apiFetch(`${BACKEND}/media-buying-plan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -215,7 +216,7 @@ function MarketingBrain() {
     if (!result) return
     setLaunchLoading(true); setLaunchError(null); setLaunchKit(null); setLaunchTab('meta')
     try {
-      const res = await fetch(`${BACKEND}/campaign-launch-kit`, {
+      const res = await apiFetch(`${BACKEND}/campaign-launch-kit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

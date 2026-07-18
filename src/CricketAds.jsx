@@ -1,7 +1,8 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import { Copy, Check, ChevronDown, ChevronUp, Trash2, Plus, ExternalLink, TrendingUp } from 'lucide-react'
 
-const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+
 
 const BUSINESS_TYPES = [
   'Cricket Community', 'Fantasy Sports Platform', 'Gaming Community', 'Esports Content',
@@ -297,7 +298,7 @@ export default function CricketAds() {
 
   async function loadAccounts() {
     try {
-      const res = await fetch(`${BACKEND}/cricket-ads/accounts/list`)
+      const res = await apiFetch(`${BACKEND}/cricket-ads/accounts/list`)
       const json = await res.json()
       if (json.success) {
         setAccounts(json.accounts || [])
@@ -311,7 +312,7 @@ export default function CricketAds() {
     if (!acctName.trim() || !acctCid.trim()) { setAcctStatus({ ok: false, msg: 'Account Name and Customer ID are required.' }); return }
     setAcctAdding(true); setAcctStatus(null)
     try {
-      const res  = await fetch(`${BACKEND}/cricket-ads/accounts/add`, {
+      const res  = await apiFetch(`${BACKEND}/cricket-ads/accounts/add`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ account_name: acctName.trim(), customer_id: acctCid.trim() }),
       })
@@ -330,7 +331,7 @@ export default function CricketAds() {
   async function handleDeleteAccount(cid) {
     setDeletingCid(cid)
     try {
-      await fetch(`${BACKEND}/cricket-ads/accounts/${cid}`, { method: 'DELETE' })
+      await apiFetch(`${BACKEND}/cricket-ads/accounts/${cid}`, { method: 'DELETE' })
       await loadAccounts()
       if (selectedCid === cid) setSelectedCid('')
     } catch { /* silent */ }
@@ -341,7 +342,7 @@ export default function CricketAds() {
     if (!url.trim()) { setError('Website URL is required.'); return }
     setLoading(true); setError(''); setData(null); setPushResult(null); setPushError(null); setMemoryReused(false); setWarnings([]); setPlacementLearningNote(''); setPlacementTrackCount(0)
     try {
-      const res  = await fetch(`${BACKEND}/cricket-ads-intelligence`, {
+      const res  = await apiFetch(`${BACKEND}/cricket-ads-intelligence`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           url: url.trim(), whatsapp_link: waLink.trim(), city: city.trim() || 'India',
@@ -375,7 +376,7 @@ export default function CricketAds() {
     // Step 1: run pre-flight check
     setPreflightLoading(true)
     try {
-      const pfRes = await fetch(`${BACKEND}/cricket-ads/preflight`, {
+      const pfRes = await apiFetch(`${BACKEND}/cricket-ads/preflight`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           customer_id:    selectedCid,
@@ -402,7 +403,7 @@ export default function CricketAds() {
     setShowPreflight(false)
     setPushLoading(true)
     try {
-      const res = await fetch(`${BACKEND}/cricket-ads/push-to-google`, {
+      const res = await apiFetch(`${BACKEND}/cricket-ads/push-to-google`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           customer_id:    selectedCid,
@@ -431,7 +432,7 @@ export default function CricketAds() {
     if (!perfCid) { setPerfError('Select an ad account first.'); return }
     setPerfLoading(true); setPerfError(''); setPerfData(null); setOptData(null); setOptError('')
     try {
-      const res  = await fetch(`${BACKEND}/cricket-ads/performance?customer_id=${encodeURIComponent(perfCid)}&days=30`)
+      const res  = await apiFetch(`${BACKEND}/cricket-ads/performance?customer_id=${encodeURIComponent(perfCid)}&days=30`)
       const json = await res.json()
       if (json.success) setPerfData(json.performance)
       else setPerfError(json.error || 'Could not load performance.')
@@ -443,7 +444,7 @@ export default function CricketAds() {
     if (!perfCid) { setOptError('Select an ad account first.'); return }
     setOptLoading(true); setOptError(''); setOptData(null)
     try {
-      const res  = await fetch(`${BACKEND}/cricket-ads/optimize`, {
+      const res  = await apiFetch(`${BACKEND}/cricket-ads/optimize`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ customer_id: perfCid }),
       })

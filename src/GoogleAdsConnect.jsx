@@ -1,10 +1,11 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { Link2, CheckCircle, RefreshCw, ChevronRight, AlertCircle } from 'lucide-react'
 import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
 
 
-const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+
 
 function Skeleton({ w = '100%', h = '16px', radius = '4px', style = {} }) {
   return <div className="skeleton" style={{ width: w, height: h, borderRadius: radius, flexShrink: 0, ...style }} />
@@ -50,7 +51,7 @@ export default function GoogleAdsConnect() {
   async function loadAccounts() {
     setAccountsLoading(true); setAccountsError('')
     try {
-      const res = await fetch(`${BACKEND}/google/accounts`)
+      const res = await apiFetch(`${BACKEND}/google/accounts`)
       const json = await res.json()
       if (json.success) {
         setConnected(true)
@@ -69,7 +70,7 @@ export default function GoogleAdsConnect() {
 
   async function handleConnect() {
     try {
-      const res = await fetch(`${BACKEND}/google/connect`)
+      const res = await apiFetch(`${BACKEND}/google/connect`)
       const json = await res.json()
       if (json.success && json.auth_url) window.location.href = json.auth_url
       else setBanner({ ok: false, msg: json.error || 'Could not start Google connection.' })
@@ -81,7 +82,7 @@ export default function GoogleAdsConnect() {
   async function handleSelect(cid) {
     setSelectingCid(cid)
     try {
-      const res = await fetch(`${BACKEND}/google/accounts/select`, {
+      const res = await apiFetch(`${BACKEND}/google/accounts/select`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ customer_id: cid }),
       })
@@ -98,7 +99,7 @@ export default function GoogleAdsConnect() {
     if (pollRef.current) clearInterval(pollRef.current)
     pollRef.current = setInterval(async () => {
       try {
-        const res = await fetch(`${BACKEND}/google-ads/import/status/${id}`)
+        const res = await apiFetch(`${BACKEND}/google-ads/import/status/${id}`)
         const json = await res.json()
         if (json.success) {
           setJobStatus(json.job)
@@ -115,7 +116,7 @@ export default function GoogleAdsConnect() {
   async function handleImport(refresh = false) {
     setImportStarting(true); setJobStatus(null)
     try {
-      const res = await fetch(`${BACKEND}/google-ads/${refresh ? 'refresh' : 'import'}`, {
+      const res = await apiFetch(`${BACKEND}/google-ads/${refresh ? 'refresh' : 'import'}`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({}),
       })

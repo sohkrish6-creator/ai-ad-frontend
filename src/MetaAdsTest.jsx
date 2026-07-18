@@ -1,9 +1,10 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import { CheckCircle, AlertCircle, AlertTriangle, RefreshCw, ExternalLink } from 'lucide-react'
 import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
 
 
-const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+
 
 export default function MetaAdsTest() {
   const [loading, setLoading] = useState(true)
@@ -19,7 +20,7 @@ export default function MetaAdsTest() {
     if (!campaignName.trim() || !dailyBudget) return
     setCreating(true); setCreateResult(null)
     try {
-      const res = await fetch(`${BACKEND}/meta-ads/create-campaign`, {
+      const res = await apiFetch(`${BACKEND}/meta-ads/create-campaign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -47,7 +48,7 @@ export default function MetaAdsTest() {
   async function checkConnection() {
     setLoading(true)
     try {
-      const res = await fetch(`${BACKEND}/meta-ads/test-connection`)
+      const res = await apiFetch(`${BACKEND}/meta-ads/test-connection`)
       const text = await res.text()
       let json
       try {

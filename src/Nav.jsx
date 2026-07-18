@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Dna, Brain, Globe, Search,
-  Radio, Palette, Target, Users, Menu, X, PlaySquare, TrendingUp, Gift, Monitor, Eye, MessageSquare, BarChart2, Activity, Zap, Trophy, Crosshair, Antenna, Link2, Share2, Sparkles, Radar, Clock, Wand2, BookOpen,
+  Radio, Palette, Target, Users, Menu, X, PlaySquare, TrendingUp, Gift, Monitor, Eye, MessageSquare, BarChart2, Activity, Zap, Trophy, Crosshair, Antenna, Link2, Share2, Sparkles, Radar, Clock, Wand2, BookOpen, LogOut, User,
 } from 'lucide-react'
+import { useAuth } from './AuthContext'
+import { supabase } from './lib/supabase'
 
 const INK   = '#0B0B0D'
 const SLATE = '#23242B'
@@ -50,8 +52,15 @@ const links = [
 
 function Nav() {
   const location = useLocation()
+  const navigate = useNavigate()
+  const { user } = useAuth()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const isMobile = window.innerWidth < 768
+
+  async function handleLogout() {
+    await supabase.auth.signOut()
+    navigate('/login')
+  }
 
   // Close drawer whenever route changes — Nav stays mounted between pages
   // so drawerOpen state would otherwise persist across navigations
@@ -162,10 +171,20 @@ function Nav() {
           </div>
 
           <div style={{ padding: '14px 10px 0', borderTop: `1px solid ${SLATE}`, marginTop: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: user ? '8px' : '0' }}>
               <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: GREEN, boxShadow: `0 0 0 2px rgba(63,166,107,0.2)`, flexShrink: 0 }} />
-              <span style={{ color: MUTED, fontSize: '11px', fontFamily: FONT_BODY }}>Krish · Sohscape</span>
+              <span style={{ color: MUTED, fontSize: '11px', fontFamily: FONT_BODY }}>{user?.email || 'Sohscape'}</span>
             </div>
+            {user && (
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <Link to="/account" style={{ display: 'flex', alignItems: 'center', gap: '5px', color: MUTED, fontSize: '11px', textDecoration: 'none', padding: '4px 0' }}>
+                  <User size={11} /> Account
+                </Link>
+                <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'none', border: 'none', color: MUTED, fontSize: '11px', cursor: 'pointer', padding: '4px 0', fontFamily: FONT_BODY }}>
+                  <LogOut size={11} /> Log out
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </>
@@ -243,10 +262,20 @@ function Nav() {
         </div>
 
         <div style={{ padding: '14px 10px 0', borderTop: `1px solid ${SLATE}`, marginTop: '4px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: user ? '6px' : '0' }}>
             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: GREEN, boxShadow: `0 0 0 2px rgba(63,166,107,0.2)`, flexShrink: 0 }} />
-            <span style={{ color: MUTED, fontSize: '11px' }}>Krish · Sohscape</span>
+            <span style={{ color: MUTED, fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email || 'Sohscape'}</span>
           </div>
+          {user && (
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <Link to="/account" style={{ display: 'flex', alignItems: 'center', gap: '4px', color: MUTED, fontSize: '11px', textDecoration: 'none' }}>
+                <User size={11} /> Account
+              </Link>
+              <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'none', border: 'none', color: MUTED, fontSize: '11px', cursor: 'pointer', padding: 0, fontFamily: FONT_BODY }}>
+                <LogOut size={11} /> Log out
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </>

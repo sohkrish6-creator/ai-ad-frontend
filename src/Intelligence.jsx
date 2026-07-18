@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 
 const LS_KEY_BI = 'adsoh_bi_result'
@@ -6,7 +7,7 @@ import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle
 
 
 
-const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+
 
 function ScoreRing({ score, label, inverse = false }) {
   const s = score || 0
@@ -136,7 +137,7 @@ function Intelligence() {
     setError(null)
     setResult(null)
     try {
-      const res = await fetch(`${BACKEND}/intelligence`, {
+      const res = await apiFetch(`${BACKEND}/intelligence`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import {
   Wand2, Copy, Check, ChevronDown, ChevronUp, Sparkles, Layers, Type, LayoutGrid,
@@ -12,7 +13,7 @@ import PageShell from './PageShell'
 import PageHeader from './PageHeader'
 
 
-const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+
 const LS_KEY  = 'adsoh_creative_studio_result'
 const LOADING_STEPS = [
   'Analyzing business & audience first...', 'Reading campaign data...', 'Checking performance signals...',
@@ -200,7 +201,7 @@ export default function CreativeStudio() {
   async function loadCampaigns() {
     setCampaignsLoading(true)
     try {
-      const res = await fetch(`${BACKEND}/campaigns/all`)
+      const res = await apiFetch(`${BACKEND}/campaigns/all`)
       const data = await res.json()
       if (data.success) setCampaigns(data.campaigns || [])
     } catch {}
@@ -220,7 +221,7 @@ export default function CreativeStudio() {
           : { mode: 'campaign', url: url.trim(), industry: industry.trim(), city, campaign_objective: objective, offer: offer.trim() }
         : { mode: 'business', url: url.trim(), industry: industry.trim(), city, campaign_objective: objective, offer: offer.trim() }
 
-      const res = await fetch(`${BACKEND}/creative-studio`, {
+      const res = await apiFetch(`${BACKEND}/creative-studio`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

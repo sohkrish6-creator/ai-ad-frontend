@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import CityInput, { getLastCity } from './CityInput'
 import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
@@ -6,7 +7,7 @@ import PageHeader from './PageHeader'
 
 
 const LS_KEY_AUDIENCE = 'adsoh_audience_result'
-const API = 'https://ai-ad-backend-zhpj.onrender.com'
+const API = BACKEND
 
 const BUSINESS_TYPES = [
   'E-commerce / Online Store','Restaurant / Cafe / Food','Fashion / Apparel / Accessories',
@@ -52,7 +53,7 @@ export default function AudienceFinder() {
     if (!form.url.trim() && !form.niche.trim()) { setError('URL ya Niche — kuch toh do!'); return }
     setError(''); setLoading(true); setResult('')
     try {
-      const res = await fetch(`${API}/audience-finder`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...form, target_industry: resolvedIndustry, target_city: targetCity }) })
+      const res = await apiFetch(`${API}/audience-finder`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...form, target_industry: resolvedIndustry, target_city: targetCity }) })
       const data = await res.json()
       if (data.success) { setResult(data.audience); localStorage.setItem(LS_KEY_AUDIENCE, JSON.stringify(data.audience)); setFromCache(false) }
       else setError(data.message || 'Kuch toh gadbad hai, dobara try karo.')

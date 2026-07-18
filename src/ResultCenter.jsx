@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import { Trophy, Copy, Check, ChevronDown, ChevronUp, TrendingUp, TrendingDown, Minus, Star, ArrowRight, Zap } from 'lucide-react'
 import CityInput, { getLastCity } from './CityInput'
@@ -7,7 +8,7 @@ import PageHeader from './PageHeader'
 
 
 
-const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+
 const LS_KEY  = 'adsoh_result_result'
 
 
@@ -135,7 +136,7 @@ export default function ResultCenter() {
   async function handleGenerate() {
     setError(''); setLoading(true); setResult(null)
     try {
-      const res  = await fetch(`${BACKEND}/result-center`, {
+      const res  = await apiFetch(`${BACKEND}/result-center`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: url.trim(), industry: resolvedIndustry, city }),

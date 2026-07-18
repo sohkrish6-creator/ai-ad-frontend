@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Crosshair, Copy, Check, ExternalLink, Phone, MapPin, TrendingUp, Flame, Thermometer, Snowflake, Radar } from 'lucide-react'
@@ -9,7 +10,7 @@ import PageShell from './PageShell'
 import PageHeader from './PageHeader'
 
 
-const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+
 const LS_KEY  = 'adsoh_prospect_result'
 const SIE_PREFILL_LS_KEY = 'adsoh_social_intel_prefill'
 const PROSPECT_LOADING_STEPS = ['Scanning Google Maps...', 'Enriching business details...', 'Scoring prospects...']
@@ -213,7 +214,7 @@ export default function ProspectDiscovery() {
     if (!resolvedIndustry) { setError('Please select an industry.'); return }
     setError(''); setLoading(true); setResult(null)
     try {
-      const res  = await fetch(`${BACKEND}/prospect-discovery`, {
+      const res  = await apiFetch(`${BACKEND}/prospect-discovery`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ industry: resolvedIndustry, city, max_prospects: maxProspects }),

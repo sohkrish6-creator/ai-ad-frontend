@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { ExternalLink, X, Rocket, AlertTriangle } from 'lucide-react'
 import { useToast } from './ToastContext'
@@ -6,7 +7,7 @@ import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle
 
 const LS_KEY_GADS_PUSH = 'adsoh_gads_push_result'
 const LS_KEY_MADS_PUSH = 'adsoh_mads_push_result'
-const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+
 
 const inpSt2 = { width: '100%', padding: '9px 12px', borderRadius: '6px', border: `1px solid ${SLATE_L}`, background: INK, color: BONE, fontSize: '13px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
 const lbl2   = { display: 'block', color: MUTED, fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '5px' }
@@ -131,7 +132,7 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
     // Step 1: run pre-flight check before creating campaign
     setPreflightLoading(true); setGAdsError(null)
     try {
-      const pfRes = await fetch(`${BACKEND}/google-ads/preflight`, {
+      const pfRes = await apiFetch(`${BACKEND}/google-ads/preflight`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: url || '', budget_daily: parseFloat(gAdsForm.budget_daily) }),
@@ -153,7 +154,7 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
     setShowPreflight(false)
     setGAdsLoading(true); setGAdsError(null)
     try {
-      const res = await fetch(`${BACKEND}/google-ads/create-campaign`, {
+      const res = await apiFetch(`${BACKEND}/google-ads/create-campaign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -198,7 +199,7 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
     // Step 1: run Meta pre-flight check before creating campaign
     setMetaPreflightLoading(true); setMAdsError(null)
     try {
-      const pfRes = await fetch(`${BACKEND}/meta-ads/preflight`, {
+      const pfRes = await apiFetch(`${BACKEND}/meta-ads/preflight`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -224,7 +225,7 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
     setShowMetaPreflight(false)
     setMAdsLoading(true); setMAdsError(null)
     try {
-      const res = await fetch(`${BACKEND}/meta-ads/create-campaign`, {
+      const res = await apiFetch(`${BACKEND}/meta-ads/create-campaign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

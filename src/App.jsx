@@ -1,6 +1,11 @@
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import ErrorBoundary from './ErrorBoundary'
+import { AuthProvider, useAuth } from './AuthContext'
+import Login from './Login'
+import Signup from './Signup'
+import ForgotPassword from './ForgotPassword'
+import Account from './Account'
 import Dashboard from './Dashboard'
 import UrlInput from './UrlInput'
 import Leads from './Leads'
@@ -35,22 +40,32 @@ import Nav from './Nav'
 import { ToastProvider } from './ToastContext'
 import CommandPalette from './CommandPalette'
 
+function ProtectedRoute({ children }) {
+  const { user, loading } = useAuth()
+  if (loading) return null
+  if (!user) return <Navigate to="/login" replace />
+  return children
+}
+
 function ScrollToTop() {
   const { pathname } = useLocation()
   useEffect(() => { window.scrollTo(0, 0) }, [pathname])
   return null
 }
 
+const AUTH_PATHS = new Set(['/login', '/signup', '/forgot-password'])
+
 function Layout() {
   const location = useLocation()
-  const showNav = location.pathname !== '/'
+  const isAuthPage = AUTH_PATHS.has(location.pathname)
+  const showNav = !isAuthPage && location.pathname !== '/'
   const isMobile = window.innerWidth < 768
 
   return (
     <div>
       <ScrollToTop />
       {showNav && <Nav />}
-      <CommandPalette />
+      {!isAuthPage && <CommandPalette />}
       <div style={{
         marginLeft: showNav && !isMobile ? '220px' : '0',
         paddingTop: showNav && isMobile ? '48px' : '0',
@@ -62,37 +77,44 @@ function Layout() {
       }}>
         <ErrorBoundary>
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/intelligence" element={<Intelligence />} />
-          <Route path="/brain" element={<MarketingBrain />} />
-          <Route path="/ad-creative" element={<AdCreative />} />
-          <Route path="/audience" element={<AudienceFinder />} />
-          <Route path="/analyze" element={<UrlInput />} />
-          <Route path="/competitor" element={<Competitor />} />
-          <Route path="/ad-intel" element={<AdIntel />} />
-          <Route path="/leads" element={<Leads />} />
-          <Route path="/youtube" element={<YouTube />} />
-          <Route path="/opportunity" element={<OpportunityEngine />} />
-          <Route path="/offer" element={<OfferIntelligence />} />
-          <Route path="/website-audit" element={<WebsiteAudit />} />
-          <Route path="/visibility" element={<VisibilityIntelligence />} />
-          <Route path="/outreach" element={<OutreachAI />} />
-          <Route path="/kpi-engine" element={<KPIEngine />} />
-          <Route path="/performance" element={<PerformanceIntelligence />} />
-          <Route path="/ai-optimizer" element={<AIOptimizer />} />
-          <Route path="/result-center" element={<ResultCenter />} />
-          <Route path="/prospects" element={<ProspectDiscovery />} />
-          <Route path="/cricket-ads" element={<CricketAds />} />
-          <Route path="/google-ads" element={<GoogleAdsConnect />} />
-          <Route path="/google-ads/dashboard" element={<GoogleAdsDashboard />} />
-          <Route path="/meta-test" element={<MetaAdsTest />} />
-          <Route path="/smart-analysis" element={<SmartAnalysis />} />
-          <Route path="/social-intelligence" element={<SocialIntelligence />} />
-          <Route path="/history" element={<History />} />
-          <Route path="/creative-studio" element={<CreativeStudio />} />
-          <Route path="/command-center" element={<CommandCenter />} />
-          <Route path="/marketing-intelligence" element={<MarketingIntelligence />} />
+          {/* Public auth routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+
+          {/* Protected app routes */}
+          <Route path="/" element={<ProtectedRoute><Navigate to="/dashboard" replace /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+          <Route path="/intelligence" element={<ProtectedRoute><Intelligence /></ProtectedRoute>} />
+          <Route path="/brain" element={<ProtectedRoute><MarketingBrain /></ProtectedRoute>} />
+          <Route path="/ad-creative" element={<ProtectedRoute><AdCreative /></ProtectedRoute>} />
+          <Route path="/audience" element={<ProtectedRoute><AudienceFinder /></ProtectedRoute>} />
+          <Route path="/analyze" element={<ProtectedRoute><UrlInput /></ProtectedRoute>} />
+          <Route path="/competitor" element={<ProtectedRoute><Competitor /></ProtectedRoute>} />
+          <Route path="/ad-intel" element={<ProtectedRoute><AdIntel /></ProtectedRoute>} />
+          <Route path="/leads" element={<ProtectedRoute><Leads /></ProtectedRoute>} />
+          <Route path="/youtube" element={<ProtectedRoute><YouTube /></ProtectedRoute>} />
+          <Route path="/opportunity" element={<ProtectedRoute><OpportunityEngine /></ProtectedRoute>} />
+          <Route path="/offer" element={<ProtectedRoute><OfferIntelligence /></ProtectedRoute>} />
+          <Route path="/website-audit" element={<ProtectedRoute><WebsiteAudit /></ProtectedRoute>} />
+          <Route path="/visibility" element={<ProtectedRoute><VisibilityIntelligence /></ProtectedRoute>} />
+          <Route path="/outreach" element={<ProtectedRoute><OutreachAI /></ProtectedRoute>} />
+          <Route path="/kpi-engine" element={<ProtectedRoute><KPIEngine /></ProtectedRoute>} />
+          <Route path="/performance" element={<ProtectedRoute><PerformanceIntelligence /></ProtectedRoute>} />
+          <Route path="/ai-optimizer" element={<ProtectedRoute><AIOptimizer /></ProtectedRoute>} />
+          <Route path="/result-center" element={<ProtectedRoute><ResultCenter /></ProtectedRoute>} />
+          <Route path="/prospects" element={<ProtectedRoute><ProspectDiscovery /></ProtectedRoute>} />
+          <Route path="/cricket-ads" element={<ProtectedRoute><CricketAds /></ProtectedRoute>} />
+          <Route path="/google-ads" element={<ProtectedRoute><GoogleAdsConnect /></ProtectedRoute>} />
+          <Route path="/google-ads/dashboard" element={<ProtectedRoute><GoogleAdsDashboard /></ProtectedRoute>} />
+          <Route path="/meta-test" element={<ProtectedRoute><MetaAdsTest /></ProtectedRoute>} />
+          <Route path="/smart-analysis" element={<ProtectedRoute><SmartAnalysis /></ProtectedRoute>} />
+          <Route path="/social-intelligence" element={<ProtectedRoute><SocialIntelligence /></ProtectedRoute>} />
+          <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
+          <Route path="/creative-studio" element={<ProtectedRoute><CreativeStudio /></ProtectedRoute>} />
+          <Route path="/command-center" element={<ProtectedRoute><CommandCenter /></ProtectedRoute>} />
+          <Route path="/marketing-intelligence" element={<ProtectedRoute><MarketingIntelligence /></ProtectedRoute>} />
           <Route path="/creative-director" element={<Navigate to="/creative-studio" replace />} />
           <Route path="/ad-to-creative" element={<Navigate to="/creative-studio" replace />} />
         </Routes>
@@ -104,11 +126,13 @@ function Layout() {
 
 function App() {
   return (
-    <ToastProvider>
-      <BrowserRouter>
-        <Layout />
-      </BrowserRouter>
-    </ToastProvider>
+    <AuthProvider>
+      <ToastProvider>
+        <BrowserRouter>
+          <Layout />
+        </BrowserRouter>
+      </ToastProvider>
+    </AuthProvider>
   )
 }
 

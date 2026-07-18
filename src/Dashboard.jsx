@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect, useRef } from 'react'
 import {
   Users, Bot, CheckCircle, MessageCircle,
@@ -105,7 +106,7 @@ function BarChart({ sources, maxSource, visible }) {
 
 // ── Main component ─────────────────────────────────────────────────────────
 function Dashboard() {
-  const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+  
 
   const [isMobile, setIsMobile]   = useState(window.innerWidth < 768)
   const [stats, setStats]         = useState(null)
@@ -137,7 +138,7 @@ function Dashboard() {
     async function fetchWithTimeout(url, ms = 12000) {
       const ctrl = new AbortController()
       const timer = setTimeout(() => ctrl.abort(), ms)
-      try { return await fetch(url, { signal: ctrl.signal }) }
+      try { return await apiFetch(url, { signal: ctrl.signal }) }
       finally { clearTimeout(timer) }
     }
 
@@ -177,9 +178,9 @@ function Dashboard() {
       const _authH  = _apiKey ? { 'X-API-Key': _apiKey } : {}
       try {
         const [perfRes, campRes, dailyRes] = await Promise.all([
-          fetch(`${BACKEND}/google-ads/performance?days=${gAdsDays}`, { signal: ctrl.signal, headers: _authH }),
-          fetch(`${BACKEND}/google-ads/campaigns?days=${gAdsDays}`,   { signal: ctrl.signal, headers: _authH }),
-          fetch(`${BACKEND}/google-ads/daily?days=${gAdsDays}`,       { signal: ctrl.signal, headers: _authH }),
+          apiFetch(`${BACKEND}/google-ads/performance?days=${gAdsDays}`, { signal: ctrl.signal, headers: _authH }),
+          apiFetch(`${BACKEND}/google-ads/campaigns?days=${gAdsDays}`,   { signal: ctrl.signal, headers: _authH }),
+          apiFetch(`${BACKEND}/google-ads/daily?days=${gAdsDays}`,       { signal: ctrl.signal, headers: _authH }),
         ])
         if (perfRes.status === 401) { setGAdsUnauth(true); setGAdsError(true); return }
         const [perf, camp, daily] = await Promise.all([perfRes.json(), campRes.json(), dailyRes.json()])

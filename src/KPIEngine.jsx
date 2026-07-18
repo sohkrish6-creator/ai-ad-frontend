@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import { BarChart2, Copy, Check, Zap } from 'lucide-react'
 import { useToast } from './ToastContext'
@@ -10,7 +11,7 @@ import PageHeader from './PageHeader'
 
 
 
-const BACKEND  = 'https://ai-ad-backend-zhpj.onrender.com'
+
 const LS_KEY   = 'adsoh_kpi_result'
 const KPI_LOADING_STEPS = ['Gathering benchmarks...', 'Calculating predictions...', 'Building budget breakdown...']
 
@@ -148,7 +149,7 @@ export default function KPIEngine() {
     if (!resolvedIndustry) { setError('Industry select karo.'); return }
     setError(''); setLoading(true); setResult(null)
     try {
-      const res  = await fetch(`${BACKEND}/kpi-engine`, {
+      const res  = await apiFetch(`${BACKEND}/kpi-engine`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

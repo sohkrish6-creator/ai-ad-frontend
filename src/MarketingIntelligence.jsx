@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import { Download } from 'lucide-react'
 import { useLoadingSteps } from './useLoadingSteps'
@@ -10,7 +11,7 @@ import PageShell from './PageShell'
 import PageHeader from './PageHeader'
 
 const LS_KEY = 'adsoh_mi_result'
-const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+
 
 const MI_STEPS = [
   'Researching company history...',
@@ -749,7 +750,7 @@ export default function MarketingIntelligence() {
       if (compareEnabled && (myUrl || myIndustry)) {
         body.compare_to_my_business = { url: myUrl, industry: myIndustry, city: myCity }
       }
-      const res = await fetch(`${BACKEND}/marketing-intelligence`, {
+      const res = await apiFetch(`${BACKEND}/marketing-intelligence`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

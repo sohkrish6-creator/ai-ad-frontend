@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import {
   Radar, ChevronDown, ChevronUp, Copy, Check, ExternalLink, Camera, MessageCircle,
@@ -7,7 +8,7 @@ import CityInput, { getLastCity } from './CityInput'
 import { useToast } from './ToastContext'
 import { useLoadingSteps } from './useLoadingSteps'
 
-const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+
 const LS_KEY = 'adsoh_social_intel_result'
 const PREFILL_LS_KEY = 'adsoh_social_intel_prefill'
 
@@ -145,7 +146,7 @@ export default function SocialIntelligence() {
     if (!inputValue.trim()) { setError('Please enter a value to analyze.'); return }
     setLoading(true); setError(''); setData(null); setFromCache(false)
     try {
-      const res = await fetch(`${BACKEND}/social-intelligence`, {
+      const res = await apiFetch(`${BACKEND}/social-intelligence`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ input_value: inputValue.trim(), input_type: inputType, city: city.trim(), industry: industry.trim() }),
       })

@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import { Activity, Copy, Check, TrendingUp, TrendingDown, Minus, AlertCircle, Zap } from 'lucide-react'
 import CityInput, { getLastCity } from './CityInput'
@@ -7,7 +8,7 @@ import PageHeader from './PageHeader'
 
 
 
-const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+
 const LS_KEY  = 'adsoh_performance_result'
 
 
@@ -140,7 +141,7 @@ export default function PerformanceIntelligence() {
   async function handleAnalyse() {
     setError(''); setLoading(true); setResult(null)
     try {
-      const res  = await fetch(`${BACKEND}/performance-intelligence`, {
+      const res  = await apiFetch(`${BACKEND}/performance-intelligence`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: url.trim(), industry: resolvedIndustry, city, date_range: dateRange }),

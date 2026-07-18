@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -8,7 +9,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGri
 import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
 
 
-const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+
 
 function useCountUp(target, duration = 700, enabled = true) {
   const [count, setCount] = useState(0)
@@ -108,7 +109,7 @@ export default function GoogleAdsDashboard() {
   async function load() {
     setLoading(true); setError('')
     try {
-      const res = await fetch(`${BACKEND}/google-ads/dashboard`)
+      const res = await apiFetch(`${BACKEND}/google-ads/dashboard`)
       const json = await res.json()
       if (json.success) setData(json)
       else setError(json.error || 'Could not load dashboard.')
@@ -121,7 +122,7 @@ export default function GoogleAdsDashboard() {
   async function handleRefresh() {
     setRefreshing(true)
     try {
-      const res = await fetch(`${BACKEND}/google-ads/refresh`, {
+      const res = await apiFetch(`${BACKEND}/google-ads/refresh`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}),
       })
       const json = await res.json()

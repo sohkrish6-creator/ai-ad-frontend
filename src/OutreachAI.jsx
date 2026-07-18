@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import CityInput, { getLastCity } from './CityInput'
 
@@ -8,7 +9,7 @@ import PageShell from './PageShell'
 import PageHeader from './PageHeader'
 
 
-const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+
 
 
 const INDUSTRIES = [
@@ -176,7 +177,7 @@ export default function OutreachAI() {
     if (!resolvedIndustry) { setError('Industry select karo.'); return }
     setError(''); setLoading(true); setResult(null); setActiveTab('whatsapp')
     try {
-      const res  = await fetch(`${BACKEND}/outreach-ai`, {
+      const res  = await apiFetch(`${BACKEND}/outreach-ai`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

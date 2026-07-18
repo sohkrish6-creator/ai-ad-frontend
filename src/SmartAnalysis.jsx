@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Sparkles, CheckCircle, AlertCircle, ChevronDown, ChevronUp, ArrowRight, Clock, History, X } from 'lucide-react'
@@ -11,7 +12,7 @@ import PageHeader from './PageHeader'
 
 
 const LS_KEY_SMART = 'adsoh_smart_analysis_result'
-const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+
 
 
 const INDUSTRIES = [
@@ -109,7 +110,7 @@ export default function SmartAnalysis() {
   async function loadHistory() {
     setHistoryLoading(true)
     try {
-      const res = await fetch(`${BACKEND}/smart-analysis/history?limit=5`)
+      const res = await apiFetch(`${BACKEND}/smart-analysis/history?limit=5`)
       const data = await res.json()
       if (data.success) setHistory(data.history || [])
     } catch { /* silent — history is a nice-to-have, not core */ }
@@ -118,7 +119,7 @@ export default function SmartAnalysis() {
 
   async function handleViewHistory(id) {
     try {
-      const res = await fetch(`${BACKEND}/smart-analysis/history/${id}`)
+      const res = await apiFetch(`${BACKEND}/smart-analysis/history/${id}`)
       const data = await res.json()
       if (data.success) {
         setResult(data.result)
@@ -144,7 +145,7 @@ export default function SmartAnalysis() {
       setTimeout(() => setLoadingStage(2), 18000),
     ]
     try {
-      const res = await fetch(`${BACKEND}/smart-analysis`, {
+      const res = await apiFetch(`${BACKEND}/smart-analysis`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -177,7 +178,7 @@ export default function SmartAnalysis() {
     if (!url.trim()) { alert('Website URL bharo!'); return }
     setPlanning(true); setError(null); setResult(null); setPlan(null)
     try {
-      const res = await fetch(`${BACKEND}/smart-analysis/plan`, {
+      const res = await apiFetch(`${BACKEND}/smart-analysis/plan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -210,7 +211,7 @@ export default function SmartAnalysis() {
     if (!plan) return
     setExecuting(true); setError(null)
     try {
-      const res = await fetch(`${BACKEND}/smart-analysis/execute`, {
+      const res = await apiFetch(`${BACKEND}/smart-analysis/execute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

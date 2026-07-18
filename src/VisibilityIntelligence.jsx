@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import CityInput, { getLastCity } from './CityInput'
 
@@ -8,7 +9,7 @@ import PageShell from './PageShell'
 import PageHeader from './PageHeader'
 
 
-const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+
 
 
 const INDUSTRIES = [
@@ -185,7 +186,7 @@ export default function VisibilityIntelligence() {
     if (!url.trim()) { setError('Website URL daalo.'); return }
     setError(''); setLoading(true); setResult(null); setExpanded('seo')
     try {
-      const res  = await fetch(`${BACKEND}/visibility-intelligence`, {
+      const res  = await apiFetch(`${BACKEND}/visibility-intelligence`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: url.trim(), industry: resolvedIndustry, city }),

@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MessageSquare, Send, Sparkles, AlertTriangle, ArrowRight, Copy, Check, Search, Clapperboard, ChevronDown, ChevronUp } from 'lucide-react'
@@ -11,7 +12,7 @@ import PageShell from './PageShell'
 import PageHeader from './PageHeader'
 
 
-const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+
 
 
 const EXAMPLE_CHIPS = [
@@ -433,7 +434,7 @@ export default function CommandCenter() {
 
     async function poll() {
       try {
-        const res = await fetch(`${BACKEND}/command/status/${activeTask.taskId}`)
+        const res = await apiFetch(`${BACKEND}/command/status/${activeTask.taskId}`)
         const statusData = await res.json()
         if (cancelled || !statusData.success) return
         if (statusData.status === 'done' || statusData.status === 'error') {
@@ -473,7 +474,7 @@ export default function CommandCenter() {
 
     const ctx = pendingContext.current || {}
     try {
-      const res = await fetch(`${BACKEND}/command`, {
+      const res = await apiFetch(`${BACKEND}/command`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import CityInput, { getLastCity } from './CityInput'
 
@@ -11,7 +12,7 @@ import PageHeader from './PageHeader'
 
 
 
-const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+
 
 
 const INDUSTRIES = [
@@ -105,7 +106,7 @@ export default function OfferIntelligence() {
     }
     setError(''); setLoading(true); setResult(null)
     try {
-      const res  = await fetch(`${BACKEND}/offer-intelligence`, {
+      const res  = await apiFetch(`${BACKEND}/offer-intelligence`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

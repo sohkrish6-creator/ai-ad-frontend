@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
 import PageShell from './PageShell'
@@ -24,13 +25,13 @@ function AdCreative() {
     try { const s = localStorage.getItem(LS_KEY_ADCREATIVE); if (s) { setResult(JSON.parse(s)); setFromCache(true) } } catch {}
   }, [])
 
-  const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+  
 
   async function handleRun() {
     if (!url || !businessType || !offer) { alert('Website, business type aur offer bharo!'); return }
     setLoading(true); setError(null); setResult(null)
     try {
-      const res = await fetch(`${BACKEND}/ad-creative`, {
+      const res = await apiFetch(`${BACKEND}/ad-creative`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url, business_type: businessType, offer, platform, language })

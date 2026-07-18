@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import CityInput, { getLastCity } from './CityInput'
 
@@ -9,7 +10,7 @@ import PageHeader from './PageHeader'
 
 
 
-const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+
 
 const INDUSTRIES = [
   'Hospitality (Hotels, Restaurants, Cafes)', 'Schools & Education', 'Healthcare & Clinics',
@@ -84,7 +85,7 @@ export default function YouTube() {
     if (!resolvedIndustry) { setError('Industry select karo!'); return }
     setError(''); setLoading(true); setResult(null)
     try {
-      const res = await fetch(`${BACKEND}/youtube-intelligence`, {
+      const res = await apiFetch(`${BACKEND}/youtube-intelligence`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ industry: resolvedIndustry, city, topic }),

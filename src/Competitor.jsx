@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
 import PageShell from './PageShell'
@@ -37,7 +38,7 @@ function Competitor() {
     try { const s = localStorage.getItem(LS_KEY_COMPETITOR); if (s) { setResult(JSON.parse(s)); setFromCache(true) } } catch {}
   }, [])
 
-  const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+  
 
   async function handleAnalyze() {
     if (!myUrl || !comp1 || !businessType) {
@@ -46,7 +47,7 @@ function Competitor() {
     }
     setLoading(true); setError(null); setResult(null)
     try {
-      const res = await fetch(`${BACKEND}/competitor`, {
+      const res = await apiFetch(`${BACKEND}/competitor`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ my_url: myUrl, competitor_urls: [comp1, comp2, comp3].filter(u => u.trim()), business_type: businessType })

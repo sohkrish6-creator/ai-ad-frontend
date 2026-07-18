@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import CityInput, { getLastCity } from './CityInput'
 
@@ -14,7 +15,7 @@ import PageHeader from './PageHeader'
 
 const OPP_LOADING_STEPS = ['Loading business memory...', 'Finding best audience...', 'Calculating opportunity score...']
 
-const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+
 
 const input = { width: '100%', padding: '10px 13px', borderRadius: '7px', border: `1px solid ${SLATE_L}`, background: INK, color: BONE, fontSize: '14px', boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit' }
 
@@ -107,7 +108,7 @@ export default function OpportunityEngine() {
     }
     setError(''); setLoading(true); setResult(null)
     try {
-      const res  = await fetch(`${BACKEND}/opportunity-engine`, {
+      const res  = await apiFetch(`${BACKEND}/opportunity-engine`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

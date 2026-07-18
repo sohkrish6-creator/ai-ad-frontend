@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -8,7 +9,7 @@ import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle
 import PageShell from './PageShell'
 import PageHeader from './PageHeader'
 
-const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
+
 const LS_TAB    = 'adsoh_history_tab'
 const LS_FILTER = 'adsoh_history_filter'
 
@@ -186,7 +187,7 @@ export default function History() {
   async function loadActivity() {
     setActivityLoading(true); setActivityError(null)
     try {
-      const res = await fetch(`${BACKEND}/activity/list?limit=100`)
+      const res = await apiFetch(`${BACKEND}/activity/list?limit=100`)
       const data = await res.json()
       if (data.success) setActivity(data.activity || [])
       else setActivityError(data.error || 'Could not load activity.')
@@ -199,7 +200,7 @@ export default function History() {
   async function loadCampaigns() {
     setCampaignsLoading(true); setCampaignsError(null)
     try {
-      const res = await fetch(`${BACKEND}/campaigns/all`)
+      const res = await apiFetch(`${BACKEND}/campaigns/all`)
       const data = await res.json()
       if (data.success) { setCampaigns(data.campaigns || []); setCampaignErrors(data.errors || {}) }
       else setCampaignsError(data.error || 'Could not load campaigns.')

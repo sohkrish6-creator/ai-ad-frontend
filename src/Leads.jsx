@@ -1,3 +1,4 @@
+import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
 
@@ -14,26 +15,26 @@ function Leads() {
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({ name: '', phone: '', email: '', source: 'whatsapp', message: '', campaign: '' })
 
-  const BASE = 'https://ai-ad-backend-zhpj.onrender.com'
+  const BASE = BACKEND
 
   async function loadLeads() {
-    try { const res = await fetch(`${BASE}/leads`); const d = await res.json(); setLeads(d.leads) } catch {}
+    try { const res = await apiFetch(`${BASE}/leads`); const d = await res.json(); setLeads(d.leads) } catch {}
   }
   async function loadStats() {
-    try { const res = await fetch(`${BASE}/leads/stats`); setStats(await res.json()) } catch {}
+    try { const res = await apiFetch(`${BASE}/leads/stats`); setStats(await res.json()) } catch {}
   }
   async function handleAddLead() {
     if (!form.name || !form.phone) { alert('Naam aur phone zaroori hai!'); return }
     setLoading(true)
     try {
-      await fetch(`${BASE}/leads`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
+      await apiFetch(`${BASE}/leads`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
       setForm({ name: '', phone: '', email: '', source: 'whatsapp', message: '', campaign: '' })
       setShowForm(false); loadLeads(); loadStats()
     } catch { alert('Lead add nahi hua') }
     setLoading(false)
   }
   async function updateStatus(id, status) {
-    await fetch(`${BASE}/leads/${id}?status=${status}`, { method: 'PUT' })
+    await apiFetch(`${BASE}/leads/${id}?status=${status}`, { method: 'PUT' })
     loadLeads()
   }
 
