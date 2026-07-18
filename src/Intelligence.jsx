@@ -173,7 +173,7 @@ function Intelligence() {
   ]
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: INK, fontFamily: FONT, padding: isMobile ? '28px 16px' : '40px 36px', width: '100%', boxSizing: 'border-box' }}>
+      <div style={{ minHeight: '100vh', background: INK, fontFamily: FONT_BODY, padding: isMobile ? '28px 16px' : '40px 36px', width: '100%', boxSizing: 'border-box' }}>
         <style>{`@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }`}</style>
         <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px', color: BONE }}>Business Intelligence</h1>
         <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 24px' }}>6 engines running — 30–60 seconds</p>
@@ -520,7 +520,7 @@ function Intelligence() {
     }
 
     return (
-      <div style={{ minHeight: '100vh', background: INK, fontFamily: FONT, color: BONE, width: '100%', boxSizing: 'border-box', overflowX: 'hidden' }}>
+      <div style={{ minHeight: '100vh', background: INK, fontFamily: FONT_BODY, color: BONE, width: '100%', boxSizing: 'border-box', overflowX: 'hidden' }}>
 
         {/* Sticky Header */}
         <div style={{ background: SLATE, borderBottom: '1px solid #EAEAEA', padding: '0 24px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: isMobile ? '48px' : 0, zIndex: 10 }}>
@@ -1022,7 +1022,7 @@ function Intelligence() {
 
   // ── FORM ─────────────────────────────────────────────────────────────────
   return (
-    <div style={{ minHeight: '100vh', background: INK, fontFamily: FONT, color: BONE, width: '100%', boxSizing: 'border-box', overflowX: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: INK, fontFamily: FONT_BODY, color: BONE, width: '100%', boxSizing: 'border-box', overflowX: 'hidden' }}>
       <div style={{ background: SLATE, borderBottom: '1px solid #EAEAEA', padding: '0 16px', height: '56px', display: 'flex', alignItems: 'center', gap: '8px' }}>
         <Dna size={15} color="#D4AF37" strokeWidth={1.5} />
         <span style={{ fontWeight: '600', fontSize: '15px' }}>Business Intelligence</span>
