@@ -84,6 +84,15 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
 ) {
   const toast = useToast()
 
+  const [connStatus, setConnStatus] = useState(null)
+
+  useEffect(() => {
+    apiFetch(`${BACKEND}/connected-accounts`)
+      .then(r => r.json())
+      .then(d => setConnStatus(d))
+      .catch(() => {})
+  }, [])
+
   const [showGAdsModal, setShowGAdsModal]     = useState(false)
   const [gAdsForm, setGAdsForm]               = useState({ campaign_name: '', budget_daily: '', start_date: '', end_date: '', campaign_type: 'SEARCH' })
   const [gAdsLoading, setGAdsLoading]         = useState(false)
@@ -172,6 +181,7 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
       })
       const data = await res.json()
       if (data.success) { setGAdsResult(data); setGAdsError(null); localStorage.setItem(LS_KEY_GADS_PUSH, JSON.stringify(data)); toast.success('Done!') }
+      else if (data.connect_required) { setGAdsError('__CONNECT_REQUIRED__'); toast.error('Connect your Google Ads account first') }
       else if (data.preflight_blocked) { setGAdsError(`Pre-flight blocked: ${data.launch_readiness?.blocking_issues?.map(b => b.message).join(' | ')}`); toast.error('Pre-flight check failed') }
       else if (data.errors && Array.isArray(data.errors)) { setGAdsError(data.errors); toast.error(data.errors[0]?.message || 'Campaign creation failed.') }
       else { setGAdsError(data.error || 'Campaign creation failed.'); toast.error(data.error || 'Campaign creation failed.') }
@@ -241,6 +251,7 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
       })
       const data = await res.json()
       if (data.success) { setMAdsResult(data); setMAdsError(null); localStorage.setItem(LS_KEY_MADS_PUSH, JSON.stringify(data)); toast.success('Done!') }
+      else if (data.connect_required) { setMAdsError({ error: '__CONNECT_REQUIRED__' }); toast.error('Connect your Meta Ads account first') }
       else if (data.preflight_blocked) { setMAdsError({ error: `Pre-flight blocked: ${data.launch_readiness?.blocking_issues?.map(b => b.message).join(' | ')}` }); toast.error('Meta pre-flight check failed') }
       else { setMAdsError(data); toast.error(data.error || 'Campaign creation failed.') }
     } catch (err) { setMAdsError({ error: `Network error: ${err.message}` }); toast.error(`Network error: ${err.message}`) }
@@ -284,6 +295,16 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
             </div>
             <div style={{ padding: '20px' }}>
               {!gAdsResult ? (
+                connStatus?.google_ads?.connected === false || gAdsError === '__CONNECT_REQUIRED__' ? (
+                  <div style={{ textAlign: 'center', padding: '12px 0' }}>
+                    <div style={{ fontSize: '28px', marginBottom: '10px' }}>🔗</div>
+                    <p style={{ margin: '0 0 6px', fontSize: '14px', fontWeight: '600', color: BONE }}>Google Ads account required</p>
+                    <p style={{ margin: '0 0 20px', fontSize: '12px', color: MUTED }}>Connect your Google Ads account to push campaigns directly from here.</p>
+                    <a href="/account" style={{ display: 'inline-block', background: '#34A853', color: '#fff', padding: '10px 22px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', textDecoration: 'none' }}>
+                      Go to Account → Connect
+                    </a>
+                  </div>
+                ) : (
                 <>
                   <p style={{ margin: '0 0 16px', fontSize: '12px', color: MUTED, background: '#F9FAFB', borderRadius: '6px', padding: '9px 12px', border: '1px solid #F0F0F0' }}>
                     Campaign will be created in <strong>PAUSED</strong> status — review it in Google Ads before going live.
@@ -336,6 +357,7 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
                     {preflightLoading ? 'Running pre-flight check…' : gAdsLoading ? 'Creating campaign...' : 'Launch Campaign 🚀'}
                   </button>
                 </>
+                )
               ) : (
                 <GoogleCampaignSuccessCard result={gAdsResult} onClose={() => setShowGAdsModal(false)} />
               )}
@@ -359,11 +381,21 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
             </div>
             <div style={{ padding: '20px' }}>
               {!mAdsResult ? (
+                connStatus?.meta_ads?.connected === false || mAdsError?.error === '__CONNECT_REQUIRED__' ? (
+                  <div style={{ textAlign: 'center', padding: '12px 0' }}>
+                    <div style={{ fontSize: '28px', marginBottom: '10px' }}>🔗</div>
+                    <p style={{ margin: '0 0 6px', fontSize: '14px', fontWeight: '600', color: BONE }}>Meta Ads account required</p>
+                    <p style={{ margin: '0 0 20px', fontSize: '12px', color: MUTED }}>Connect your Meta Ads account to push campaigns directly from here.</p>
+                    <a href="/account" style={{ display: 'inline-block', background: '#1877F2', color: '#fff', padding: '10px 22px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', textDecoration: 'none' }}>
+                      Go to Account → Connect
+                    </a>
+                  </div>
+                ) : (
                 <>
                   <p style={{ margin: '0 0 16px', fontSize: '12px', color: MUTED, background: '#F9FAFB', borderRadius: '6px', padding: '9px 12px', border: '1px solid #F0F0F0' }}>
                     Campaign will be created in <strong>PAUSED</strong> status — review it in Meta Ads Manager before going live.
                   </p>
-                  {mAdsError && (
+                  {mAdsError && mAdsError.error !== '__CONNECT_REQUIRED__' && (
                     <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '6px', padding: '10px 13px', marginBottom: '14px', color: RED, fontSize: '12.5px' }}>
                       <p style={{ margin: '0 0 4px', fontWeight: '600' }}>{mAdsError.error || 'Campaign creation failed.'}</p>
                       {(mAdsError.error_code != null || mAdsError.error_subcode != null) && (
@@ -403,6 +435,7 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
                     {metaPreflightLoading ? 'Running pre-flight…' : mAdsLoading ? 'Creating campaign...' : 'Launch on Meta Ads 🚀'}
                   </button>
                 </>
+                )
               ) : mAdsResult.action_needed ? (
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#FFFBEB', border: '2px solid #FDE68A', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>

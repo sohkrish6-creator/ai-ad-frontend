@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from './lib/supabase'
 import { useAuth } from './AuthContext'
+import { BACKEND, apiFetch } from './lib/api'
 import { INK, BONE, GOLD, SLATE, SLATE_L, SLATE_M, MUTED, RED, GREEN, FONT_BODY, FONT_DISPLAY, inp, lbl, errBox, okBox, card } from './ds'
 
 export default function Account() {
@@ -15,6 +16,78 @@ export default function Account() {
   const [deleteConfirm, setDeleteConfirm] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [deleteError, setDeleteError] = useState('')
+
+  // Connected Accounts
+  const [connStatus, setConnStatus] = useState(null)
+  const [connLoading, setConnLoading] = useState(true)
+  const [connError, setConnError] = useState('')
+  const [oauthMsg, setOauthMsg] = useState({ text: '', ok: false })
+  const [disconnectingG, setDisconnectingG] = useState(false)
+  const [disconnectingM, setDisconnectingM] = useState(false)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('gads_connected') === 'true') {
+      setOauthMsg({ text: 'Google Ads connected successfully!', ok: true })
+    } else if (params.get('gads_connected') === 'false') {
+      setOauthMsg({ text: `Google Ads connection failed: ${params.get('error') || 'Unknown error'}`, ok: false })
+    } else if (params.get('meta_connected') === 'true') {
+      setOauthMsg({ text: 'Meta Ads connected successfully!', ok: true })
+    } else if (params.get('meta_connected') === 'false') {
+      setOauthMsg({ text: `Meta Ads connection failed: ${params.get('error') || 'Unknown error'}`, ok: false })
+    }
+    if (params.has('gads_connected') || params.has('meta_connected')) {
+      window.history.replaceState({}, '', '/account')
+    }
+    fetchConnStatus()
+  }, [])
+
+  async function fetchConnStatus() {
+    setConnLoading(true)
+    setConnError('')
+    try {
+      const res = await apiFetch(`${BACKEND}/connected-accounts`)
+      const data = await res.json()
+      setConnStatus(data)
+    } catch {
+      setConnError('Could not load connection status.')
+    }
+    setConnLoading(false)
+  }
+
+  async function connectGoogle() {
+    try {
+      const res = await apiFetch(`${BACKEND}/google/connect`)
+      const data = await res.json()
+      if (data.auth_url) window.location.href = data.auth_url
+    } catch { setConnError('Could not start Google Ads connection.') }
+  }
+
+  async function disconnectGoogle() {
+    setDisconnectingG(true)
+    try {
+      await apiFetch(`${BACKEND}/google/disconnect`, { method: 'DELETE' })
+      await fetchConnStatus()
+    } catch { setConnError('Disconnect failed.') }
+    setDisconnectingG(false)
+  }
+
+  async function connectMeta() {
+    try {
+      const res = await apiFetch(`${BACKEND}/meta/connect`)
+      const data = await res.json()
+      if (data.auth_url) window.location.href = data.auth_url
+    } catch { setConnError('Could not start Meta Ads connection.') }
+  }
+
+  async function disconnectMeta() {
+    setDisconnectingM(true)
+    try {
+      await apiFetch(`${BACKEND}/meta/disconnect`, { method: 'DELETE' })
+      await fetchConnStatus()
+    } catch { setConnError('Disconnect failed.') }
+    setDisconnectingM(false)
+  }
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -77,6 +150,91 @@ export default function Account() {
           >
             Log out
           </button>
+        </div>
+
+        {/* Connected Accounts */}
+        <div style={{ ...section }}>
+          <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em', color: MUTED, margin: '0 0 16px' }}>Connected Accounts</p>
+          {oauthMsg.text && (
+            <div style={{ ...(oauthMsg.ok ? okBox : errBox), marginBottom: '14px', fontSize: '13px' }}>{oauthMsg.text}</div>
+          )}
+          {connError && <div style={{ ...errBox, marginBottom: '14px', fontSize: '13px' }}>{connError}</div>}
+          {connLoading ? (
+            <div style={{ color: MUTED, fontSize: '13px' }}>Loading…</div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {/* Google Ads */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: INK, border: `1px solid ${SLATE_L}`, borderRadius: '8px', gap: '12px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '11px' }}>
+                  <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#34A853', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '800', color: '#fff', flexShrink: 0 }}>G</span>
+                  <div>
+                    <div style={{ color: BONE, fontSize: '13px', fontWeight: '600' }}>Google Ads</div>
+                    {connStatus?.google_ads?.connected ? (
+                      <>
+                        <div style={{ color: GREEN, fontSize: '11px', marginTop: '2px' }}>Connected</div>
+                        {connStatus.google_ads.customer_id && (
+                          <div style={{ color: MUTED, fontSize: '11px' }}>Account: {connStatus.google_ads.customer_id}</div>
+                        )}
+                      </>
+                    ) : (
+                      <div style={{ color: MUTED, fontSize: '11px', marginTop: '2px' }}>Not connected</div>
+                    )}
+                  </div>
+                </div>
+                {connStatus?.google_ads?.connected ? (
+                  <button
+                    onClick={disconnectGoogle}
+                    disabled={disconnectingG}
+                    style={{ padding: '7px 14px', background: 'transparent', color: RED, border: `1px solid ${RED}50`, borderRadius: '6px', fontSize: '12px', fontWeight: '500', cursor: disconnectingG ? 'not-allowed' : 'pointer', opacity: disconnectingG ? 0.6 : 1, fontFamily: FONT_BODY, flexShrink: 0 }}
+                  >
+                    {disconnectingG ? 'Disconnecting…' : 'Disconnect'}
+                  </button>
+                ) : (
+                  <button
+                    onClick={connectGoogle}
+                    style={{ padding: '7px 14px', background: '#34A853', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', fontFamily: FONT_BODY, flexShrink: 0 }}
+                  >
+                    Connect
+                  </button>
+                )}
+              </div>
+              {/* Meta Ads */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: INK, border: `1px solid ${SLATE_L}`, borderRadius: '8px', gap: '12px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '11px' }}>
+                  <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#1877F2', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '800', color: '#fff', flexShrink: 0 }}>f</span>
+                  <div>
+                    <div style={{ color: BONE, fontSize: '13px', fontWeight: '600' }}>Meta Ads</div>
+                    {connStatus?.meta_ads?.connected ? (
+                      <>
+                        <div style={{ color: GREEN, fontSize: '11px', marginTop: '2px' }}>Connected</div>
+                        {connStatus.meta_ads.ad_account_id && (
+                          <div style={{ color: MUTED, fontSize: '11px' }}>Ad Account: {connStatus.meta_ads.ad_account_id}</div>
+                        )}
+                      </>
+                    ) : (
+                      <div style={{ color: MUTED, fontSize: '11px', marginTop: '2px' }}>Not connected</div>
+                    )}
+                  </div>
+                </div>
+                {connStatus?.meta_ads?.connected ? (
+                  <button
+                    onClick={disconnectMeta}
+                    disabled={disconnectingM}
+                    style={{ padding: '7px 14px', background: 'transparent', color: RED, border: `1px solid ${RED}50`, borderRadius: '6px', fontSize: '12px', fontWeight: '500', cursor: disconnectingM ? 'not-allowed' : 'pointer', opacity: disconnectingM ? 0.6 : 1, fontFamily: FONT_BODY, flexShrink: 0 }}
+                  >
+                    {disconnectingM ? 'Disconnecting…' : 'Disconnect'}
+                  </button>
+                ) : (
+                  <button
+                    onClick={connectMeta}
+                    style={{ padding: '7px 14px', background: '#1877F2', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', fontFamily: FONT_BODY, flexShrink: 0 }}
+                  >
+                    Connect
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Change password — only for email-auth users */}
