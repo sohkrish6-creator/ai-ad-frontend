@@ -539,7 +539,7 @@ function Dashboard() {
                   <TrendingUp size={13} color={RED} />
                   <p style={{ fontSize: '13px', color: RED, margin: 0, fontFamily: FONT_BODY }}>
                     {gAdsUnauth
-                      ? 'Google Ads blocked — VITE_ADSOH_API_KEY not set in Vercel. Add it and redeploy.'
+                      ? 'Google Ads blocked — authentication error. Refresh the page or log in again.'
                       : 'Google Ads data unavailable — check API credentials'}
                   </p>
                 </div>
