@@ -1,7 +1,7 @@
 import { supabase } from './supabase'
 
 export const BACKEND = 'https://ai-ad-backend-zhpj.onrender.com'
-const API_KEY = import.meta.env.VITE_API_KEY || ''
+const API_KEY = import.meta.env.VITE_ADSOH_API_KEY || ''
 
 /**
  * Drop-in replacement for fetch() that auto-attaches:
