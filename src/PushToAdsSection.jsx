@@ -144,7 +144,7 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
       const pfRes = await apiFetch(`${BACKEND}/google-ads/preflight`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: url || '', budget_daily: parseFloat(gAdsForm.budget_daily) }),
+        body: JSON.stringify({ url: url || '', budget_daily: parseFloat(gAdsForm.budget_daily), business_key: businessKey || '', industry: industry || '', city: city || '' }),
       })
       const pfJson = await pfRes.json()
       if (pfJson.success) {
