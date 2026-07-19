@@ -25,9 +25,19 @@ export default function Account() {
   const [disconnectingG, setDisconnectingG] = useState(false)
   const [disconnectingM, setDisconnectingM] = useState(false)
 
+  // Account picker (shown after OAuth completes — user must explicitly choose their account)
+  const [showPicker, setShowPicker] = useState(false)
+  const [pickerAccounts, setPickerAccounts] = useState([])
+  const [pickerLoading, setPickerLoading] = useState(false)
+  const [pickerError, setPickerError] = useState('')
+  const [pickerSaving, setPickerSaving] = useState(false)
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
-    if (params.get('gads_connected') === 'true') {
+    if (params.get('gads_connected') === 'pending') {
+      setOauthMsg({ text: 'Google Ads authorized — select your ad account below to finish connecting.', ok: true })
+      setShowPicker(true)
+    } else if (params.get('gads_connected') === 'true') {
       setOauthMsg({ text: 'Google Ads connected successfully!', ok: true })
     } else if (params.get('gads_connected') === 'false') {
       setOauthMsg({ text: `Google Ads connection failed: ${params.get('error') || 'Unknown error'}`, ok: false })
@@ -41,6 +51,57 @@ export default function Account() {
     }
     fetchConnStatus()
   }, [])
+
+  async function fetchPickerAccounts() {
+    setPickerLoading(true)
+    setPickerError('')
+    try {
+      const res = await apiFetch(`${BACKEND}/google/accessible-accounts`)
+      const data = await res.json()
+      if (data.success) {
+        setPickerAccounts(data.accounts || [])
+      } else {
+        setPickerError(data.error || 'Could not load accounts.')
+      }
+    } catch {
+      setPickerError('Could not load accessible accounts.')
+    }
+    setPickerLoading(false)
+  }
+
+  async function selectAccount(customerId) {
+    setPickerSaving(true)
+    setPickerError('')
+    try {
+      const res = await apiFetch(`${BACKEND}/google/select-account`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customer_id: customerId }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setShowPicker(false)
+        setOauthMsg({ text: `Google Ads connected — account ${customerId}`, ok: true })
+        await fetchConnStatus()
+      } else {
+        setPickerError(data.error || 'Could not save account selection.')
+      }
+    } catch {
+      setPickerError('Could not save account selection.')
+    }
+    setPickerSaving(false)
+  }
+
+  useEffect(() => {
+    if (showPicker) fetchPickerAccounts()
+  }, [showPicker])
+
+  // Auto-show account picker if token is stored but no account selected yet
+  useEffect(() => {
+    if (connStatus?.google_ads?.pending_account_selection && !showPicker) {
+      setShowPicker(true)
+    }
+  }, [connStatus])
 
   async function fetchConnStatus() {
     setConnLoading(true)
@@ -164,40 +225,94 @@ export default function Account() {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {/* Google Ads */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: INK, border: `1px solid ${SLATE_L}`, borderRadius: '8px', gap: '12px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: INK, border: `1px solid ${connStatus?.google_ads?.pending_account_selection ? '#D4AF37' : SLATE_L}`, borderRadius: '8px', gap: '12px', flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '11px' }}>
                   <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#34A853', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '800', color: '#fff', flexShrink: 0 }}>G</span>
                   <div>
                     <div style={{ color: BONE, fontSize: '13px', fontWeight: '600' }}>Google Ads</div>
                     {connStatus?.google_ads?.connected ? (
-                      <>
-                        <div style={{ color: GREEN, fontSize: '11px', marginTop: '2px' }}>Connected</div>
-                        {connStatus.google_ads.customer_id && (
-                          <div style={{ color: MUTED, fontSize: '11px' }}>Account: {connStatus.google_ads.customer_id}</div>
-                        )}
-                      </>
+                      connStatus.google_ads.pending_account_selection ? (
+                        <div style={{ color: GOLD, fontSize: '11px', marginTop: '2px' }}>Authorized — select your ad account below</div>
+                      ) : (
+                        <>
+                          <div style={{ color: GREEN, fontSize: '11px', marginTop: '2px' }}>Connected</div>
+                          {connStatus.google_ads.customer_id && (
+                            <div style={{ color: MUTED, fontSize: '11px' }}>Account: {connStatus.google_ads.customer_id}</div>
+                          )}
+                        </>
+                      )
                     ) : (
                       <div style={{ color: MUTED, fontSize: '11px', marginTop: '2px' }}>Not connected</div>
                     )}
                   </div>
                 </div>
-                {connStatus?.google_ads?.connected ? (
-                  <button
-                    onClick={disconnectGoogle}
-                    disabled={disconnectingG}
-                    style={{ padding: '7px 14px', background: 'transparent', color: RED, border: `1px solid ${RED}50`, borderRadius: '6px', fontSize: '12px', fontWeight: '500', cursor: disconnectingG ? 'not-allowed' : 'pointer', opacity: disconnectingG ? 0.6 : 1, fontFamily: FONT_BODY, flexShrink: 0 }}
-                  >
-                    {disconnectingG ? 'Disconnecting…' : 'Disconnect'}
-                  </button>
-                ) : (
-                  <button
-                    onClick={connectGoogle}
-                    style={{ padding: '7px 14px', background: '#34A853', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', fontFamily: FONT_BODY, flexShrink: 0 }}
-                  >
-                    Connect
-                  </button>
-                )}
+                <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                  {connStatus?.google_ads?.pending_account_selection && (
+                    <button
+                      onClick={() => setShowPicker(true)}
+                      style={{ padding: '7px 14px', background: GOLD, color: INK, border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', fontFamily: FONT_BODY }}
+                    >
+                      Select Account
+                    </button>
+                  )}
+                  {connStatus?.google_ads?.connected ? (
+                    <button
+                      onClick={disconnectGoogle}
+                      disabled={disconnectingG}
+                      style={{ padding: '7px 14px', background: 'transparent', color: RED, border: `1px solid ${RED}50`, borderRadius: '6px', fontSize: '12px', fontWeight: '500', cursor: disconnectingG ? 'not-allowed' : 'pointer', opacity: disconnectingG ? 0.6 : 1, fontFamily: FONT_BODY }}
+                    >
+                      {disconnectingG ? 'Disconnecting…' : 'Disconnect'}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={connectGoogle}
+                      style={{ padding: '7px 14px', background: '#34A853', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', fontFamily: FONT_BODY }}
+                    >
+                      Connect
+                    </button>
+                  )}
+                </div>
               </div>
+
+              {/* Account Picker — shown after OAuth or when pending_account_selection */}
+              {showPicker && (
+                <div style={{ padding: '16px', background: INK, border: `1px solid ${GOLD}40`, borderRadius: '8px' }}>
+                  <p style={{ color: GOLD, fontSize: '12px', fontWeight: '600', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Select your Google Ads account</p>
+                  <p style={{ color: MUTED, fontSize: '12px', margin: '0 0 12px' }}>Choose the account you want to use for campaign creation. If you manage multiple accounts, pick the one that belongs to your business.</p>
+                  {pickerError && <div style={{ ...errBox, marginBottom: '10px', fontSize: '12px' }}>{pickerError}</div>}
+                  {pickerLoading ? (
+                    <div style={{ color: MUTED, fontSize: '13px' }}>Loading accessible accounts…</div>
+                  ) : pickerAccounts.length === 0 ? (
+                    <div style={{ color: MUTED, fontSize: '12px' }}>No accessible accounts found. Make sure your Google account has access to a Google Ads account.</div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {pickerAccounts.map(acc => (
+                        <button
+                          key={acc.customer_id}
+                          onClick={() => selectAccount(acc.customer_id)}
+                          disabled={pickerSaving}
+                          style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            padding: '10px 14px', background: SLATE, border: `1px solid ${SLATE_L}`,
+                            borderRadius: '6px', cursor: pickerSaving ? 'not-allowed' : 'pointer',
+                            opacity: pickerSaving ? 0.6 : 1, textAlign: 'left', fontFamily: FONT_BODY,
+                          }}
+                        >
+                          <div>
+                            <div style={{ color: BONE, fontSize: '13px', fontWeight: '500' }}>
+                              {acc.name || `Account ${acc.customer_id}`}
+                              {acc.is_manager && <span style={{ color: MUTED, fontSize: '11px', marginLeft: '6px' }}>(Manager)</span>}
+                              {acc.is_test && <span style={{ color: MUTED, fontSize: '11px', marginLeft: '6px' }}>(Test)</span>}
+                            </div>
+                            <div style={{ color: MUTED, fontSize: '11px', marginTop: '2px' }}>ID: {acc.customer_id}</div>
+                          </div>
+                          <span style={{ color: GREEN, fontSize: '11px', fontWeight: '600' }}>Use this →</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
               {/* Meta Ads */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: INK, border: `1px solid ${SLATE_L}`, borderRadius: '8px', gap: '12px', flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '11px' }}>
