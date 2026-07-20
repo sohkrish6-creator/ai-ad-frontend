@@ -46,6 +46,7 @@ const links = [
   { path: '/result-center', label: 'Result Center',  Icon: Trophy          },
   { path: '/prospects',     label: 'Prospects',      Icon: Crosshair       },
   { path: '/cricket-ads',  label: 'Sports Growth',  Icon: Antenna         },
+  { path: '/account-audit', label: 'Account Audit',  Icon: BarChart2     },
   { path: '/google-ads',  label: 'Google Ads Import', Icon: Link2         },
   { path: '/meta-test',   label: 'Meta Ads Test',     Icon: Share2        },
 ]

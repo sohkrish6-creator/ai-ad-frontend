@@ -29,6 +29,7 @@ import ProspectDiscovery from './ProspectDiscovery'
 import CricketAds from './CricketAds'
 import GoogleAdsConnect from './GoogleAdsConnect'
 import GoogleAdsDashboard from './GoogleAdsDashboard'
+import AccountAudit from './AccountAudit'
 import MetaAdsTest from './MetaAdsTest'
 import SmartAnalysis from './SmartAnalysis'
 import SocialIntelligence from './SocialIntelligence'
@@ -108,6 +109,7 @@ function Layout() {
           <Route path="/cricket-ads" element={<ProtectedRoute><CricketAds /></ProtectedRoute>} />
           <Route path="/google-ads" element={<ProtectedRoute><GoogleAdsConnect /></ProtectedRoute>} />
           <Route path="/google-ads/dashboard" element={<ProtectedRoute><GoogleAdsDashboard /></ProtectedRoute>} />
+          <Route path="/account-audit" element={<ProtectedRoute><AccountAudit /></ProtectedRoute>} />
           <Route path="/meta-test" element={<ProtectedRoute><MetaAdsTest /></ProtectedRoute>} />
           <Route path="/smart-analysis" element={<ProtectedRoute><SmartAnalysis /></ProtectedRoute>} />
           <Route path="/social-intelligence" element={<ProtectedRoute><SocialIntelligence /></ProtectedRoute>} />
