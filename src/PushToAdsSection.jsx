@@ -398,6 +398,14 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
                   {mAdsError && mAdsError.error !== '__CONNECT_REQUIRED__' && (
                     <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '6px', padding: '10px 13px', marginBottom: '14px', color: RED, fontSize: '12.5px' }}>
                       <p style={{ margin: '0 0 4px', fontWeight: '600' }}>{mAdsError.error || 'Campaign creation failed.'}</p>
+                      {/* Backend should always send a real "error" string now — this only
+                          fires if some future response shape slips through without one, so a
+                          bare unhelpful fallback never hides real diagnostic detail again. */}
+                      {!mAdsError.error && (
+                        <pre style={{ margin: '4px 0 0', fontSize: '10.5px', whiteSpace: 'pre-wrap', wordBreak: 'break-word', color: RED, opacity: 0.85 }}>
+                          {JSON.stringify(mAdsError, null, 2)}
+                        </pre>
+                      )}
                       {(mAdsError.error_code != null || mAdsError.error_subcode != null) && (
                         <p style={{ margin: '4px 0 0', fontSize: '11px' }}>
                           {mAdsError.error_type ? `type: ${mAdsError.error_type}` : ''}
