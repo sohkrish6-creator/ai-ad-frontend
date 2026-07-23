@@ -2,7 +2,7 @@ import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import {
   PlaySquare, AtSign, Send, Copy, Check, ExternalLink, Mail, MessageCircle,
-  ShieldCheck, ShieldAlert, Sparkles, Video,
+  ShieldCheck, ShieldAlert, Sparkles, Video, AlertTriangle,
 } from 'lucide-react'
 import CityInput, { getLastCity } from './CityInput'
 import { useToast } from './ToastContext'
@@ -399,6 +399,16 @@ export default function CreatorFinder() {
       {/* ── TAB 2: Enrich My List ── */}
       {activeTab === 'instagram' && (
         <div>
+          <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '8px', padding: '12px 16px', marginBottom: '14px', maxWidth: '640px', display: 'flex', gap: '9px', alignItems: 'flex-start' }}>
+            <AlertTriangle size={15} color="#D97706" style={{ flexShrink: 0, marginTop: '1px' }} />
+            <p style={{ margin: 0, fontSize: '12px', color: '#92400E', lineHeight: 1.55 }}>
+              Meta's Business Discovery API currently requires Advanced Access via App Review to look up ANY Instagram
+              account through this app — confirmed live: even our own connected @sohscape account fails identically to
+              a random third-party handle. This isn't a per-account restriction we can code around; enrichment won't
+              return real data for anyone until that Meta App Review process is complete.
+            </p>
+          </div>
+
           <div style={{ ...card, padding: isMobile ? '16px' : '20px', marginBottom: '16px', maxWidth: '640px' }}>
             {igError && <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '7px', padding: '10px 14px', marginBottom: '14px', color: RED, fontSize: '13px' }}>{igError}</div>}
             <div style={{ marginBottom: '14px' }}>
@@ -459,6 +469,16 @@ export default function CreatorFinder() {
                 </select>
               </div>
             </div>
+
+            {outreachPlatform === 'instagram' && (
+              <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '7px', padding: '9px 12px', marginBottom: '14px', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                <AlertTriangle size={13} color="#D97706" style={{ flexShrink: 0, marginTop: '1px' }} />
+                <p style={{ margin: 0, fontSize: '12px', color: '#92400E', lineHeight: 1.5 }}>
+                  Same Meta App Review limitation as the Enrich My List tab — Instagram creator verification currently
+                  fails for any handle, including our own connected account.
+                </p>
+              </div>
+            )}
 
             <p style={{ margin: '0 0 8px', fontSize: '11px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Your Business (for grounding)</p>
             <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
