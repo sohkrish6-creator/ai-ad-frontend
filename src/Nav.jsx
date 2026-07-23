@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Dna, Brain, Globe, Search,
-  Radio, Palette, Target, Users, Menu, X, PlaySquare, TrendingUp, Gift, Monitor, Eye, MessageSquare, BarChart2, Activity, Zap, Trophy, Crosshair, Antenna, Link2, Share2, Sparkles, Radar, Clock, Wand2, BookOpen, LogOut, User, Send,
+  Radio, Palette, Target, Users, Menu, X, PlaySquare, TrendingUp, Gift, Monitor, Eye, MessageSquare, BarChart2, Activity, Zap, Trophy, Crosshair, Antenna, Link2, Share2, Sparkles, Radar, Clock, Wand2, BookOpen, LogOut, User, Send, Image as ImageIcon,
 } from 'lucide-react'
 import { useAuth } from './AuthContext'
 import { supabase } from './lib/supabase'
@@ -33,6 +33,7 @@ const links = [
   { path: '/creative-studio', label: 'Creative Studio', Icon: Wand2       },
   { path: '/command-center', label: 'Command Center', Icon: MessageSquare },
   { path: '/creator-finder', label: 'Creator Finder', Icon: Send            },
+  { path: '/instagram-coach', label: 'Instagram Coach', Icon: ImageIcon     },
   { path: '/audience',     label: 'Audience Finder', Icon: Target          },
   { path: '/leads',        label: 'Leads',           Icon: Users           },
   { path: '/youtube',      label: 'YouTube Intel',   Icon: PlaySquare      },

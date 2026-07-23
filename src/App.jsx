@@ -38,6 +38,7 @@ import CreativeStudio from './CreativeStudio'
 import CommandCenter from './CommandCenter'
 import MarketingIntelligence from './MarketingIntelligence'
 import CreatorFinder from './CreatorFinder'
+import InstagramCoach from './InstagramCoach'
 import Nav from './Nav'
 import { ToastProvider } from './ToastContext'
 import CommandPalette from './CommandPalette'
@@ -118,6 +119,7 @@ function Layout() {
           <Route path="/creative-studio" element={<ProtectedRoute><CreativeStudio /></ProtectedRoute>} />
           <Route path="/command-center" element={<ProtectedRoute><CommandCenter /></ProtectedRoute>} />
           <Route path="/creator-finder" element={<ProtectedRoute><CreatorFinder /></ProtectedRoute>} />
+          <Route path="/instagram-coach" element={<ProtectedRoute><InstagramCoach /></ProtectedRoute>} />
           <Route path="/marketing-intelligence" element={<ProtectedRoute><MarketingIntelligence /></ProtectedRoute>} />
           <Route path="/creative-director" element={<Navigate to="/creative-studio" replace />} />
           <Route path="/ad-to-creative" element={<Navigate to="/creative-studio" replace />} />
