@@ -241,7 +241,7 @@ const PushToAdsSection = forwardRef(function PushToAdsSection(
         body: JSON.stringify({
           campaign_name:  form.campaign_name,
           daily_budget:   parseFloat(form.budget_daily),
-          creative_id:    form.creative_id.trim() || null,
+          creative_id:    form.creative_id.trim(),
           business_key:   businessKey || '',
           url:            url || '',
           industry:       industry || '',
