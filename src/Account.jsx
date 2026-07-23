@@ -32,6 +32,16 @@ export default function Account() {
   const [pickerError, setPickerError] = useState('')
   const [pickerSaving, setPickerSaving] = useState(false)
 
+  // Meta ad account picker — same reasoning as the Google one above: Krish
+  // has access to multiple ad accounts (Sohscape's + sohjustbe's) through
+  // one Facebook login, so the account must be explicitly picked rather
+  // than auto-selected/carried over from a previous connection.
+  const [showMetaPicker, setShowMetaPicker] = useState(false)
+  const [metaPickerAccounts, setMetaPickerAccounts] = useState([])
+  const [metaPickerLoading, setMetaPickerLoading] = useState(false)
+  const [metaPickerError, setMetaPickerError] = useState('')
+  const [metaPickerSaving, setMetaPickerSaving] = useState(false)
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.get('gads_connected') === 'pending') {
@@ -41,6 +51,9 @@ export default function Account() {
       setOauthMsg({ text: 'Google Ads connected successfully!', ok: true })
     } else if (params.get('gads_connected') === 'false') {
       setOauthMsg({ text: `Google Ads connection failed: ${params.get('error') || 'Unknown error'}`, ok: false })
+    } else if (params.get('meta_connected') === 'pending') {
+      setOauthMsg({ text: 'Meta Ads authorized — select your ad account below to finish connecting.', ok: true })
+      setShowMetaPicker(true)
     } else if (params.get('meta_connected') === 'true') {
       setOauthMsg({ text: 'Meta Ads connected successfully!', ok: true })
     } else if (params.get('meta_connected') === 'false') {
@@ -102,6 +115,56 @@ export default function Account() {
       setShowPicker(true)
     }
   }, [connStatus])
+
+  useEffect(() => {
+    if (connStatus?.meta_ads?.pending_account_selection && !showMetaPicker) {
+      setShowMetaPicker(true)
+    }
+  }, [connStatus])
+
+  async function fetchMetaPickerAccounts() {
+    setMetaPickerLoading(true)
+    setMetaPickerError('')
+    try {
+      const res = await apiFetch(`${BACKEND}/meta/accounts`)
+      const data = await res.json()
+      if (data.success) {
+        setMetaPickerAccounts(data.ad_accounts || [])
+      } else {
+        setMetaPickerError(data.error || 'Could not load ad accounts.')
+      }
+    } catch {
+      setMetaPickerError('Could not load accessible ad accounts.')
+    }
+    setMetaPickerLoading(false)
+  }
+
+  async function selectMetaAccount(accountId, accountName) {
+    setMetaPickerSaving(true)
+    setMetaPickerError('')
+    try {
+      const res = await apiFetch(`${BACKEND}/meta/accounts/select`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ad_account_id: accountId }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setShowMetaPicker(false)
+        setOauthMsg({ text: `Meta Ads connected — ${accountName || accountId}`, ok: true })
+        await fetchConnStatus()
+      } else {
+        setMetaPickerError(data.error || 'Could not save account selection.')
+      }
+    } catch {
+      setMetaPickerError('Could not save account selection.')
+    }
+    setMetaPickerSaving(false)
+  }
+
+  useEffect(() => {
+    if (showMetaPicker) fetchMetaPickerAccounts()
+  }, [showMetaPicker])
 
   async function fetchConnStatus() {
     setConnLoading(true)
@@ -320,34 +383,87 @@ export default function Account() {
                   <div>
                     <div style={{ color: BONE, fontSize: '13px', fontWeight: '600' }}>Meta Ads</div>
                     {connStatus?.meta_ads?.connected ? (
-                      <>
-                        <div style={{ color: GREEN, fontSize: '11px', marginTop: '2px' }}>Connected</div>
-                        {connStatus.meta_ads.ad_account_id && (
-                          <div style={{ color: MUTED, fontSize: '11px' }}>Ad Account: {connStatus.meta_ads.ad_account_id}</div>
-                        )}
-                      </>
+                      connStatus.meta_ads.pending_account_selection ? (
+                        <div style={{ color: GOLD, fontSize: '11px', marginTop: '2px' }}>Authorized — select an ad account</div>
+                      ) : (
+                        <>
+                          <div style={{ color: GREEN, fontSize: '11px', marginTop: '2px' }}>Connected</div>
+                          {connStatus.meta_ads.ad_account_id && (
+                            <div style={{ color: MUTED, fontSize: '11px' }}>Ad Account: {connStatus.meta_ads.ad_account_id}</div>
+                          )}
+                        </>
+                      )
                     ) : (
                       <div style={{ color: MUTED, fontSize: '11px', marginTop: '2px' }}>Not connected</div>
                     )}
                   </div>
                 </div>
-                {connStatus?.meta_ads?.connected ? (
-                  <button
-                    onClick={disconnectMeta}
-                    disabled={disconnectingM}
-                    style={{ padding: '7px 14px', background: 'transparent', color: RED, border: `1px solid ${RED}50`, borderRadius: '6px', fontSize: '12px', fontWeight: '500', cursor: disconnectingM ? 'not-allowed' : 'pointer', opacity: disconnectingM ? 0.6 : 1, fontFamily: FONT_BODY, flexShrink: 0 }}
-                  >
-                    {disconnectingM ? 'Disconnecting…' : 'Disconnect'}
-                  </button>
-                ) : (
-                  <button
-                    onClick={connectMeta}
-                    style={{ padding: '7px 14px', background: '#1877F2', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', fontFamily: FONT_BODY, flexShrink: 0 }}
-                  >
-                    Connect
-                  </button>
-                )}
+                <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                  {connStatus?.meta_ads?.pending_account_selection && (
+                    <button
+                      onClick={() => setShowMetaPicker(true)}
+                      style={{ padding: '7px 14px', background: GOLD, color: INK, border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', fontFamily: FONT_BODY }}
+                    >
+                      Select Account
+                    </button>
+                  )}
+                  {connStatus?.meta_ads?.connected ? (
+                    <button
+                      onClick={disconnectMeta}
+                      disabled={disconnectingM}
+                      style={{ padding: '7px 14px', background: 'transparent', color: RED, border: `1px solid ${RED}50`, borderRadius: '6px', fontSize: '12px', fontWeight: '500', cursor: disconnectingM ? 'not-allowed' : 'pointer', opacity: disconnectingM ? 0.6 : 1, fontFamily: FONT_BODY }}
+                    >
+                      {disconnectingM ? 'Disconnecting…' : 'Disconnect'}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={connectMeta}
+                      style={{ padding: '7px 14px', background: '#1877F2', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', fontFamily: FONT_BODY }}
+                    >
+                      Connect
+                    </button>
+                  )}
+                </div>
               </div>
+
+              {/* Meta Ad Account Picker — shown after OAuth or when pending_account_selection */}
+              {showMetaPicker && (
+                <div style={{ padding: '16px', background: INK, border: `1px solid ${GOLD}40`, borderRadius: '8px' }}>
+                  <p style={{ color: GOLD, fontSize: '12px', fontWeight: '600', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Select your Meta ad account</p>
+                  <p style={{ color: MUTED, fontSize: '12px', margin: '0 0 12px' }}>Choose the account you want to use for campaign creation. If this Facebook login has access to multiple businesses' accounts, pick the one that belongs to your business.</p>
+                  {metaPickerError && <div style={{ ...errBox, marginBottom: '10px', fontSize: '12px' }}>{metaPickerError}</div>}
+                  {metaPickerLoading ? (
+                    <div style={{ color: MUTED, fontSize: '13px' }}>Loading accessible accounts…</div>
+                  ) : metaPickerAccounts.length === 0 ? (
+                    <div style={{ color: MUTED, fontSize: '12px' }}>No accessible ad accounts found. Make sure this Facebook login has access to a Meta Ads account.</div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {metaPickerAccounts.map(acc => (
+                        <button
+                          key={acc.account_id}
+                          onClick={() => selectMetaAccount(acc.account_id, acc.name)}
+                          disabled={metaPickerSaving}
+                          style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            padding: '10px 14px', background: SLATE, border: `1px solid ${SLATE_L}`,
+                            borderRadius: '6px', cursor: metaPickerSaving ? 'not-allowed' : 'pointer',
+                            opacity: metaPickerSaving ? 0.6 : 1, textAlign: 'left', fontFamily: FONT_BODY,
+                          }}
+                        >
+                          <div>
+                            <div style={{ color: BONE, fontSize: '13px', fontWeight: '500' }}>
+                              {acc.name || `Account ${acc.account_id}`}
+                              {acc.currency && <span style={{ color: MUTED, fontSize: '11px', marginLeft: '6px' }}>({acc.currency})</span>}
+                            </div>
+                            <div style={{ color: MUTED, fontSize: '11px', marginTop: '2px' }}>ID: {acc.account_id}</div>
+                          </div>
+                          <span style={{ color: GREEN, fontSize: '11px', fontWeight: '600' }}>Use this →</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
