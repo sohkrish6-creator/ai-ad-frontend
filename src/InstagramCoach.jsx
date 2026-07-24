@@ -146,6 +146,7 @@ export default function InstagramCoach() {
     setLoading(false)
   }
 
+  const coherence = result?.content_coherence || {}
   const hook = result?.hook_assessment || {}
   const cap  = result?.caption_analysis || {}
   const vis  = result?.visual_psychology || {}
@@ -242,6 +243,16 @@ export default function InstagramCoach() {
 
           {result && !loading && (
             <div>
+              {coherence.coherent === false && (
+                <div style={{ background: 'rgba(196,69,58,0.12)', border: `1.5px solid ${RED}`, borderRadius: '8px', padding: '14px 16px', marginBottom: '14px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                  <span style={{ fontSize: '18px', lineHeight: 1, flexShrink: 0 }}>⚠️</span>
+                  <div>
+                    <p style={{ margin: '0 0 4px', fontSize: '13.5px', fontWeight: '700', color: RED }}>Image and caption appear to be about different things</p>
+                    <p style={{ margin: 0, fontSize: '13px', color: BONE, lineHeight: 1.55 }}>{coherence.mismatch_warning}</p>
+                  </div>
+                </div>
+              )}
+
               {resultImagePreview && (
                 <div style={{ ...card, padding: '10px', marginBottom: '14px', textAlign: 'center' }}>
                   <img src={resultImagePreview} alt="Analyzed" style={{ maxWidth: '100%', maxHeight: '260px', borderRadius: '6px' }} />
