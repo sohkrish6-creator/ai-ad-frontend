@@ -13,7 +13,20 @@ import PageHeader from './PageHeader'
 
 const LS_KEY  = 'adsoh_prospect_result'
 const SIE_PREFILL_LS_KEY = 'adsoh_social_intel_prefill'
-const PROSPECT_LOADING_STEPS = ['Scanning Google Maps...', 'Enriching business details...', 'Scoring prospects...']
+
+// Rotating status text, not a live progress counter — a single request/
+// response call has no real incremental count to report mid-flight (that
+// would need converting this into a background-task+polling flow), so
+// these describe the actual phase happening rather than fabricate an "X of
+// N" number that isn't really being tracked.
+function prospectLoadingSteps(maxProspects) {
+  return [
+    'Scanning Google Maps...',
+    `Enriching up to ${maxProspects} business profiles...`,
+    'Checking social & ad presence...',
+    'Scoring prospects with AI...',
+  ]
+}
 
 
 const INDUSTRIES = [
@@ -197,7 +210,7 @@ export default function ProspectDiscovery() {
   const [city, setCity]                   = useState(getLastCity)
   const [maxProspects, setMaxProspects]   = useState(15)
   const [loading, setLoading]             = useState(false)
-  const loadingStep = useLoadingSteps(PROSPECT_LOADING_STEPS, loading)
+  const loadingStep = useLoadingSteps(prospectLoadingSteps(maxProspects), loading)
   const [error, setError]                 = useState('')
   const [result, setResult]               = useState(null)
   const [fromCache, setFromCache]         = useState(false)
@@ -284,6 +297,7 @@ export default function ProspectDiscovery() {
                 <option value={10}>10 prospects</option>
                 <option value={15}>15 prospects</option>
                 <option value={20}>20 prospects</option>
+                <option value={50}>50 prospects</option>
               </select>
             </div>
           </div>
@@ -305,9 +319,9 @@ export default function ProspectDiscovery() {
         <div style={{ maxWidth: '640px', width: '100%' }}>
           {[
             'Scanning Google Maps for real businesses...',
-            'Fetching contact details & ratings...',
+            `Fetching contact details & ratings for up to ${maxProspects} businesses...`,
             'Checking social media & ad presence...',
-            'AI scoring each prospect...',
+            `Scoring all prospects with AI${maxProspects > 20 ? ' (larger scans take a bit longer)' : ''}...`,
           ].map((label, i) => (
             <div key={i} style={{ ...card, padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
               <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: '#FFFBF0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
