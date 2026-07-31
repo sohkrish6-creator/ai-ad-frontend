@@ -25,6 +25,7 @@ export default function Account() {
   const [disconnectingG, setDisconnectingG] = useState(false)
   const [disconnectingM, setDisconnectingM] = useState(false)
   const [disconnectingGsc, setDisconnectingGsc] = useState(false)
+  const [syncingGsc, setSyncingGsc] = useState(false)
 
   // Account picker (shown after OAuth completes — user must explicitly choose their account)
   const [showPicker, setShowPicker] = useState(false)
@@ -286,6 +287,22 @@ export default function Account() {
       const data = await res.json()
       if (data.auth_url) window.location.href = data.auth_url
     } catch { setConnError('Could not start Search Console connection.') }
+  }
+
+  async function syncSearchConsole() {
+    setSyncingGsc(true)
+    try {
+      const res = await apiFetch(`${BACKEND}/search-console/sync`, { method: 'POST' })
+      const data = await res.json()
+      if (data.success) {
+        setOauthMsg({ text: `Synced ${data.query_rows ?? 0} query rows and ${data.page_rows ?? 0} page rows for ${data.site_url}.`, ok: true })
+      } else {
+        setOauthMsg({ text: `Sync failed: ${data.error || 'Unknown error'}`, ok: false })
+      }
+    } catch {
+      setOauthMsg({ text: 'Sync failed: network error.', ok: false })
+    }
+    setSyncingGsc(false)
   }
 
   async function disconnectSearchConsole() {
@@ -578,6 +595,15 @@ export default function Account() {
                       style={{ padding: '7px 14px', background: GOLD, color: INK, border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', fontFamily: FONT_BODY }}
                     >
                       Select Property
+                    </button>
+                  )}
+                  {connStatus?.search_console?.connected && !connStatus?.search_console?.pending_account_selection && (
+                    <button
+                      onClick={syncSearchConsole}
+                      disabled={syncingGsc}
+                      style={{ padding: '7px 14px', background: 'transparent', color: '#00ACC1', border: '1px solid #00ACC150', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: syncingGsc ? 'not-allowed' : 'pointer', opacity: syncingGsc ? 0.6 : 1, fontFamily: FONT_BODY }}
+                    >
+                      {syncingGsc ? 'Syncing…' : 'Sync Now'}
                     </button>
                   )}
                   {connStatus?.search_console?.connected ? (

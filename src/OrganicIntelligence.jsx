@@ -120,6 +120,7 @@ export default function OrganicIntelligence() {
   const [repurposeResult, setRepurposeResult] = useState(null)
   const [repurposeLoading, setRepurposeLoading] = useState(false)
   const [copiedKey, setCopiedKey] = useState('')
+  const [syncing, setSyncing] = useState(false)
 
   useEffect(() => { load() }, [])
 
@@ -165,6 +166,23 @@ export default function OrganicIntelligence() {
       if (data.success) setQueryRows(data.queries || [])
     } catch { /* keep prior rows on transient failure */ }
     setQueryLoading(false)
+  }
+
+  async function handleSyncNow() {
+    setSyncing(true)
+    try {
+      const res = await apiFetch(`${BACKEND}/search-console/sync`, { method: 'POST' })
+      const data = await res.json()
+      if (data.success) {
+        toast.success(`Synced ${data.query_rows ?? 0} query rows, ${data.page_rows ?? 0} page rows.`)
+        await load()
+      } else {
+        toast.error(data.error || 'Sync failed.')
+      }
+    } catch {
+      toast.error('Network error during sync.')
+    }
+    setSyncing(false)
   }
 
   async function handleRegenerateInsights() {
@@ -275,6 +293,19 @@ export default function OrganicIntelligence() {
       <PageHeader
         title="Organic Intelligence"
         sub={siteUrl ? `Google Search Console — ${siteUrl}` : 'Google Search Console — organic search performance, opportunities, and AI insights'}
+        action={
+          <button
+            onClick={handleSyncNow}
+            disabled={syncing}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '6px', background: GOLD, color: '#171717',
+              border: 'none', borderRadius: '7px', padding: '9px 18px', fontSize: '13px', fontWeight: '700',
+              cursor: syncing ? 'not-allowed' : 'pointer', opacity: syncing ? 0.6 : 1, fontFamily: FONT_BODY,
+            }}
+          >
+            <RefreshCw size={13} className={syncing ? 'spin' : ''} /> {syncing ? 'Syncing…' : 'Sync Now'}
+          </button>
+        }
       />
 
       {insufficient && health?.banner && (
