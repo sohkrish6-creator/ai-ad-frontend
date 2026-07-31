@@ -24,6 +24,7 @@ export default function Account() {
   const [oauthMsg, setOauthMsg] = useState({ text: '', ok: false })
   const [disconnectingG, setDisconnectingG] = useState(false)
   const [disconnectingM, setDisconnectingM] = useState(false)
+  const [disconnectingGsc, setDisconnectingGsc] = useState(false)
 
   // Account picker (shown after OAuth completes — user must explicitly choose their account)
   const [showPicker, setShowPicker] = useState(false)
@@ -42,6 +43,15 @@ export default function Account() {
   const [metaPickerError, setMetaPickerError] = useState('')
   const [metaPickerSaving, setMetaPickerSaving] = useState(false)
 
+  // Search Console property picker — same reasoning as Google Ads/Meta above:
+  // one Google login can have access to multiple verified properties, so the
+  // property must be explicitly picked rather than auto-selected.
+  const [showGscPicker, setShowGscPicker] = useState(false)
+  const [gscPickerProperties, setGscPickerProperties] = useState([])
+  const [gscPickerLoading, setGscPickerLoading] = useState(false)
+  const [gscPickerError, setGscPickerError] = useState('')
+  const [gscPickerSaving, setGscPickerSaving] = useState(false)
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.get('gads_connected') === 'pending') {
@@ -58,8 +68,15 @@ export default function Account() {
       setOauthMsg({ text: 'Meta Ads connected successfully!', ok: true })
     } else if (params.get('meta_connected') === 'false') {
       setOauthMsg({ text: `Meta Ads connection failed: ${params.get('error') || 'Unknown error'}`, ok: false })
+    } else if (params.get('gsc_connected') === 'pending') {
+      setOauthMsg({ text: 'Search Console authorized — select your property below to finish connecting.', ok: true })
+      setShowGscPicker(true)
+    } else if (params.get('gsc_connected') === 'true') {
+      setOauthMsg({ text: 'Search Console connected successfully!', ok: true })
+    } else if (params.get('gsc_connected') === 'false') {
+      setOauthMsg({ text: `Search Console connection failed: ${params.get('error') || 'Unknown error'}`, ok: false })
     }
-    if (params.has('gads_connected') || params.has('meta_connected')) {
+    if (params.has('gads_connected') || params.has('meta_connected') || params.has('gsc_connected')) {
       window.history.replaceState({}, '', '/account')
     }
     fetchConnStatus()
@@ -166,6 +183,56 @@ export default function Account() {
     if (showMetaPicker) fetchMetaPickerAccounts()
   }, [showMetaPicker])
 
+  async function fetchGscProperties() {
+    setGscPickerLoading(true)
+    setGscPickerError('')
+    try {
+      const res = await apiFetch(`${BACKEND}/search-console/properties`)
+      const data = await res.json()
+      if (data.success) {
+        setGscPickerProperties(data.properties || [])
+      } else {
+        setGscPickerError(data.error || 'Could not load properties.')
+      }
+    } catch {
+      setGscPickerError('Could not load accessible properties.')
+    }
+    setGscPickerLoading(false)
+  }
+
+  async function selectGscProperty(siteUrl) {
+    setGscPickerSaving(true)
+    setGscPickerError('')
+    try {
+      const res = await apiFetch(`${BACKEND}/search-console/select-property`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ site_url: siteUrl }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setShowGscPicker(false)
+        setOauthMsg({ text: `Search Console connected — ${siteUrl}`, ok: true })
+        await fetchConnStatus()
+      } else {
+        setGscPickerError(data.error || 'Could not save property selection.')
+      }
+    } catch {
+      setGscPickerError('Could not save property selection.')
+    }
+    setGscPickerSaving(false)
+  }
+
+  useEffect(() => {
+    if (showGscPicker) fetchGscProperties()
+  }, [showGscPicker])
+
+  useEffect(() => {
+    if (connStatus?.search_console?.pending_account_selection && !showGscPicker) {
+      setShowGscPicker(true)
+    }
+  }, [connStatus])
+
   async function fetchConnStatus() {
     setConnLoading(true)
     setConnError('')
@@ -211,6 +278,23 @@ export default function Account() {
       await fetchConnStatus()
     } catch { setConnError('Disconnect failed.') }
     setDisconnectingM(false)
+  }
+
+  async function connectSearchConsole() {
+    try {
+      const res = await apiFetch(`${BACKEND}/search-console/connect`)
+      const data = await res.json()
+      if (data.auth_url) window.location.href = data.auth_url
+    } catch { setConnError('Could not start Search Console connection.') }
+  }
+
+  async function disconnectSearchConsole() {
+    setDisconnectingGsc(true)
+    try {
+      await apiFetch(`${BACKEND}/search-console/disconnect`, { method: 'DELETE' })
+      await fetchConnStatus()
+    } catch { setConnError('Disconnect failed.') }
+    setDisconnectingGsc(false)
   }
 
   async function handleLogout() {
@@ -456,6 +540,92 @@ export default function Account() {
                               {acc.currency && <span style={{ color: MUTED, fontSize: '11px', marginLeft: '6px' }}>({acc.currency})</span>}
                             </div>
                             <div style={{ color: MUTED, fontSize: '11px', marginTop: '2px' }}>ID: {acc.account_id}</div>
+                          </div>
+                          <span style={{ color: GREEN, fontSize: '11px', fontWeight: '600' }}>Use this →</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Search Console */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: INK, border: `1px solid ${connStatus?.search_console?.pending_account_selection ? '#D4AF37' : SLATE_L}`, borderRadius: '8px', gap: '12px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '11px' }}>
+                  <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#00ACC1', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '800', color: '#fff', flexShrink: 0 }}>SC</span>
+                  <div>
+                    <div style={{ color: BONE, fontSize: '13px', fontWeight: '600' }}>Search Console</div>
+                    {connStatus?.search_console?.connected ? (
+                      connStatus.search_console.pending_account_selection ? (
+                        <div style={{ color: GOLD, fontSize: '11px', marginTop: '2px' }}>Authorized — select your property below</div>
+                      ) : (
+                        <>
+                          <div style={{ color: GREEN, fontSize: '11px', marginTop: '2px' }}>Connected</div>
+                          {connStatus.search_console.site_url && (
+                            <div style={{ color: MUTED, fontSize: '11px' }}>Property: {connStatus.search_console.site_url}</div>
+                          )}
+                        </>
+                      )
+                    ) : (
+                      <div style={{ color: MUTED, fontSize: '11px', marginTop: '2px' }}>Not connected</div>
+                    )}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                  {connStatus?.search_console?.pending_account_selection && (
+                    <button
+                      onClick={() => setShowGscPicker(true)}
+                      style={{ padding: '7px 14px', background: GOLD, color: INK, border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', fontFamily: FONT_BODY }}
+                    >
+                      Select Property
+                    </button>
+                  )}
+                  {connStatus?.search_console?.connected ? (
+                    <button
+                      onClick={disconnectSearchConsole}
+                      disabled={disconnectingGsc}
+                      style={{ padding: '7px 14px', background: 'transparent', color: RED, border: `1px solid ${RED}50`, borderRadius: '6px', fontSize: '12px', fontWeight: '500', cursor: disconnectingGsc ? 'not-allowed' : 'pointer', opacity: disconnectingGsc ? 0.6 : 1, fontFamily: FONT_BODY }}
+                    >
+                      {disconnectingGsc ? 'Disconnecting…' : 'Disconnect'}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={connectSearchConsole}
+                      style={{ padding: '7px 14px', background: '#00ACC1', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', fontFamily: FONT_BODY }}
+                    >
+                      Connect
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Search Console Property Picker — shown after OAuth or when pending_account_selection */}
+              {showGscPicker && (
+                <div style={{ padding: '16px', background: INK, border: `1px solid ${GOLD}40`, borderRadius: '8px' }}>
+                  <p style={{ color: GOLD, fontSize: '12px', fontWeight: '600', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Select your Search Console property</p>
+                  <p style={{ color: MUTED, fontSize: '12px', margin: '0 0 12px' }}>Choose the verified property you want Organic Intelligence to sync. If this Google login has access to multiple sites, pick the one that belongs to your business.</p>
+                  {gscPickerError && <div style={{ ...errBox, marginBottom: '10px', fontSize: '12px' }}>{gscPickerError}</div>}
+                  {gscPickerLoading ? (
+                    <div style={{ color: MUTED, fontSize: '13px' }}>Loading accessible properties…</div>
+                  ) : gscPickerProperties.length === 0 ? (
+                    <div style={{ color: MUTED, fontSize: '12px' }}>No verified properties found. Make sure this Google login has Owner or Full access to a Search Console property.</div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {gscPickerProperties.map(p => (
+                        <button
+                          key={p.site_url}
+                          onClick={() => selectGscProperty(p.site_url)}
+                          disabled={gscPickerSaving}
+                          style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            padding: '10px 14px', background: SLATE, border: `1px solid ${SLATE_L}`,
+                            borderRadius: '6px', cursor: gscPickerSaving ? 'not-allowed' : 'pointer',
+                            opacity: gscPickerSaving ? 0.6 : 1, textAlign: 'left', fontFamily: FONT_BODY,
+                          }}
+                        >
+                          <div>
+                            <div style={{ color: BONE, fontSize: '13px', fontWeight: '500' }}>{p.site_url}</div>
+                            <div style={{ color: MUTED, fontSize: '11px', marginTop: '2px' }}>{p.permission_level}</div>
                           </div>
                           <span style={{ color: GREEN, fontSize: '11px', fontWeight: '600' }}>Use this →</span>
                         </button>

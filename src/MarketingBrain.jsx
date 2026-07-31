@@ -1,5 +1,6 @@
 import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
 import CityInput, { getLastCity } from './CityInput'
 import { Copy, Check, ExternalLink, Download, TrendingUp, Rocket, X, AlertTriangle } from 'lucide-react'
 import { useToast } from './ToastContext'
@@ -107,6 +108,8 @@ function renderBlock(text) {
 function MarketingBrain() {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
   const toast = useToast()
+  const location = useLocation()
+  const [additionalContext, setAdditionalContext] = useState('')
   const [url, setUrl] = useState('')
   const [businessType, setBusinessType] = useState('')
   const [budget, setBudget] = useState('')
@@ -136,6 +139,17 @@ function MarketingBrain() {
   
 
   useEffect(() => {
+    // Arriving from Organic Intelligence's "Generate Campaign" button — prefill
+    // the inputs and stash the real query/page context to pass into the launch
+    // kit call once the user runs the (still-required) brain analysis below.
+    const prefill = location.state
+    if (prefill?.prefillUrl || prefill?.prefillIndustry || prefill?.prefillCity || prefill?.additionalContext) {
+      if (prefill.prefillUrl) setUrl(prefill.prefillUrl)
+      if (prefill.prefillIndustry) setBusinessType(prefill.prefillIndustry)
+      if (prefill.prefillCity) setTargetCity(prefill.prefillCity)
+      if (prefill.additionalContext) setAdditionalContext(prefill.additionalContext)
+      toast.success('Pre-filled from Organic Intelligence — run analysis, then Generate Launch Kit.')
+    }
     // Arriving from the History page with a business_key takes priority over
     // whatever this browser's own localStorage happens to have cached.
     const businessKey = new URLSearchParams(window.location.search).get('business_key')
@@ -227,6 +241,7 @@ function MarketingBrain() {
           goal,
           language,
           sections: result.sections || {},
+          additional_context: additionalContext,
         })
       })
       const data = await res.json()
