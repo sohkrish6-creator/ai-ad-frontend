@@ -5,6 +5,7 @@ import { BACKEND, apiFetch } from './lib/api'
 import { GOLD, GREEN, RED, MUTED, BONE, SLATE_M, SLATE_L, card, cardInner, lbl } from './ds'
 import PageShell from './PageShell'
 import PageHeader from './PageHeader'
+import VoiceOutreachSubNav from './VoiceOutreachSubNav'
 
 function Metric({ label, value, color }) {
   return (
@@ -38,6 +39,7 @@ export default function VoiceOutreachAnalytics() {
   if (!analytics) {
     return (
       <PageShell maxWidth="960px">
+        <VoiceOutreachSubNav />
         <PageHeader title="Voice Outreach — Analytics" sub="Loading..." />
       </PageShell>
     )
@@ -45,6 +47,7 @@ export default function VoiceOutreachAnalytics() {
 
   return (
     <PageShell maxWidth="960px">
+      <VoiceOutreachSubNav />
       <PageHeader
         title="Voice Outreach — Analytics"
         sub="Real completed calls only — test calls and Dry Run simulations are excluded from every number below."

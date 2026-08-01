@@ -6,6 +6,7 @@ import { BACKEND, apiFetch } from './lib/api'
 import { GOLD, GREEN, RED, MUTED, BONE, SLATE_M, SLATE_L, card } from './ds'
 import PageShell from './PageShell'
 import PageHeader from './PageHeader'
+import VoiceOutreachSubNav from './VoiceOutreachSubNav'
 
 // Status glyph/color language mirrors CommandCenter.jsx's Live Tasks Panel
 // (STEP_STATUS_STYLE, pulsing dot while running) — that component itself is
@@ -121,6 +122,7 @@ export default function VoiceOutreachCallDashboard() {
   return (
     <PageShell maxWidth="960px">
       <style>{`@keyframes voicePulse { 0%{opacity:1} 100%{opacity:0.25} }`}</style>
+      <VoiceOutreachSubNav />
       <PageHeader
         title="Voice Outreach — Call Dashboard"
         sub={`${activeCount} call${activeCount === 1 ? '' : 's'} in progress · running cost estimate ₹${Math.round(totalCost)}`}

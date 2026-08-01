@@ -9,6 +9,7 @@ import { BACKEND, apiFetch } from './lib/api'
 import { GOLD, card, cardInner, lbl, inp, BONE, MUTED, RED, GREEN, SLATE_M, SLATE_L } from './ds'
 import PageShell from './PageShell'
 import PageHeader from './PageHeader'
+import VoiceOutreachSubNav from './VoiceOutreachSubNav'
 
 const LAST_URL_KEY = 'adsoh_voice_outreach_business_url'
 
@@ -282,6 +283,7 @@ export default function VoiceOutreachReview() {
   if (error) {
     return (
       <PageShell maxWidth="960px">
+        <VoiceOutreachSubNav />
         <PageHeader title="Voice Outreach — Review" sub="" />
         <div style={{ ...card, padding: '24px', textAlign: 'center', color: RED }}>{error}</div>
       </PageShell>
@@ -291,6 +293,7 @@ export default function VoiceOutreachReview() {
   if (!batch) {
     return (
       <PageShell maxWidth="960px">
+        <VoiceOutreachSubNav />
         <PageHeader title="Voice Outreach — Review" sub="Loading batch..." />
       </PageShell>
     )
@@ -306,6 +309,7 @@ export default function VoiceOutreachReview() {
 
   return (
     <PageShell maxWidth="960px">
+      <VoiceOutreachSubNav />
       <PageHeader
         title="Voice Outreach — Review"
         sub={`${batch.industry}${batch.city ? ' in ' + batch.city : ''} — every prospect below needs your explicit approval before anything further happens.`}

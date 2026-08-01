@@ -9,6 +9,7 @@ import { BACKEND, apiFetch } from './lib/api'
 import { GOLD, GREEN, MUTED, BONE, SLATE_M, SLATE_L, card, cardInner, lbl, inp } from './ds'
 import PageShell from './PageShell'
 import PageHeader from './PageHeader'
+import VoiceOutreachSubNav from './VoiceOutreachSubNav'
 
 const CLASSIFICATIONS = [
   'Interested', 'Callback Requested', 'Not Interested', 'Wrong Contact', 'Voicemail', 'Busy', 'Unknown',
@@ -119,6 +120,7 @@ export default function VoiceOutreachCallDetail() {
   if (!data) {
     return (
       <PageShell maxWidth="900px">
+        <VoiceOutreachSubNav />
         <PageHeader title="Voice Outreach — Call Detail" sub="Loading..." />
       </PageShell>
     )
@@ -129,6 +131,7 @@ export default function VoiceOutreachCallDetail() {
 
   return (
     <PageShell maxWidth="900px">
+      <VoiceOutreachSubNav />
       <PageHeader
         title={prospect?.business_name || (call.is_test ? 'Test Call' : `Call #${call.id}`)}
         sub={`${call.status} · ${call.duration_seconds || 0}s${(call.is_dry_run === true || call.is_dry_run === 1) ? ' · DRY RUN' : ''}${(call.is_test === true || call.is_test === 1) ? ' · TEST' : ''}`}

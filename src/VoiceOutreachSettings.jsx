@@ -5,6 +5,7 @@ import { BACKEND, apiFetch } from './lib/api'
 import { GOLD, GREEN, card, cardInner, lbl, inp, BONE, MUTED, SLATE_M, SLATE_L } from './ds'
 import PageShell from './PageShell'
 import PageHeader from './PageHeader'
+import VoiceOutreachSubNav from './VoiceOutreachSubNav'
 
 const DAYS = [
   { key: 'mon', label: 'Mon' }, { key: 'tue', label: 'Tue' }, { key: 'wed', label: 'Wed' },
@@ -93,6 +94,7 @@ export default function VoiceOutreachSettings() {
   if (!settings) {
     return (
       <PageShell maxWidth="720px">
+        <VoiceOutreachSubNav />
         <PageHeader title="Voice Outreach — Settings" sub="Loading..." />
       </PageShell>
     )
@@ -102,6 +104,7 @@ export default function VoiceOutreachSettings() {
 
   return (
     <PageShell maxWidth="720px">
+      <VoiceOutreachSubNav />
       <PageHeader title="Voice Outreach — Settings" sub="Calling window, compliance mode, and cooldown rules — enforced server-side on every approval and every call." />
 
       <div style={{ ...card, padding: '20px', marginBottom: '16px' }}>

@@ -8,6 +8,7 @@ import { BACKEND, apiFetch } from './lib/api'
 import { GOLD, card, lbl, inp, BONE, MUTED, RED, SLATE_M, SLATE_L } from './ds'
 import PageShell from './PageShell'
 import PageHeader from './PageHeader'
+import VoiceOutreachSubNav from './VoiceOutreachSubNav'
 
 export default function VoiceOutreachBatchBuilder() {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
@@ -68,6 +69,7 @@ export default function VoiceOutreachBatchBuilder() {
 
   return (
     <PageShell maxWidth="720px">
+      <VoiceOutreachSubNav />
       <PageHeader
         title="Voice Outreach — Build Batch"
         sub="Discover real local prospects, detect genuine weaknesses, and prepare AI phone pitches for human review — no calls are made in this step."

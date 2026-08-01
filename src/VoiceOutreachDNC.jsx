@@ -5,6 +5,7 @@ import { BACKEND, apiFetch } from './lib/api'
 import { GOLD, card, lbl, inp, BONE, MUTED, RED, SLATE_L } from './ds'
 import PageShell from './PageShell'
 import PageHeader from './PageHeader'
+import VoiceOutreachSubNav from './VoiceOutreachSubNav'
 
 export default function VoiceOutreachDNC() {
   const toast = useToast()
@@ -57,6 +58,7 @@ export default function VoiceOutreachDNC() {
 
   return (
     <PageShell maxWidth="720px">
+      <VoiceOutreachSubNav />
       <PageHeader title="Voice Outreach — DNC List" sub="Numbers here are permanently blocked from voice outreach — checked automatically on every approval." />
 
       <div style={{ ...card, padding: '20px', marginBottom: '20px' }}>
