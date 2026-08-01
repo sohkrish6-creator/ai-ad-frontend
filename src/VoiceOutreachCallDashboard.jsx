@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
-import { PhoneOff, FlaskConical, Filter } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { PhoneOff, FlaskConical, Filter, BarChart2 } from 'lucide-react'
 import { BACKEND, apiFetch } from './lib/api'
 import { GOLD, GREEN, RED, MUTED, BONE, SLATE_M, SLATE_L, card } from './ds'
 import PageShell from './PageShell'
@@ -20,14 +21,17 @@ const STATUS_STYLE = {
 }
 const ACTIVE_STATUSES = new Set(['dialing', 'connected', 'talking'])
 
-function CallRow({ call, rateMicros }) {
+function CallRow({ call, rateMicros, onOpen }) {
   const st = STATUS_STYLE[call.status] || STATUS_STYLE.queued
   const isActive = ACTIVE_STATUSES.has(call.status)
   const estCost = call.duration_seconds && rateMicros
     ? Math.round((call.duration_seconds / 60) * (rateMicros / 1_000_000))
     : null
   return (
-    <div style={{ ...card, padding: '13px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+    <div
+      onClick={onOpen}
+      style={{ ...card, padding: '13px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', cursor: 'pointer' }}
+    >
       <div style={{
         width: '7px', height: '7px', borderRadius: '50%', background: st.color, flexShrink: 0,
         animation: isActive ? 'voicePulse 1s ease-in-out infinite alternate' : 'none',
@@ -60,6 +64,7 @@ function CallRow({ call, rateMicros }) {
 }
 
 export default function VoiceOutreachCallDashboard() {
+  const navigate = useNavigate()
   const [calls, setCalls] = useState([])
   const [rateMicros, setRateMicros] = useState(null)
   const [needsReview, setNeedsReview] = useState(false)
@@ -104,13 +109,22 @@ export default function VoiceOutreachCallDashboard() {
         title="Voice Outreach — Call Dashboard"
         sub={`${activeCount} call${activeCount === 1 ? '' : 's'} in progress · running cost estimate ₹${Math.round(totalCost)}`}
         action={
-          <button onClick={() => setNeedsReview(v => !v)} style={{
-            display: 'flex', alignItems: 'center', gap: '6px', background: needsReview ? 'rgba(201,162,39,0.14)' : 'transparent',
-            border: `1px solid ${needsReview ? GOLD : SLATE_L}`, color: needsReview ? GOLD : MUTED,
-            padding: '8px 14px', borderRadius: '7px', fontSize: '12.5px', fontWeight: '600', cursor: 'pointer',
-          }}>
-            <Filter size={13} /> Needs Review
-          </button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button onClick={() => navigate('/voice-outreach/analytics')} style={{
+              display: 'flex', alignItems: 'center', gap: '6px', background: 'transparent',
+              border: `1px solid ${SLATE_L}`, color: MUTED, padding: '8px 14px', borderRadius: '7px',
+              fontSize: '12.5px', fontWeight: '600', cursor: 'pointer',
+            }}>
+              <BarChart2 size={13} /> Analytics
+            </button>
+            <button onClick={() => setNeedsReview(v => !v)} style={{
+              display: 'flex', alignItems: 'center', gap: '6px', background: needsReview ? 'rgba(201,162,39,0.14)' : 'transparent',
+              border: `1px solid ${needsReview ? GOLD : SLATE_L}`, color: needsReview ? GOLD : MUTED,
+              padding: '8px 14px', borderRadius: '7px', fontSize: '12.5px', fontWeight: '600', cursor: 'pointer',
+            }}>
+              <Filter size={13} /> Needs Review
+            </button>
+          </div>
         }
       />
 
@@ -135,7 +149,7 @@ export default function VoiceOutreachCallDashboard() {
           )}
         </div>
       ) : (
-        calls.map(c => <CallRow key={c.id} call={c} rateMicros={rateMicros} />)
+        calls.map(c => <CallRow key={c.id} call={c} rateMicros={rateMicros} onOpen={() => navigate(`/voice-outreach/calls/${c.id}`)} />)
       )}
     </PageShell>
   )

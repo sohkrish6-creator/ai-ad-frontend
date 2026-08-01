@@ -45,6 +45,8 @@ import VoiceOutreachReview from './VoiceOutreachReview'
 import VoiceOutreachDNC from './VoiceOutreachDNC'
 import VoiceOutreachSettings from './VoiceOutreachSettings'
 import VoiceOutreachCallDashboard from './VoiceOutreachCallDashboard'
+import VoiceOutreachCallDetail from './VoiceOutreachCallDetail'
+import VoiceOutreachAnalytics from './VoiceOutreachAnalytics'
 import Nav from './Nav'
 import { ToastProvider } from './ToastContext'
 import CommandPalette from './CommandPalette'
@@ -133,6 +135,8 @@ function Layout() {
           <Route path="/voice-outreach/dnc" element={<ProtectedRoute><VoiceOutreachDNC /></ProtectedRoute>} />
           <Route path="/voice-outreach/settings" element={<ProtectedRoute><VoiceOutreachSettings /></ProtectedRoute>} />
           <Route path="/voice-outreach/calls" element={<ProtectedRoute><VoiceOutreachCallDashboard /></ProtectedRoute>} />
+          <Route path="/voice-outreach/calls/:callId" element={<ProtectedRoute><VoiceOutreachCallDetail /></ProtectedRoute>} />
+          <Route path="/voice-outreach/analytics" element={<ProtectedRoute><VoiceOutreachAnalytics /></ProtectedRoute>} />
           <Route path="/creative-director" element={<Navigate to="/creative-studio" replace />} />
           <Route path="/ad-to-creative" element={<Navigate to="/creative-studio" replace />} />
         </Routes>
