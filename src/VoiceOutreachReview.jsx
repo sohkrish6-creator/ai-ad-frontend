@@ -189,7 +189,16 @@ export default function VoiceOutreachReview() {
       const data = await res.json()
       if (data.success) {
         setBatch(data.batch)
-        setProspects(data.prospects)
+        // Fix 5: sort by the (confidence-capped) priority first — that's
+        // what a human actually scans to decide who to call — with
+        // opportunity_score as the tie-breaker within the same tier.
+        const rank = { high: 2, medium: 1, low: 0 }
+        const sorted = [...data.prospects].sort((a, b) => {
+          const pr = (rank[b.priority] ?? -1) - (rank[a.priority] ?? -1)
+          if (pr !== 0) return pr
+          return (b.opportunity_score ?? -1) - (a.opportunity_score ?? -1)
+        })
+        setProspects(sorted)
       } else {
         setError(data.detail || 'Batch not found.')
       }
