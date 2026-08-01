@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { PhoneOff, FlaskConical, Filter, BarChart2 } from 'lucide-react'
+import { PhoneOff, FlaskConical, Filter, BarChart2, RotateCcw, AlertTriangle } from 'lucide-react'
+import { useToast } from './ToastContext'
 import { BACKEND, apiFetch } from './lib/api'
 import { GOLD, GREEN, RED, MUTED, BONE, SLATE_M, SLATE_L, card } from './ds'
 import PageShell from './PageShell'
@@ -12,12 +13,13 @@ import PageHeader from './PageHeader'
 // (confirmed non-portable in Phase 1), so only the visual pattern is reused
 // here, not the component.
 const STATUS_STYLE = {
-  queued:    { glyph: '○', color: MUTED,  label: 'Queued' },
-  dialing:   { glyph: '◐', color: GOLD,   label: 'Dialing' },
-  connected: { glyph: '◐', color: GOLD,   label: 'Connected' },
-  talking:   { glyph: '◐', color: GOLD,   label: 'Talking' },
-  ended:     { glyph: '✓', color: GREEN,  label: 'Ended' },
-  failed:    { glyph: '✕', color: RED,    label: 'Failed' },
+  queued:              { glyph: '○', color: MUTED, label: 'Queued' },
+  dialing:             { glyph: '◐', color: GOLD,  label: 'Dialing' },
+  connected:           { glyph: '◐', color: GOLD,  label: 'Connected' },
+  talking:             { glyph: '◐', color: GOLD,  label: 'Talking' },
+  ended:               { glyph: '✓', color: GREEN, label: 'Ended' },
+  failed:              { glyph: '✕', color: RED,   label: 'Failed' },
+  unknown_interrupted: { glyph: '⚠', color: RED,   label: 'Interrupted' },
 }
 const ACTIVE_STATUSES = new Set(['dialing', 'connected', 'talking'])
 
@@ -65,10 +67,12 @@ function CallRow({ call, rateMicros, onOpen }) {
 
 export default function VoiceOutreachCallDashboard() {
   const navigate = useNavigate()
+  const toast = useToast()
   const [calls, setCalls] = useState([])
   const [rateMicros, setRateMicros] = useState(null)
   const [needsReview, setNeedsReview] = useState(false)
   const [loaded, setLoaded] = useState(false)
+  const [resuming, setResuming] = useState(false)
 
   const load = useCallback(async () => {
     try {
@@ -97,10 +101,22 @@ export default function VoiceOutreachCallDashboard() {
   }, [load])
 
   const activeCount = calls.filter(c => ACTIVE_STATUSES.has(c.status)).length
+  const staleQueued = calls.filter(c => c.stale_queued)
   const totalCost = calls.reduce((sum, c) => {
     if (!c.duration_seconds || !rateMicros) return sum
     return sum + (c.duration_seconds / 60) * (rateMicros / 1_000_000)
   }, 0)
+
+  async function handleResume() {
+    setResuming(true)
+    try {
+      const res = await apiFetch(`${BACKEND}/voice-outreach/calls/resume`, { method: 'POST' })
+      const d = await res.json()
+      if (d.success) { toast.success(`Resumed ${d.resumed} interrupted call(s).`); load() }
+      else toast.error(d.detail || 'Could not resume.')
+    } catch { toast.error('Backend se connect nahi ho paya.') }
+    setResuming(false)
+  }
 
   return (
     <PageShell maxWidth="960px">
@@ -127,6 +143,24 @@ export default function VoiceOutreachCallDashboard() {
           </div>
         }
       />
+
+      {staleQueued.length > 0 && (
+        <div style={{ ...card, padding: '14px 16px', marginBottom: '16px', border: `1px solid ${GOLD}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <AlertTriangle size={15} color={GOLD} />
+            <p style={{ margin: 0, fontSize: '12.5px', color: BONE }}>
+              {staleQueued.length} call{staleQueued.length === 1 ? '' : 's'} left queued from an interrupted batch — never auto-resumed.
+            </p>
+          </div>
+          <button onClick={handleResume} disabled={resuming} style={{
+            display: 'flex', alignItems: 'center', gap: '6px', background: GOLD, border: 'none',
+            color: '#0B0B0D', padding: '7px 14px', borderRadius: '7px', fontSize: '12.5px', fontWeight: '700',
+            cursor: resuming ? 'not-allowed' : 'pointer',
+          }}>
+            <RotateCcw size={13} /> {resuming ? 'Resuming...' : 'Resume'}
+          </button>
+        </div>
+      )}
 
       {!loaded ? (
         <div style={{ ...card, padding: '24px', textAlign: 'center', color: MUTED, fontSize: '13px' }}>Loading...</div>
