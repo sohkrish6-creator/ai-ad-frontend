@@ -25,7 +25,7 @@ const WEAKNESS_LABELS = {
   weak_seo_meta:      'Weak SEO Meta',
   weak_seo_title:     'Weak SEO Title',
   no_cta:             'No Clear CTA',
-  website_unreachable: 'Site Unreachable',
+  site_unreachable:   'Site Unreachable',
 }
 
 function PriorityBadge({ priority }) {
@@ -400,6 +400,12 @@ function ProspectCardWithUrl({ prospect, batch, businessUrl, onAction, estCost, 
       {prospect.reason && (
         <div style={{ background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '6px', padding: '9px 12px', marginBottom: '10px' }}>
           <p style={{ margin: 0, fontSize: '12px', color: BONE, lineHeight: 1.5 }}>{prospect.reason}</p>
+        </div>
+      )}
+
+      {prospect.rescore_note && (
+        <div style={{ background: 'rgba(201,162,39,0.10)', border: `1px solid ${GOLD}`, borderRadius: '6px', padding: '9px 12px', marginBottom: '10px' }}>
+          <p style={{ margin: 0, fontSize: '11.5px', color: GOLD, lineHeight: 1.5 }}>⚠ {prospect.rescore_note}</p>
         </div>
       )}
 

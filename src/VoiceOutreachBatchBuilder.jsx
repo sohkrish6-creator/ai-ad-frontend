@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Phone, ShieldCheck } from 'lucide-react'
+import { Phone, ShieldCheck, RefreshCw } from 'lucide-react'
 import CityInput, { getLastCity } from './CityInput'
 import { INDUSTRIES } from './ProspectDiscovery'
 import { useToast } from './ToastContext'
@@ -20,6 +20,7 @@ export default function VoiceOutreachBatchBuilder() {
   const [maxProspects, setMaxProspects]   = useState(15)
   const [loading, setLoading]             = useState(false)
   const [error, setError]                 = useState('')
+  const [rescoring, setRescoring]         = useState(false)
 
   const resolvedIndustry = industry === 'Other' ? industryOther : industry
 
@@ -44,6 +45,25 @@ export default function VoiceOutreachBatchBuilder() {
       setError('Backend se connect nahi ho paya.'); toast.error('Backend se connect nahi ho paya.')
     }
     setLoading(false)
+  }
+
+  async function handleRescore() {
+    setRescoring(true)
+    try {
+      const res = await apiFetch(`${BACKEND}/voice-outreach/rescore-existing`, { method: 'POST' })
+      const data = await res.json()
+      if (data.success) {
+        toast.success(
+          `Rescored ${data.prospects_rescored} prospect(s) — ${data.score_changed} score change(s), `
+          + `${data.reverted_to_pending} reverted to pending review.`
+        )
+      } else {
+        toast.error(data.detail || 'Could not rescore.')
+      }
+    } catch {
+      toast.error('Backend se connect nahi ho paya.')
+    }
+    setRescoring(false)
   }
 
   return (
@@ -107,6 +127,20 @@ export default function VoiceOutreachBatchBuilder() {
         }}>
           <Phone size={15} />
           {loading ? 'Starting batch...' : 'Build Batch for Review'}
+        </button>
+      </div>
+
+      <div style={{ ...card, padding: '14px 16px', marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+        <p style={{ margin: 0, fontSize: '12px', color: MUTED, lineHeight: 1.5, maxWidth: '460px' }}>
+          Rescores every not-yet-called prospect with the corrected site-fetch classifier (a real GPT call — not
+          free, and one-time, never automatic). Approved prospects whose score drops too low revert to pending review.
+        </p>
+        <button onClick={handleRescore} disabled={rescoring} style={{
+          display: 'flex', alignItems: 'center', gap: '6px', background: 'transparent',
+          border: `1px solid ${SLATE_L}`, color: MUTED, padding: '9px 16px', borderRadius: '7px',
+          fontSize: '12.5px', fontWeight: '600', cursor: rescoring ? 'not-allowed' : 'pointer', flexShrink: 0,
+        }}>
+          <RefreshCw size={13} /> {rescoring ? 'Rescoring...' : 'Rescore Existing Prospects'}
         </button>
       </div>
     </PageShell>
