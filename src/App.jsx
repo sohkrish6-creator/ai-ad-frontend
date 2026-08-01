@@ -40,6 +40,11 @@ import CommandCenter from './CommandCenter'
 import MarketingIntelligence from './MarketingIntelligence'
 import CreatorFinder from './CreatorFinder'
 import InstagramCoach from './InstagramCoach'
+import VoiceOutreachBatchBuilder from './VoiceOutreachBatchBuilder'
+import VoiceOutreachReview from './VoiceOutreachReview'
+import VoiceOutreachDNC from './VoiceOutreachDNC'
+import VoiceOutreachSettings from './VoiceOutreachSettings'
+import VoiceOutreachCallDashboard from './VoiceOutreachCallDashboard'
 import Nav from './Nav'
 import { ToastProvider } from './ToastContext'
 import CommandPalette from './CommandPalette'
@@ -123,6 +128,11 @@ function Layout() {
           <Route path="/creator-finder" element={<ProtectedRoute><CreatorFinder /></ProtectedRoute>} />
           <Route path="/instagram-coach" element={<ProtectedRoute><InstagramCoach /></ProtectedRoute>} />
           <Route path="/marketing-intelligence" element={<ProtectedRoute><MarketingIntelligence /></ProtectedRoute>} />
+          <Route path="/voice-outreach" element={<ProtectedRoute><VoiceOutreachBatchBuilder /></ProtectedRoute>} />
+          <Route path="/voice-outreach/review/:batchId" element={<ProtectedRoute><VoiceOutreachReview /></ProtectedRoute>} />
+          <Route path="/voice-outreach/dnc" element={<ProtectedRoute><VoiceOutreachDNC /></ProtectedRoute>} />
+          <Route path="/voice-outreach/settings" element={<ProtectedRoute><VoiceOutreachSettings /></ProtectedRoute>} />
+          <Route path="/voice-outreach/calls" element={<ProtectedRoute><VoiceOutreachCallDashboard /></ProtectedRoute>} />
           <Route path="/creative-director" element={<Navigate to="/creative-studio" replace />} />
           <Route path="/ad-to-creative" element={<Navigate to="/creative-studio" replace />} />
         </Routes>

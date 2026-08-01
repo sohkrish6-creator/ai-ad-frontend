@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Dna, Brain, Globe, Search,
-  Radio, Palette, Target, Users, Menu, X, PlaySquare, TrendingUp, Gift, Monitor, Eye, MessageSquare, BarChart2, Activity, Zap, Trophy, Crosshair, Antenna, Link2, Share2, Sparkles, Radar, Clock, Wand2, BookOpen, LogOut, User, Send, Image as ImageIcon, Compass,
+  Radio, Palette, Target, Users, Menu, X, PlaySquare, TrendingUp, Gift, Monitor, Eye, MessageSquare, BarChart2, Activity, Zap, Trophy, Crosshair, Antenna, Link2, Share2, Sparkles, Radar, Clock, Wand2, BookOpen, LogOut, User, Send, Image as ImageIcon, Compass, Phone,
 } from 'lucide-react'
 import { useAuth } from './AuthContext'
 import { supabase } from './lib/supabase'
@@ -52,6 +52,7 @@ const links = [
   { path: '/google-ads',  label: 'Google Ads Import', Icon: Link2         },
   { path: '/meta-test',   label: 'Meta Ads Test',     Icon: Share2        },
   { path: '/organic-intelligence', label: 'Organic Intel', Icon: Compass  },
+  { path: '/voice-outreach', label: 'Voice Outreach', Icon: Phone         },
 ]
 
 function Nav() {

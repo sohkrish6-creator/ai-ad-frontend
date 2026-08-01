@@ -29,7 +29,7 @@ function prospectLoadingSteps(maxProspects) {
 }
 
 
-const INDUSTRIES = [
+export const INDUSTRIES = [
   'Hospitality (Hotels, Restaurants, Cafes)', 'Schools & Education', 'Healthcare & Clinics',
   'Real Estate', 'Retail & Fashion', 'Food & Beverage', 'Wellness & Fitness', 'Wedding & Events',
   'Auto & Transport', 'Professional Services', 'Coaching & Tutoring', 'Jewellery & Accessories',
