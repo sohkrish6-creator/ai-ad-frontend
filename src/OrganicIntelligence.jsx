@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   Search, TrendingDown, Target, Sparkles, RefreshCw, Copy, Check,
-  Rocket, FileText, X,
+  Rocket, FileText, X, AlertTriangle,
 } from 'lucide-react'
 import { BACKEND, apiFetch } from './lib/api'
 import { useToast } from './ToastContext'
@@ -109,6 +109,7 @@ export default function OrganicIntelligence() {
   const [health, setHealth] = useState(null)
   const [opportunities, setOpportunities] = useState(null)
   const [pages, setPages] = useState([])
+  const [fragmentationNote, setFragmentationNote] = useState('')
   const [recommendations, setRecommendations] = useState(null)
   const [recRefreshing, setRecRefreshing] = useState(false)
 
@@ -150,7 +151,10 @@ export default function OrganicIntelligence() {
       const [h, o, p, r] = await Promise.all([hRes.json(), oRes.json(), pRes.json(), rRes.json()])
       if (h.success) setHealth(h)
       if (o.success) setOpportunities(o)
-      if (p.success) setPages(p.pages || [])
+      if (p.success) {
+        setPages(p.pages || [])
+        setFragmentationNote(p.www_fragmentation_detected ? p.fragmentation_note : '')
+      }
       if (r.success) setRecommendations(r)
     } catch {
       toast.error('Could not load Organic Intelligence data.')
@@ -371,6 +375,12 @@ export default function OrganicIntelligence() {
           {/* Top Pages */}
           <div style={{ ...card, padding: '20px', marginBottom: '18px' }}>
             <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em', color: MUTED, margin: '0 0 14px' }}>Top Pages</p>
+            {fragmentationNote && (
+              <div style={{ display: 'flex', gap: '8px', padding: '10px 14px', background: `${AMBER}18`, border: `1px solid ${AMBER}40`, borderRadius: '6px', marginBottom: '14px' }}>
+                <AlertTriangle size={14} color={AMBER} style={{ flexShrink: 0, marginTop: '1px' }} />
+                <p style={{ color: AMBER, fontSize: '12px', margin: 0, lineHeight: '1.5' }}>{fragmentationNote}</p>
+              </div>
+            )}
             {pages.length === 0 ? (
               <p style={{ fontSize: '13px', color: MUTED, margin: 0 }}>No page data yet.</p>
             ) : (
@@ -410,11 +420,19 @@ export default function OrganicIntelligence() {
               const opp = opportunities?.opportunities || {}
               const groups = [
                 { key: 'low_ctr_queries', label: 'High Impressions, Low CTR', Icon: TrendingDown, itemLabel: (i) => i.query_text, evidence: (i) => `${i.impressions} impressions · ${(i.ctr * 100).toFixed(1)}% CTR · pos ${i.avg_position}` },
-                { key: 'position_4_10_pages', label: 'Page 1, Not Top 3 (Position 4-10)', Icon: Target, itemLabel: (i) => i.page_url, evidence: (i) => `${i.impressions} impressions · pos ${i.avg_position}` },
+                { key: 'position_4_15_pages', label: 'Page 1 Borderline / Page 2 (Position 4-15)', Icon: Target, itemLabel: (i) => i.page_url, evidence: (i) => `${i.impressions} impressions · pos ${i.avg_position}` },
                 { key: 'declining_queries', label: 'Declining Queries', Icon: TrendingDown, itemLabel: (i) => i.query_text, evidence: (i) => `${i.recent_clicks} clicks vs ${i.prior_clicks} prior (${(i.pct_change * 100).toFixed(0)}%)` },
               ]
               const hasAny = groups.some(g => (opp[g.key] || []).length > 0)
-              if (!hasAny) return <p style={{ fontSize: '13px', color: MUTED, margin: 0 }}>No opportunities detected yet — check back once more data has synced.</p>
+              if (!hasAny) {
+                return (
+                  <p style={{ fontSize: '13px', color: MUTED, margin: 0 }}>
+                    {opportunities?.insufficient_data
+                      ? `Opportunities need more data to confirm reliably. ${opportunities.banner || ''}`
+                      : 'No opportunities detected — traffic looks healthy against the current thresholds.'}
+                  </p>
+                )
+              }
               return groups.map(g => {
                 const items = opp[g.key] || []
                 if (items.length === 0) return null
