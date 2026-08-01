@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import {
   ShieldAlert, ShieldCheck, CheckCircle2, XCircle, MessageSquareText,
-  Sparkles, Ban, Clock, ChevronDown, ChevronUp, RefreshCw,
+  Sparkles, Ban, Clock, ChevronDown, ChevronUp, RefreshCw, PhoneCall,
 } from 'lucide-react'
 import { useToast } from './ToastContext'
 import { BACKEND, apiFetch } from './lib/api'
@@ -174,6 +174,7 @@ function ScriptPanel({ prospect, batch, businessUrl, onSaved }) {
 
 export default function VoiceOutreachReview() {
   const { batchId } = useParams()
+  const navigate = useNavigate()
   const toast = useToast()
 
   const [batch, setBatch] = useState(null)
@@ -248,6 +249,27 @@ export default function VoiceOutreachReview() {
     } catch { toast.error('Backend se connect nahi ho paya.') }
   }
 
+  async function handleConfirmAndCall() {
+    const approvedIds = prospects.filter(p => p.approval_status === 'approved').map(p => p.id)
+    if (approvedIds.length === 0) return
+    try {
+      const res = await apiFetch(`${BACKEND}/voice-outreach/confirm-and-call`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ batch_id: batchId, approved_prospect_ids: approvedIds }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        const enqueued = data.results.filter(r => r.enqueued).length
+        const skipped = data.results.length - enqueued
+        toast.success(skipped > 0 ? `${enqueued} call(s) started, ${skipped} skipped — see Call Dashboard.` : `${enqueued} call(s) started.`)
+        navigate('/voice-outreach/calls')
+      } else {
+        toast.error(data.detail || 'Could not start calls.')
+      }
+    } catch { toast.error('Backend se connect nahi ho paya.') }
+  }
+
   if (error) {
     return (
       <PageShell maxWidth="960px">
@@ -269,6 +291,7 @@ export default function VoiceOutreachReview() {
   const estMinutes = settings ? Math.round((settings.avg_estimated_call_duration_seconds / 60) * 10) / 10 : null
   const estCost = settings ? Math.round((settings.avg_estimated_call_duration_seconds / 60) * (settings.blended_rate_per_minute_micros / 1_000_000)) : null
   const eligibleCount = prospects.filter(p => p.approval_status === 'pending' && !p.gate_blocked).length
+  const approvedCount = prospects.filter(p => p.approval_status === 'approved').length
 
   return (
     <PageShell maxWidth="960px">
@@ -276,13 +299,26 @@ export default function VoiceOutreachReview() {
         title="Voice Outreach — Review"
         sub={`${batch.industry}${batch.city ? ' in ' + batch.city : ''} — every prospect below needs your explicit approval before anything further happens.`}
         action={
-          !isRunning && eligibleCount > 0 && (
-            <button onClick={handleApproveAllEligible} style={{
-              display: 'flex', alignItems: 'center', gap: '6px', background: GOLD, border: 'none',
-              color: '#0B0B0D', padding: '9px 16px', borderRadius: '7px', fontSize: '13px', fontWeight: '700', cursor: 'pointer',
-            }}>
-              <CheckCircle2 size={14} /> Approve All Eligible ({eligibleCount})
-            </button>
+          !isRunning && (eligibleCount > 0 || approvedCount > 0) && (
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {eligibleCount > 0 && (
+                <button onClick={handleApproveAllEligible} style={{
+                  display: 'flex', alignItems: 'center', gap: '6px', background: 'transparent',
+                  border: `1px solid ${GOLD}`, color: GOLD, padding: '9px 16px', borderRadius: '7px',
+                  fontSize: '13px', fontWeight: '700', cursor: 'pointer',
+                }}>
+                  <CheckCircle2 size={14} /> Approve All Eligible ({eligibleCount})
+                </button>
+              )}
+              {approvedCount > 0 && (
+                <button onClick={handleConfirmAndCall} style={{
+                  display: 'flex', alignItems: 'center', gap: '6px', background: GOLD, border: 'none',
+                  color: '#0B0B0D', padding: '9px 16px', borderRadius: '7px', fontSize: '13px', fontWeight: '700', cursor: 'pointer',
+                }}>
+                  <PhoneCall size={14} /> Confirm &amp; Call ({approvedCount})
+                </button>
+              )}
+            </div>
           )
         }
       />

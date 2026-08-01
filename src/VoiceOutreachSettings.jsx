@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Settings2, Info, Mic } from 'lucide-react'
+import { Settings2, Info, Mic, PhoneCall, FlaskConical, Radio } from 'lucide-react'
 import { useToast } from './ToastContext'
 import { BACKEND, apiFetch } from './lib/api'
-import { GOLD, card, cardInner, lbl, inp, BONE, MUTED, SLATE_M, SLATE_L } from './ds'
+import { GOLD, GREEN, card, cardInner, lbl, inp, BONE, MUTED, SLATE_M, SLATE_L } from './ds'
 import PageShell from './PageShell'
 import PageHeader from './PageHeader'
 
@@ -16,6 +16,9 @@ export default function VoiceOutreachSettings() {
   const [settings, setSettings] = useState(null)
   const [agents, setAgents] = useState([])
   const [saving, setSaving] = useState(false)
+  const [testPhone, setTestPhone] = useState('')
+  const [testAgentId, setTestAgentId] = useState('')
+  const [testingCall, setTestingCall] = useState(false)
 
   async function load() {
     try {
@@ -55,6 +58,7 @@ export default function VoiceOutreachSettings() {
           blended_rate_per_minute_micros: Math.round(Number(settings.rate_display || 0) * 1_000_000),
           avg_estimated_call_duration_seconds: Number(settings.avg_estimated_call_duration_seconds),
           default_voice_agent_id: settings.default_voice_agent_id ? Number(settings.default_voice_agent_id) : null,
+          call_mode: settings.call_mode,
         }),
       })
       const data = await res.json()
@@ -62,6 +66,25 @@ export default function VoiceOutreachSettings() {
       else toast.error(data.detail || 'Could not save settings.')
     } catch { toast.error('Backend se connect nahi ho paya.') }
     setSaving(false)
+  }
+
+  async function handleTestCall() {
+    if (!testPhone.trim()) { toast.error('Enter a phone number to test call.'); return }
+    setTestingCall(true)
+    try {
+      const res = await apiFetch(`${BACKEND}/voice-outreach/test-call`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: testPhone, agent_id: testAgentId ? Number(testAgentId) : null }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        toast.success(settings.call_mode === 'live' ? 'Live test call started.' : 'Dry-run test call started — check the Call Dashboard.')
+      } else {
+        toast.error(data.detail || 'Could not start test call.')
+      }
+    } catch { toast.error('Backend se connect nahi ho paya.') }
+    setTestingCall(false)
   }
 
   if (!settings) {
@@ -76,7 +99,43 @@ export default function VoiceOutreachSettings() {
 
   return (
     <PageShell maxWidth="720px">
-      <PageHeader title="Voice Outreach — Settings" sub="Calling window, compliance mode, and cooldown rules — enforced server-side on every approval and (once Phase 2 ships) every call." />
+      <PageHeader title="Voice Outreach — Settings" sub="Calling window, compliance mode, and cooldown rules — enforced server-side on every approval and every call." />
+
+      <div style={{ ...card, padding: '20px', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+          <Radio size={15} color={GOLD} />
+          <p style={{ ...lbl, margin: 0 }}>Call Mode</p>
+        </div>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: settings.vapi_configured ? 0 : '10px' }}>
+          {['dry_run', 'live'].map(mode => {
+            const disabled = mode === 'live' && !settings.vapi_configured
+            const active = settings.call_mode === mode
+            return (
+              <button
+                key={mode}
+                disabled={disabled}
+                onClick={() => !disabled && setSettings(s => ({ ...s, call_mode: mode }))}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 16px', borderRadius: '7px',
+                  fontSize: '13px', fontWeight: '700', cursor: disabled ? 'not-allowed' : 'pointer',
+                  border: `1px solid ${active ? GOLD : SLATE_L}`,
+                  background: active ? 'rgba(201,162,39,0.14)' : 'transparent',
+                  color: disabled ? MUTED : (active ? GOLD : BONE), opacity: disabled ? 0.5 : 1,
+                }}
+              >
+                {mode === 'dry_run' ? <FlaskConical size={14} /> : <PhoneCall size={14} />}
+                {mode === 'dry_run' ? 'Dry Run' : 'Live'}
+              </button>
+            )
+          })}
+        </div>
+        {!settings.vapi_configured && (
+          <p style={{ margin: '10px 0 0', fontSize: '11.5px', color: MUTED, lineHeight: 1.5 }}>
+            Live calling is unavailable until Vapi credentials are configured on the server — everything runs in
+            Dry Run (zero cost, zero external calls, full pipeline exercised with a synthetic transcript).
+          </p>
+        )}
+      </div>
 
       <div style={{ ...card, padding: '20px', marginBottom: '16px' }}>
         <p style={{ ...lbl, marginBottom: '14px' }}>Calling Window</p>
@@ -160,10 +219,34 @@ export default function VoiceOutreachSettings() {
             </label>
           ))}
         </div>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: '10px' }}>
+          <div style={{ flex: '1 1 200px' }}>
+            <label style={lbl}>Test Call — Your Number</label>
+            <input type="text" value={testPhone} onChange={e => setTestPhone(e.target.value)} placeholder="+91 98765 43210" style={inp} />
+          </div>
+          <div style={{ flex: '1 1 160px' }}>
+            <label style={lbl}>Personality</label>
+            <select value={testAgentId} onChange={e => setTestAgentId(e.target.value)} style={inp}>
+              <option value="">Use default</option>
+              {agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+            </select>
+          </div>
+          <button onClick={handleTestCall} disabled={testingCall} style={{
+            display: 'flex', alignItems: 'center', gap: '6px', background: 'transparent',
+            border: `1px solid ${GOLD}`, color: GOLD, padding: '10px 16px', borderRadius: '7px',
+            fontSize: '12.5px', fontWeight: '700', cursor: testingCall ? 'not-allowed' : 'pointer', height: '40px',
+          }}>
+            <PhoneCall size={13} /> {testingCall ? 'Starting...' : 'Test Call'}
+          </button>
+        </div>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '6px', padding: '9px 12px' }}>
-          <Info size={13} color={MUTED} style={{ flexShrink: 0, marginTop: '1px' }} />
+          {settings.call_mode === 'live'
+            ? <PhoneCall size={13} color={GREEN} style={{ flexShrink: 0, marginTop: '1px' }} />
+            : <Info size={13} color={MUTED} style={{ flexShrink: 0, marginTop: '1px' }} />}
           <p style={{ margin: 0, fontSize: '11.5px', color: MUTED, lineHeight: 1.5 }}>
-            Test Call becomes available once Vapi is connected in Phase 2 — these presets have no assigned voice yet.
+            {settings.call_mode === 'live'
+              ? 'Live mode — this will place a real call via Vapi.'
+              : 'Dry Run mode — this simulates the full call pipeline with a synthetic transcript, zero cost, zero external calls. Check the Call Dashboard to watch it progress.'}
           </p>
         </div>
       </div>
