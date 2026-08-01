@@ -59,6 +59,9 @@ export default function VoiceOutreachSettings() {
           avg_estimated_call_duration_seconds: Number(settings.avg_estimated_call_duration_seconds),
           default_voice_agent_id: settings.default_voice_agent_id ? Number(settings.default_voice_agent_id) : null,
           call_mode: settings.call_mode,
+          max_review_count: Number(settings.max_review_count),
+          min_review_count: Number(settings.min_review_count),
+          exclude_chains: settings.exclude_chains,
         }),
       })
       const data = await res.json()
@@ -184,6 +187,28 @@ export default function VoiceOutreachSettings() {
             <input type="number" min="1" value={settings.max_call_attempts_same_day} onChange={e => setSettings(s => ({ ...s, max_call_attempts_same_day: e.target.value }))} style={inp} />
           </div>
         </div>
+      </div>
+
+      <div style={{ ...card, padding: '20px', marginBottom: '16px' }}>
+        <p style={{ ...lbl, marginBottom: '14px' }}>Enterprise/Chain Filter</p>
+        <p style={{ margin: '0 0 14px', fontSize: '11.5px', color: MUTED, lineHeight: 1.5 }}>
+          Businesses matching these are excluded from a batch automatically — never silently dropped, they stay
+          visible in a "Filtered Out" section on the Review screen with an explicit per-business override.
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
+          <div>
+            <label style={lbl}>Max Reviews</label>
+            <input type="number" min="0" value={settings.max_review_count} onChange={e => setSettings(s => ({ ...s, max_review_count: e.target.value }))} style={inp} />
+          </div>
+          <div>
+            <label style={lbl}>Min Reviews</label>
+            <input type="number" min="0" value={settings.min_review_count} onChange={e => setSettings(s => ({ ...s, min_review_count: e.target.value }))} style={inp} />
+          </div>
+        </div>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+          <input type="checkbox" checked={!!settings.exclude_chains} onChange={e => setSettings(s => ({ ...s, exclude_chains: e.target.checked }))} />
+          <span style={{ fontSize: '12.5px', color: BONE }}>Exclude known chains/brands (same-name-multiple-locations + brand keyword list)</span>
+        </label>
       </div>
 
       <div style={{ ...card, padding: '20px', marginBottom: '16px' }}>

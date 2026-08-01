@@ -290,6 +290,8 @@ export default function VoiceOutreachReview() {
   const isRunning = batch.status === 'queued' || batch.status === 'running'
   const estMinutes = settings ? Math.round((settings.avg_estimated_call_duration_seconds / 60) * 10) / 10 : null
   const estCost = settings ? Math.round((settings.avg_estimated_call_duration_seconds / 60) * (settings.blended_rate_per_minute_micros / 1_000_000)) : null
+  const visibleProspects = prospects.filter(p => p.approval_status !== 'filtered')
+  const filteredProspects = prospects.filter(p => p.approval_status === 'filtered')
   const eligibleCount = prospects.filter(p => p.approval_status === 'pending' && !p.gate_blocked).length
   const approvedCount = prospects.filter(p => p.approval_status === 'approved').length
 
@@ -352,10 +354,48 @@ export default function VoiceOutreachReview() {
         </div>
       )}
 
-      {prospects.map(p => (
+      {visibleProspects.map(p => (
         <ProspectCardWithUrl key={p.id} prospect={p} batch={batch} businessUrl={businessUrl} onAction={handleAction} estCost={estCost} estMinutes={estMinutes} />
       ))}
+
+      {filteredProspects.length > 0 && (
+        <FilteredOutSection prospects={filteredProspects} onAction={handleAction} />
+      )}
     </PageShell>
+  )
+}
+
+function FilteredOutSection({ prospects, onAction }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div style={{ ...card, padding: '14px 16px', marginTop: '8px' }}>
+      <button onClick={() => setOpen(o => !o)} style={{
+        display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none',
+        color: MUTED, fontSize: '12.5px', fontWeight: '600', cursor: 'pointer', padding: 0, width: '100%',
+      }}>
+        {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        Filtered Out ({prospects.length}) — enterprise/chain businesses excluded from scoring
+      </button>
+      {open && (
+        <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {prospects.map(p => (
+            <div key={p.id} style={{ ...cardInner, padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <div>
+                <p style={{ margin: 0, fontSize: '13px', fontWeight: '600', color: BONE }}>{p.business_name}</p>
+                <p style={{ margin: '2px 0 0', fontSize: '11px', color: MUTED }}>{p.filter_reason}</p>
+              </div>
+              <button onClick={() => onAction(p.id, 'admit')} style={{
+                display: 'flex', alignItems: 'center', gap: '5px', background: 'transparent',
+                border: `1px solid ${GOLD}`, color: GOLD, padding: '6px 12px', borderRadius: '6px',
+                fontSize: '11.5px', fontWeight: '700', cursor: 'pointer', flexShrink: 0,
+              }}>
+                Admit Anyway
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 
