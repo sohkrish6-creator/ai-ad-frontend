@@ -22,6 +22,7 @@ export default function VoiceOutreachBatchBuilder() {
   const [loading, setLoading]             = useState(false)
   const [error, setError]                 = useState('')
   const [rescoring, setRescoring]         = useState(false)
+  const [regenerating, setRegenerating]   = useState(false)
 
   const resolvedIndustry = industry === 'Other' ? industryOther : industry
 
@@ -65,6 +66,22 @@ export default function VoiceOutreachBatchBuilder() {
       toast.error('Backend se connect nahi ho paya.')
     }
     setRescoring(false)
+  }
+
+  async function handleRegeneratePitches() {
+    setRegenerating(true)
+    try {
+      const res = await apiFetch(`${BACKEND}/voice-outreach/regenerate-pitches`, { method: 'POST' })
+      const data = await res.json()
+      if (data.success) {
+        toast.success(`Regenerated pitches for ${data.prospects_regenerated} prospect(s).`)
+      } else {
+        toast.error(data.message || data.detail || 'Could not regenerate pitches.')
+      }
+    } catch {
+      toast.error('Backend se connect nahi ho paya.')
+    }
+    setRegenerating(false)
   }
 
   return (
@@ -143,6 +160,21 @@ export default function VoiceOutreachBatchBuilder() {
           fontSize: '12.5px', fontWeight: '600', cursor: rescoring ? 'not-allowed' : 'pointer', flexShrink: 0,
         }}>
           <RefreshCw size={13} /> {rescoring ? 'Rescoring...' : 'Rescore Existing Prospects'}
+        </button>
+      </div>
+
+      <div style={{ ...card, padding: '14px 16px', marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+        <p style={{ margin: 0, fontSize: '12px', color: MUTED, lineHeight: 1.5, maxWidth: '460px' }}>
+          Regenerates the phone pitch for every not-yet-called prospect using your CURRENT business name and
+          services from Settings (a real GPT call — not free, and one-time, never automatic). Use this after
+          changing your business profile so old pitches stop offering services you don't provide.
+        </p>
+        <button onClick={handleRegeneratePitches} disabled={regenerating} style={{
+          display: 'flex', alignItems: 'center', gap: '6px', background: 'transparent',
+          border: `1px solid ${SLATE_L}`, color: MUTED, padding: '9px 16px', borderRadius: '7px',
+          fontSize: '12.5px', fontWeight: '600', cursor: regenerating ? 'not-allowed' : 'pointer', flexShrink: 0,
+        }}>
+          <RefreshCw size={13} /> {regenerating ? 'Regenerating...' : 'Regenerate Pitches'}
         </button>
       </div>
     </PageShell>

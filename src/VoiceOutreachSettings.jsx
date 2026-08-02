@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Settings2, Info, Mic, PhoneCall, FlaskConical, Radio } from 'lucide-react'
+import { Settings2, Info, Mic, PhoneCall, FlaskConical, Radio, Building2 } from 'lucide-react'
 import { useToast } from './ToastContext'
 import { BACKEND, apiFetch } from './lib/api'
 import { GOLD, GREEN, card, cardInner, lbl, inp, BONE, MUTED, SLATE_M, SLATE_L } from './ds'
@@ -43,6 +43,14 @@ export default function VoiceOutreachSettings() {
     })
   }
 
+  function toggleService(key) {
+    setSettings(s => {
+      const cur = s.services_offered || []
+      const next = cur.includes(key) ? cur.filter(k => k !== key) : [...cur, key]
+      return { ...s, services_offered: next }
+    })
+  }
+
   async function handleSave() {
     setSaving(true)
     try {
@@ -50,6 +58,8 @@ export default function VoiceOutreachSettings() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          business_name: (settings.business_name || '').trim(),
+          services_offered: settings.services_offered || [],
           calling_window_start: settings.calling_window_start,
           calling_window_end: settings.calling_window_end,
           calling_days: settings.calling_days,
@@ -106,6 +116,41 @@ export default function VoiceOutreachSettings() {
     <PageShell maxWidth="720px">
       <VoiceOutreachSubNav />
       <PageHeader title="Voice Outreach — Settings" sub="Calling window, compliance mode, and cooldown rules — enforced server-side on every approval and every call." />
+
+      <div style={{ ...card, padding: '20px', marginBottom: '16px', border: settings.business_name ? undefined : `1px solid ${GOLD}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+          <Building2 size={15} color={GOLD} />
+          <p style={{ ...lbl, margin: 0 }}>Your Business Profile</p>
+        </div>
+        <p style={{ margin: '0 0 14px', fontSize: '11.5px', color: MUTED, lineHeight: 1.5 }}>
+          This is YOUR business identity, used in every call disclosure and pitch — never a placeholder, never
+          the AdSoh platform name. Required before any pitch can be generated or any call placed.
+        </p>
+        <div style={{ marginBottom: '16px' }}>
+          <label style={lbl}>Business Name</label>
+          <input
+            type="text" value={settings.business_name || ''}
+            onChange={e => setSettings(s => ({ ...s, business_name: e.target.value }))}
+            placeholder="e.g. Digital Boost Social" style={inp}
+          />
+        </div>
+        <label style={lbl}>Services You Offer</label>
+        <p style={{ margin: '0 0 10px', fontSize: '11px', color: MUTED }}>
+          Pitches only ever mention services checked here — a detected weakness with no matching service here
+          is never pitched.
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '8px' }}>
+          {(settings.service_catalog || []).map(svc => (
+            <label key={svc.key} style={{
+              ...cardInner, padding: '9px 12px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer',
+              border: `1px solid ${(settings.services_offered || []).includes(svc.key) ? GOLD : SLATE_L}`,
+            }}>
+              <input type="checkbox" checked={(settings.services_offered || []).includes(svc.key)} onChange={() => toggleService(svc.key)} />
+              <span style={{ fontSize: '12px', color: BONE }}>{svc.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
 
       <div style={{ ...card, padding: '20px', marginBottom: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>

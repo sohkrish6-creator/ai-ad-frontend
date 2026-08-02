@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   ShieldAlert, ShieldCheck, CheckCircle2, XCircle, MessageSquareText,
-  Sparkles, Ban, Clock, ChevronDown, ChevronUp, RefreshCw, PhoneCall,
+  Sparkles, Ban, Clock, ChevronDown, ChevronUp, RefreshCw, PhoneCall, Briefcase,
 } from 'lucide-react'
 import { useToast } from './ToastContext'
 import { BACKEND, apiFetch } from './lib/api'
@@ -39,12 +39,28 @@ function PriorityBadge({ priority }) {
   return <span style={{ padding: '2px 9px', borderRadius: '20px', fontSize: '10px', fontWeight: '700', background: s.bg, color: s.color }}>{s.label}</span>
 }
 
+// service_fit is a BOOLEAN column read via a raw driver — Postgres (prod)
+// returns real true/false, but SQLite (local dev) returns 0/1, so a strict
+// `=== false` check silently fails there. Treat any falsy value as "no fit"
+// EXCEPT null/undefined (unset — never blocks; matches the backend's own
+// "NULL means don't block" convention for pre-Item-2 rows).
+function isNoServiceFit(prospect) {
+  return prospect.service_fit !== null && prospect.service_fit !== undefined && !prospect.service_fit
+}
+
 function GateBadge({ prospect }) {
   if (prospect.approval_status === 'approved') {
     return <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', fontWeight: '700', color: GREEN }}><CheckCircle2 size={13} /> Approved</span>
   }
   if (prospect.approval_status === 'rejected') {
     return <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', fontWeight: '700', color: MUTED }}><XCircle size={13} /> Rejected</span>
+  }
+  if (isNoServiceFit(prospect)) {
+    return (
+      <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', fontWeight: '700', color: GOLD }}>
+        <Briefcase size={13} /> No Service Fit
+      </span>
+    )
   }
   if (prospect.gate_blocked) {
     return (
@@ -236,7 +252,11 @@ export default function VoiceOutreachReview() {
       })
       const data = await res.json()
       if (data.success) {
-        toast.success(action === 'approve' ? 'Approved.' : 'Rejected.')
+        const messages = {
+          approve: 'Approved.', reject: 'Rejected.', admit: 'Admitted — back in the review queue.',
+          override_service_fit: 'Service-fit override applied — you can approve it now.',
+        }
+        toast.success(messages[action] || 'Done.')
         load()
       } else {
         toast.error(data.detail || 'Action failed.')
@@ -435,8 +455,9 @@ function FilteredOutSection({ prospects, onAction }) {
 
 function ProspectCardWithUrl({ prospect, batch, businessUrl, onAction, estCost, estMinutes }) {
   const weaknessChips = prospect.weaknesses || []
+  const noServiceFit = isNoServiceFit(prospect)
   return (
-    <div style={{ ...card, padding: '16px 18px', marginBottom: '10px' }}>
+    <div style={{ ...card, padding: '16px 18px', marginBottom: '10px', border: noServiceFit ? `1px solid ${GOLD}` : undefined }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '8px', flexWrap: 'wrap' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -483,6 +504,16 @@ function ProspectCardWithUrl({ prospect, batch, businessUrl, onAction, estCost, 
         </div>
       )}
 
+      {noServiceFit && (
+        <div style={{ background: 'rgba(201,162,39,0.10)', border: `1px solid ${GOLD}`, borderRadius: '6px', padding: '9px 12px', marginBottom: '10px' }}>
+          <p style={{ margin: 0, fontSize: '11.5px', color: GOLD, lineHeight: 1.5 }}>
+            <Briefcase size={12} style={{ verticalAlign: '-1px', marginRight: '4px' }} />
+            None of this prospect's detected weaknesses match a service you offer — add the right service in
+            Settings, or override below to approve anyway.
+          </p>
+        </div>
+      )}
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '10px' }}>
         {[
           { label: 'Est. ROI', value: prospect.estimated_roi },
@@ -498,12 +529,12 @@ function ProspectCardWithUrl({ prospect, batch, businessUrl, onAction, estCost, 
 
       {prospect.approval_status === 'pending' && (
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button onClick={() => onAction(prospect.id, 'approve')} disabled={prospect.gate_blocked} style={{
+          <button onClick={() => onAction(prospect.id, 'approve')} disabled={prospect.gate_blocked || noServiceFit} style={{
             display: 'flex', alignItems: 'center', gap: '5px',
-            background: prospect.gate_blocked ? SLATE_M : 'rgba(63,166,107,0.14)',
-            border: `1px solid ${prospect.gate_blocked ? SLATE_L : GREEN}`,
-            color: prospect.gate_blocked ? MUTED : GREEN, padding: '6px 13px', borderRadius: '6px',
-            fontSize: '12px', fontWeight: '700', cursor: prospect.gate_blocked ? 'not-allowed' : 'pointer',
+            background: (prospect.gate_blocked || noServiceFit) ? SLATE_M : 'rgba(63,166,107,0.14)',
+            border: `1px solid ${(prospect.gate_blocked || noServiceFit) ? SLATE_L : GREEN}`,
+            color: (prospect.gate_blocked || noServiceFit) ? MUTED : GREEN, padding: '6px 13px', borderRadius: '6px',
+            fontSize: '12px', fontWeight: '700', cursor: (prospect.gate_blocked || noServiceFit) ? 'not-allowed' : 'pointer',
           }}>
             <CheckCircle2 size={13} /> Approve
           </button>
@@ -514,6 +545,15 @@ function ProspectCardWithUrl({ prospect, batch, businessUrl, onAction, estCost, 
           }}>
             <Ban size={13} /> Reject
           </button>
+          {noServiceFit && (
+            <button onClick={() => onAction(prospect.id, 'override_service_fit')} style={{
+              display: 'flex', alignItems: 'center', gap: '5px', background: 'transparent',
+              border: `1px solid ${GOLD}`, color: GOLD, padding: '6px 13px', borderRadius: '6px',
+              fontSize: '12px', fontWeight: '700', cursor: 'pointer',
+            }}>
+              <Briefcase size={13} /> Override & Allow Approval
+            </button>
+          )}
         </div>
       )}
 
