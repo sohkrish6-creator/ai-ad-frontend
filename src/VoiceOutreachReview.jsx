@@ -260,9 +260,28 @@ export default function VoiceOutreachReview() {
   }
 
   async function handleConfirmAndCall() {
-    const approvedIds = prospects.filter(p => p.approval_status === 'approved').map(p => p.id)
-    if (approvedIds.length === 0) return
+    // Bug found in production: this used to read `prospects` from the
+    // component's closure and silently `return` with ZERO feedback (no
+    // toast, no network call) if that array happened to be empty at click
+    // time — which can genuinely happen, since the 2s poll's fetch errors
+    // are swallowed silently in load() (`catch { transient network hiccup }`)
+    // and can leave `prospects` stale relative to the server's real state.
+    // Fixed two ways: (1) re-fetch fresh right before confirming instead of
+    // trusting the possibly-stale closure, and (2) wrap the ENTIRE function
+    // in one try/catch with every exit path showing a toast — no branch can
+    // ever fail silently again.
     try {
+      const freshRes = await apiFetch(`${BACKEND}/voice-outreach/batches/${batchId}`)
+      const freshData = await freshRes.json()
+      if (!freshData.success) {
+        toast.error(freshData.detail || 'Could not refresh prospects before calling.')
+        return
+      }
+      const approvedIds = freshData.prospects.filter(p => p.approval_status === 'approved').map(p => p.id)
+      if (approvedIds.length === 0) {
+        toast.error('No approved prospects to call — approve at least one, then try again.')
+        return
+      }
       const res = await apiFetch(`${BACKEND}/voice-outreach/confirm-and-call`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -277,7 +296,9 @@ export default function VoiceOutreachReview() {
       } else {
         toast.error(data.detail || 'Could not start calls.')
       }
-    } catch { toast.error('Backend se connect nahi ho paya.') }
+    } catch {
+      toast.error('Backend se connect nahi ho paya.')
+    }
   }
 
   if (error) {
