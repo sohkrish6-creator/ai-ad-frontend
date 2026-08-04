@@ -47,6 +47,11 @@ import VoiceOutreachSettings from './VoiceOutreachSettings'
 import VoiceOutreachCallDashboard from './VoiceOutreachCallDashboard'
 import VoiceOutreachCallDetail from './VoiceOutreachCallDetail'
 import VoiceOutreachAnalytics from './VoiceOutreachAnalytics'
+import RevenueEngineGoal from './RevenueEngineGoal'
+import RevenueEnginePipeline from './RevenueEnginePipeline'
+import RevenueEngineToday from './RevenueEngineToday'
+import RevenueEngineLeadWorkspace from './RevenueEngineLeadWorkspace'
+import RevenueEngineSettings from './RevenueEngineSettings'
 import Nav from './Nav'
 import { ToastProvider } from './ToastContext'
 import CommandPalette from './CommandPalette'
@@ -137,6 +142,11 @@ function Layout() {
           <Route path="/voice-outreach/calls" element={<ProtectedRoute><VoiceOutreachCallDashboard /></ProtectedRoute>} />
           <Route path="/voice-outreach/calls/:callId" element={<ProtectedRoute><VoiceOutreachCallDetail /></ProtectedRoute>} />
           <Route path="/voice-outreach/analytics" element={<ProtectedRoute><VoiceOutreachAnalytics /></ProtectedRoute>} />
+          <Route path="/revenue-engine" element={<ProtectedRoute><RevenueEngineGoal /></ProtectedRoute>} />
+          <Route path="/revenue-engine/pipeline" element={<ProtectedRoute><RevenueEnginePipeline /></ProtectedRoute>} />
+          <Route path="/revenue-engine/today" element={<ProtectedRoute><RevenueEngineToday /></ProtectedRoute>} />
+          <Route path="/revenue-engine/lead/:prospectId" element={<ProtectedRoute><RevenueEngineLeadWorkspace /></ProtectedRoute>} />
+          <Route path="/revenue-engine/settings" element={<ProtectedRoute><RevenueEngineSettings /></ProtectedRoute>} />
           <Route path="/creative-director" element={<Navigate to="/creative-studio" replace />} />
           <Route path="/ad-to-creative" element={<Navigate to="/creative-studio" replace />} />
         </Routes>
