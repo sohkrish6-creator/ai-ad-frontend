@@ -52,6 +52,11 @@ import RevenueEnginePipeline from './RevenueEnginePipeline'
 import RevenueEngineToday from './RevenueEngineToday'
 import RevenueEngineLeadWorkspace from './RevenueEngineLeadWorkspace'
 import RevenueEngineSettings from './RevenueEngineSettings'
+import SalesHub from './SalesHub'
+import MarketingHub from './MarketingHub'
+import IntelligenceHub from './IntelligenceHub'
+import AnalyticsHub from './AnalyticsHub'
+import SettingsHub from './SettingsHub'
 import Nav from './Nav'
 import { ToastProvider } from './ToastContext'
 import CommandPalette from './CommandPalette'
@@ -147,6 +152,11 @@ function Layout() {
           <Route path="/revenue-engine/today" element={<ProtectedRoute><RevenueEngineToday /></ProtectedRoute>} />
           <Route path="/revenue-engine/lead/:prospectId" element={<ProtectedRoute><RevenueEngineLeadWorkspace /></ProtectedRoute>} />
           <Route path="/revenue-engine/settings" element={<ProtectedRoute><RevenueEngineSettings /></ProtectedRoute>} />
+          <Route path="/sales" element={<ProtectedRoute><SalesHub /></ProtectedRoute>} />
+          <Route path="/marketing" element={<ProtectedRoute><MarketingHub /></ProtectedRoute>} />
+          <Route path="/intel" element={<ProtectedRoute><IntelligenceHub /></ProtectedRoute>} />
+          <Route path="/analytics" element={<ProtectedRoute><AnalyticsHub /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><SettingsHub /></ProtectedRoute>} />
           <Route path="/creative-director" element={<Navigate to="/creative-studio" replace />} />
           <Route path="/ad-to-creative" element={<Navigate to="/creative-studio" replace />} />
         </Routes>

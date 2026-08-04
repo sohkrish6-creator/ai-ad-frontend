@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
-  LayoutDashboard, Dna, Brain, Globe, Search,
-  Radio, Palette, Target, Users, Menu, X, PlaySquare, TrendingUp, Gift, Monitor, Eye, MessageSquare, BarChart2, Activity, Zap, Trophy, Crosshair, Antenna, Link2, Share2, Sparkles, Radar, Clock, Wand2, BookOpen, LogOut, User, Send, Image as ImageIcon, Compass, Phone, Rocket,
+  LayoutDashboard, Rocket, Wand2, Dna, BarChart2, Settings2, Menu, X, LogOut, User,
 } from 'lucide-react'
 import { useAuth } from './AuthContext'
 import { supabase } from './lib/supabase'
@@ -18,43 +17,41 @@ const GREEN = '#3FA66B'
 const FONT_DISPLAY = "'Fraunces', Georgia, serif"
 const FONT_BODY    = "'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif"
 
+// AdSOH IA review (Aug 2026), Phase A: 5 top-level hubs instead of ~30 flat
+// entries — every existing page still works, just re-parented under a hub
+// (see SalesHub.jsx / MarketingHub.jsx / IntelligenceHub.jsx / AnalyticsHub.jsx
+// / SettingsHub.jsx). `match` lists every route prefix that should light up
+// this nav item, so a page reached via a hub link (or a direct URL/bookmark)
+// still shows where you are — longest-prefix match resolves any overlap.
 const links = [
-  { path: '/dashboard',    label: 'Dashboard',       Icon: LayoutDashboard },
-  { path: '/history',      label: 'History',         Icon: Clock           },
-  { path: '/intelligence', label: 'BI Platform',     Icon: Dna             },
-  { path: '/brain',        label: 'Marketing Brain', Icon: Brain           },
-  { path: '/smart-analysis', label: 'Smart Analysis', Icon: Sparkles       },
-  { path: '/social-intelligence',      label: 'Social Intel',          Icon: Radar     },
-  { path: '/marketing-intelligence',   label: 'Marketing Intel',       Icon: BookOpen  },
-  { path: '/analyze',      label: 'AI Analyzer',     Icon: Globe           },
-  { path: '/competitor',   label: 'Competitor',      Icon: Search          },
-  { path: '/ad-intel',     label: 'Ad Intel',        Icon: Radio           },
-  { path: '/ad-creative',  label: 'Ad Creative',     Icon: Palette         },
-  { path: '/creative-studio', label: 'Creative Studio', Icon: Wand2       },
-  { path: '/command-center', label: 'Command Center', Icon: MessageSquare },
-  { path: '/creator-finder', label: 'Creator Finder', Icon: Send            },
-  { path: '/instagram-coach', label: 'Instagram Coach', Icon: ImageIcon     },
-  { path: '/audience',     label: 'Audience Finder', Icon: Target          },
-  { path: '/leads',        label: 'Leads',           Icon: Users           },
-  { path: '/youtube',      label: 'YouTube Intel',   Icon: PlaySquare      },
-  { path: '/opportunity',  label: 'Opportunity',     Icon: TrendingUp      },
-  { path: '/offer',         label: 'Offer Intel',     Icon: Gift            },
-  { path: '/website-audit',   label: 'Website Audit',  Icon: Monitor         },
-  { path: '/visibility',     label: 'Visibility',     Icon: Eye             },
-  { path: '/outreach',       label: 'Outreach AI',    Icon: MessageSquare   },
-  { path: '/kpi-engine',    label: 'KPI Engine',     Icon: BarChart2       },
-  { path: '/performance',   label: 'Performance',    Icon: Activity        },
-  { path: '/ai-optimizer',  label: 'AI Optimizer',   Icon: Zap             },
-  { path: '/result-center', label: 'Result Center',  Icon: Trophy          },
-  { path: '/prospects',     label: 'Prospects',      Icon: Crosshair       },
-  { path: '/cricket-ads',  label: 'Sports Growth',  Icon: Antenna         },
-  { path: '/account-audit', label: 'Account Audit',  Icon: BarChart2     },
-  { path: '/google-ads',  label: 'Google Ads Import', Icon: Link2         },
-  { path: '/meta-test',   label: 'Meta Ads Test',     Icon: Share2        },
-  { path: '/organic-intelligence', label: 'Organic Intel', Icon: Compass  },
-  { path: '/voice-outreach', label: 'Voice Outreach', Icon: Phone         },
-  { path: '/revenue-engine', label: 'Revenue Engine', Icon: Rocket        },
+  { path: '/dashboard', label: 'Home',         Icon: LayoutDashboard, match: ['/dashboard'] },
+  { path: '/sales',     label: 'Sales',        Icon: Rocket,          match: ['/sales', '/revenue-engine', '/voice-outreach', '/prospects', '/leads', '/outreach'] },
+  { path: '/marketing', label: 'Marketing',    Icon: Wand2,           match: ['/marketing', '/google-ads/dashboard', '/cricket-ads', '/audience', '/offer', '/command-center', '/instagram-coach', '/creative-studio', '/creative-director', '/ad-creative', '/ad-to-creative', '/creator-finder'] },
+  { path: '/intel',     label: 'Intelligence', Icon: Dna,             match: ['/intel', '/website-audit', '/account-audit', '/visibility', '/analyze', '/intelligence', '/brain', '/smart-analysis', '/marketing-intelligence', '/competitor', '/ad-intel', '/opportunity', '/youtube', '/organic-intelligence', '/social-intelligence'] },
+  { path: '/analytics', label: 'Analytics',    Icon: BarChart2,       match: ['/analytics', '/performance', '/kpi-engine', '/ai-optimizer', '/result-center', '/history'] },
 ]
+
+const settingsLink = { path: '/settings', label: 'Settings', Icon: Settings2, match: ['/settings', '/account', '/google-ads', '/meta-test'] }
+
+function isActive(link, pathname) {
+  return link.match.some(p => pathname === p || pathname.startsWith(p + '/'))
+}
+
+// Longest matching prefix across every nav item (5 hubs + Settings) wins —
+// so e.g. /google-ads/dashboard (Marketing) doesn't get shadowed by the
+// shorter /google-ads (Settings) prefix.
+function activePath(pathname) {
+  const all = [...links, settingsLink]
+  let best = null, bestLen = -1
+  for (const link of all) {
+    for (const p of link.match) {
+      if ((pathname === p || pathname.startsWith(p + '/')) && p.length > bestLen) {
+        best = link.path; bestLen = p.length
+      }
+    }
+  }
+  return best
+}
 
 function Nav() {
   const location = useLocation()
@@ -62,6 +59,7 @@ function Nav() {
   const { user } = useAuth()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const isMobile = window.innerWidth < 768
+  const active = activePath(location.pathname)
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -71,6 +69,30 @@ function Nav() {
   // Close drawer whenever route changes — Nav stays mounted between pages
   // so drawerOpen state would otherwise persist across navigations
   useEffect(() => { setDrawerOpen(false) }, [location.pathname])
+
+  const NavItem = ({ path, label, Icon, mobile }) => {
+    const isOn = active === path
+    return (
+      <Link
+        key={path}
+        to={path}
+        className={`${mobile ? 'nav-drawer-link' : 'nav-link'}${isOn ? ' active' : ''}`}
+        onClick={mobile ? () => setDrawerOpen(false) : undefined}
+        style={{
+          display: 'flex', alignItems: 'center', gap: mobile ? 10 : 8,
+          padding: mobile ? '9px 10px' : '7px 10px', borderRadius: '6px',
+          borderLeft: isOn ? `3px solid ${GOLD}` : '3px solid transparent',
+          background: isOn ? 'rgba(201,162,39,0.07)' : 'transparent',
+          color: isOn ? BONE : MUTED,
+          fontSize: mobile ? '13.5px' : '13.5px', fontWeight: isOn ? '700' : '500',
+          letterSpacing: '-0.1px', textDecoration: 'none',
+        }}
+      >
+        <Icon size={mobile ? 15 : 15} strokeWidth={isOn ? 2 : 1.5} color={isOn ? GOLD : MUTED} style={{ flexShrink: 0 }} />
+        {label}
+      </Link>
+    )
+  }
 
   if (isMobile) {
     return (
@@ -150,30 +172,14 @@ function Nav() {
             </button>
           </div>
 
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1px' }}>
-            {links.map(({ path, label, Icon }) => {
-              const active = location.pathname === path
-              return (
-                <Link
-                  key={path}
-                  to={path}
-                  className={`nav-drawer-link${active ? ' active' : ''}`}
-                  onClick={() => setDrawerOpen(false)}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: '10px',
-                    padding: '8px 10px', borderRadius: '5px',
-                    borderLeft: active ? `3px solid ${GOLD}` : '3px solid transparent',
-                    background: active ? 'rgba(201,162,39,0.07)' : 'transparent',
-                    color: active ? BONE : MUTED,
-                    fontSize: '13px', fontWeight: active ? '500' : '400',
-                    letterSpacing: '-0.1px', textDecoration: 'none',
-                  }}
-                >
-                  <Icon size={14} strokeWidth={active ? 2 : 1.5} color={active ? GOLD : '#3E3F4A'} style={{ flexShrink: 0 }} />
-                  {label}
-                </Link>
-              )
-            })}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            {links.map(l => <NavItem key={l.path} {...l} mobile />)}
+          </div>
+
+          <div style={{ flex: 1 }} />
+
+          <div style={{ padding: '10px 0 0', borderTop: `1px solid ${SLATE}`, marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <NavItem {...settingsLink} mobile />
           </div>
 
           <div style={{ padding: '14px 10px 0', borderTop: `1px solid ${SLATE}`, marginTop: '8px' }}>
@@ -242,29 +248,15 @@ function Nav() {
           </svg>
         </div>
 
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1px', overflowY: 'auto' }}>
-          {links.map(({ path, label, Icon }) => {
-            const active = location.pathname === path
-            return (
-              <Link
-                key={path}
-                to={path}
-                className={`nav-link${active ? ' active' : ''}`}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '8px',
-                  padding: '6px 10px', borderRadius: '5px',
-                  borderLeft: active ? `3px solid ${GOLD}` : '3px solid transparent',
-                  background: active ? 'rgba(201,162,39,0.07)' : 'transparent',
-                  color: active ? BONE : MUTED,
-                  fontSize: '13px', fontWeight: active ? '500' : '400',
-                  letterSpacing: '-0.1px',
-                }}
-              >
-                <Icon size={14} strokeWidth={active ? 2 : 1.5} color={active ? GOLD : '#3E3F4A'} style={{ flexShrink: 0 }} />
-                {label}
-              </Link>
-            )
-          })}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+          {links.map(l => <NavItem key={l.path} {...l} />)}
+        </div>
+
+        <div style={{ flex: 1 }} />
+
+        {/* Settings — bottom-anchored, visually separated, not a nav peer */}
+        <div style={{ borderTop: `1px solid ${SLATE}`, paddingTop: '10px', marginBottom: '10px' }}>
+          <NavItem {...settingsLink} />
         </div>
 
         <div style={{ padding: '14px 10px 0', borderTop: `1px solid ${SLATE}`, marginTop: '4px' }}>

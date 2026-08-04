@@ -4,29 +4,67 @@ import { Search } from 'lucide-react'
 
 const GOLD = '#C9A227'
 
+// Kept in sync with every route in App.jsx — this list going stale (it was
+// missing Voice Outreach, Revenue Engine, and half a dozen others before
+// this pass) is exactly the "modules nothing points to" problem the Aug
+// 2026 IA review flagged. Add a line here whenever a new route is added
+// to App.jsx, not just a hub link.
 export const COMMAND_PALETTE_PAGES = [
-  { label: 'Dashboard',          path: '/dashboard' },
-  { label: 'Marketing Brain',    path: '/brain' },
-  { label: 'Smart Analysis',     path: '/smart-analysis' },
-  { label: 'BI Platform',        path: '/intelligence' },
-  { label: 'AI Analyzer',        path: '/analyze' },
-  { label: 'Competitor',         path: '/competitor' },
-  { label: 'Ad Intel',           path: '/ad-intel' },
-  { label: 'Ad Creative',        path: '/ad-creative' },
-  { label: 'Audience Finder',    path: '/audience' },
-  { label: 'Leads',              path: '/leads' },
-  { label: 'YouTube Intel',      path: '/youtube' },
-  { label: 'Opportunity Engine', path: '/opportunity' },
-  { label: 'Offer Intelligence', path: '/offer' },
-  { label: 'Website Audit',      path: '/website-audit' },
-  { label: 'Visibility',         path: '/visibility' },
-  { label: 'Outreach AI',        path: '/outreach' },
-  { label: 'KPI Engine',         path: '/kpi-engine' },
-  { label: 'Performance',        path: '/performance' },
-  { label: 'AI Optimizer',       path: '/ai-optimizer' },
-  { label: 'Result Center',      path: '/result-center' },
-  { label: 'Prospects',          path: '/prospects' },
-  { label: 'Command Center',     path: '/command-center' },
+  // Hubs (Phase A, Aug 2026 IA review)
+  { label: 'Home',                   path: '/dashboard' },
+  { label: 'Sales',                  path: '/sales' },
+  { label: 'Marketing',              path: '/marketing' },
+  { label: 'Intelligence',           path: '/intel' },
+  { label: 'Analytics',              path: '/analytics' },
+  { label: 'Settings',               path: '/settings' },
+  // Sales
+  { label: 'Sales — Pipeline',                 path: '/revenue-engine/pipeline' },
+  { label: "Sales — Today's Queue",            path: '/revenue-engine/today' },
+  { label: 'Sales — Goal / Discover',          path: '/revenue-engine' },
+  { label: 'Leads (CRM)',                      path: '/leads' },
+  { label: 'Prospect Discovery',               path: '/prospects' },
+  { label: 'Outreach AI',                      path: '/outreach' },
+  { label: 'Voice Outreach — Build Batch',     path: '/voice-outreach' },
+  { label: 'Voice Outreach — Call Dashboard',  path: '/voice-outreach/calls' },
+  { label: 'Voice Outreach — Analytics',       path: '/voice-outreach/analytics' },
+  { label: 'Voice Outreach — DNC List',        path: '/voice-outreach/dnc' },
+  { label: 'Voice Outreach — Settings',        path: '/voice-outreach/settings' },
+  { label: 'Revenue Engine — Rate Card',       path: '/revenue-engine/settings' },
+  // Marketing
+  { label: 'Google Ads Dashboard',   path: '/google-ads/dashboard' },
+  { label: 'Meta Ads Test',          path: '/meta-test' },
+  { label: 'Sports Growth (CrickHub)', path: '/cricket-ads' },
+  { label: 'Audience Finder',        path: '/audience' },
+  { label: 'Offer Intelligence',     path: '/offer' },
+  { label: 'Command Center',         path: '/command-center' },
+  { label: 'Instagram Coach',        path: '/instagram-coach' },
+  { label: 'Creative Studio',        path: '/creative-studio' },
+  { label: 'Ad Creative',            path: '/ad-creative' },
+  { label: 'Creator Finder',         path: '/creator-finder' },
+  // Intelligence
+  { label: 'Website Audit',          path: '/website-audit' },
+  { label: 'Account Audit',          path: '/account-audit' },
+  { label: 'Visibility',             path: '/visibility' },
+  { label: 'AI Analyzer',            path: '/analyze' },
+  { label: 'BI Platform',            path: '/intelligence' },
+  { label: 'Marketing Brain',        path: '/brain' },
+  { label: 'Smart Analysis',         path: '/smart-analysis' },
+  { label: 'Marketing Intelligence', path: '/marketing-intelligence' },
+  { label: 'Competitor',             path: '/competitor' },
+  { label: 'Ad Intel',               path: '/ad-intel' },
+  { label: 'Opportunity Engine',     path: '/opportunity' },
+  { label: 'YouTube Intel',          path: '/youtube' },
+  { label: 'Organic Intelligence',   path: '/organic-intelligence' },
+  { label: 'Social Intelligence',    path: '/social-intelligence' },
+  // Analytics
+  { label: 'Performance Intelligence', path: '/performance' },
+  { label: 'KPI Engine',             path: '/kpi-engine' },
+  { label: 'AI Optimizer',           path: '/ai-optimizer' },
+  { label: 'Result Center',          path: '/result-center' },
+  { label: 'History',                path: '/history' },
+  // Settings
+  { label: 'Google Ads — Connect',   path: '/google-ads' },
+  { label: 'Account',                path: '/account' },
 ]
 
 export default function CommandPalette() {
