@@ -4,10 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/check-route-reachability.js --warn-only",
     "dev": "vite",
+    "prebuild": "node scripts/check-route-reachability.js",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check:reachability": "node scripts/check-route-reachability.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.7",
