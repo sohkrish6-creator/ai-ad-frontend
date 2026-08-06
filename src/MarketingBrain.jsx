@@ -183,9 +183,19 @@ function MarketingBrain() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url, business_type: businessType, budget: parseInt(budget), goal, competitor_name: compName, competitor_website: compWebsite, language, target_industry: resolvedIndustry, target_city: targetCity })
       })
-      const data = await res.json()
-      if (data.scan_failed) { setError(data.message); toast.error(data.message) }
-      else { setResult(data); localStorage.setItem(LS_KEY_BRAIN, JSON.stringify(data)); setFromCache(false); setLastGenerated(null); toast.success('Done!') }
+      const data = await res.json().catch(() => ({}))
+      // Post-audit fix (Item 4e): /full-report never actually returns
+      // scan_failed (verified — it has exactly one return statement, at
+      // success), so this check was dead code and EVERY failure (a bare
+      // 500, a GPT error) fell through to the success branch and cached a
+      // broken report as real. Now any non-ok/non-success response is
+      // treated as a failure and never cached.
+      if (!res.ok || !data.success) {
+        const msg = data.message || data.error || data.detail || 'Report generate nahi hua. Try again.'
+        setError(msg); toast.error(msg)
+      } else {
+        setResult(data); localStorage.setItem(LS_KEY_BRAIN, JSON.stringify(data)); setFromCache(false); setLastGenerated(null); toast.success('Done!')
+      }
     } catch { setError('Backend se connect nahi ho paya.'); toast.error('Backend se connect nahi ho paya.') }
     setLoading(false)
   }

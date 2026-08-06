@@ -15,18 +15,31 @@ export default function RevenueEngineSettings() {
   const [prices, setPrices] = useState({})   // { service_key: price string }
   const [units, setUnits] = useState({})     // { service_key: unit }
   const [saving, setSaving] = useState(false)
+  const [loadError, setLoadError] = useState('')
 
+  // Post-audit fix (Item 4c): a {success:false} (or any non-2xx, e.g. a
+  // dropped 401) response left `catalog` at its initial [] with no error
+  // shown — rendered as an empty, fully-configurable form, indistinguishable
+  // from a real tenant who just hasn't set prices yet. `loadError` makes
+  // that distinction visible instead of silently offering a blank form.
   async function load() {
+    setLoadError('')
     try {
       const res = await apiFetch(`${BACKEND}/revenue-engine/rate-card`)
-      const data = await res.json()
-      if (data.success) {
+      const data = await res.json().catch(() => ({}))
+      if (res.ok && data.success) {
         setCatalog(data.service_catalog)
         const p = {}, u = {}
         data.entries.forEach(e => { p[e.service_key] = String(e.price); u[e.service_key] = e.unit })
         setPrices(p); setUnits(u)
+      } else {
+        setLoadError(data.detail || 'Could not load your rate card.')
+        toast.error(data.detail || 'Could not load your rate card.')
       }
-    } catch { toast.error('Backend se connect nahi ho paya.') }
+    } catch {
+      setLoadError('Backend se connect nahi ho paya.')
+      toast.error('Backend se connect nahi ho paya.')
+    }
   }
 
   useEffect(() => { load() }, []) // eslint-disable-line react-hooks/exhaustive-deps
@@ -72,7 +85,17 @@ export default function RevenueEngineSettings() {
           <Wallet size={15} color={GOLD} />
           <p style={{ ...lbl, margin: 0 }}>Prices Per Service</p>
         </div>
-        {catalog.map(svc => (
+        {loadError ? (
+          <div style={{ padding: '18px 4px', textAlign: 'center' }}>
+            <p style={{ margin: '0 0 10px', fontSize: '13px', color: MUTED }}>{loadError}</p>
+            <button onClick={load} style={{
+              background: 'transparent', border: `1px solid ${SLATE_L}`, color: BONE,
+              padding: '7px 16px', borderRadius: '7px', fontSize: '12.5px', fontWeight: '600', cursor: 'pointer',
+            }}>
+              Retry
+            </button>
+          </div>
+        ) : catalog.map(svc => (
           <div key={svc.key} style={{ display: 'grid', gridTemplateColumns: '1fr 120px 100px', gap: '10px', alignItems: 'end', marginBottom: '12px' }}>
             <div>
               <label style={lbl}>{svc.label}</label>
@@ -95,13 +118,15 @@ export default function RevenueEngineSettings() {
           </div>
         ))}
 
-        <button onClick={handleSave} disabled={saving} style={{
-          display: 'flex', alignItems: 'center', gap: '8px', background: saving ? SLATE_M : GOLD,
-          border: 'none', color: saving ? MUTED : '#0B0B0D', padding: '11px 22px', borderRadius: '8px',
-          fontSize: '13.5px', fontWeight: '700', cursor: saving ? 'not-allowed' : 'pointer', marginTop: '8px',
-        }}>
-          {saving ? 'Saving...' : 'Save Rate Card'}
-        </button>
+        {!loadError && (
+          <button onClick={handleSave} disabled={saving} style={{
+            display: 'flex', alignItems: 'center', gap: '8px', background: saving ? SLATE_M : GOLD,
+            border: 'none', color: saving ? MUTED : '#0B0B0D', padding: '11px 22px', borderRadius: '8px',
+            fontSize: '13.5px', fontWeight: '700', cursor: saving ? 'not-allowed' : 'pointer', marginTop: '8px',
+          }}>
+            {saving ? 'Saving...' : 'Save Rate Card'}
+          </button>
+        )}
       </div>
     </PageShell>
   )

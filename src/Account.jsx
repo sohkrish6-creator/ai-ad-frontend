@@ -248,10 +248,12 @@ export default function Account() {
   }
 
   async function connectGoogle() {
+    setConnError('')
     try {
       const res = await apiFetch(`${BACKEND}/google/connect`)
       const data = await res.json()
       if (data.auth_url) window.location.href = data.auth_url
+      else setConnError(data.detail || 'Could not start Google Ads connection.')
     } catch { setConnError('Could not start Google Ads connection.') }
   }
 
@@ -265,10 +267,12 @@ export default function Account() {
   }
 
   async function connectMeta() {
+    setConnError('')
     try {
       const res = await apiFetch(`${BACKEND}/meta/connect`)
       const data = await res.json()
       if (data.auth_url) window.location.href = data.auth_url
+      else setConnError(data.detail || 'Could not start Meta Ads connection.')
     } catch { setConnError('Could not start Meta Ads connection.') }
   }
 
@@ -282,10 +286,12 @@ export default function Account() {
   }
 
   async function connectSearchConsole() {
+    setConnError('')
     try {
       const res = await apiFetch(`${BACKEND}/search-console/connect`)
       const data = await res.json()
       if (data.auth_url) window.location.href = data.auth_url
+      else setConnError(data.detail || 'Could not start Search Console connection.')
     } catch { setConnError('Could not start Search Console connection.') }
   }
 

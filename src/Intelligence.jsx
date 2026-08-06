@@ -146,8 +146,13 @@ function Intelligence() {
           competitor_urls: competitorUrl.trim() ? [competitorUrl.trim()] : [],
         }),
       })
-      const data = await res.json()
-      if (data.scan_failed) setError(data.message)
+      const data = await res.json().catch(() => ({}))
+      // Post-audit fix (Item 4e): only `scan_failed` was treated as a
+      // failure — any other non-success shape (bare 500, GPT/report-save
+      // exception with no scan_failed flag) fell through and cached a
+      // broken result as real. Now any non-ok/non-success response is
+      // treated as a failure and never cached.
+      if (!res.ok || !data.success) setError(data.message || data.detail || 'Intelligence scan nahi ho paya. Try again.')
       else { setResult(data); localStorage.setItem(LS_KEY_BI, JSON.stringify(data)); setFromCache(false) }
     } catch {
       setError('Backend se connect nahi ho paya. Try again.')

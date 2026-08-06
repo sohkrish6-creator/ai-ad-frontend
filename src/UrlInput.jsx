@@ -103,9 +103,15 @@ function UrlInput() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url, business_type: forceCategory || businessType, budget: parseInt(budget), goal, force: !!forceCategory })
       })
-      const data = await res.json()
+      const data = await res.json().catch(() => ({}))
       if (data.needs_confirmation) setMismatch(data.classification)
-      else if (data.scan_failed) setError(data.message)
+      // Post-audit fix (Item 4e): this only recognized `scan_failed` as a
+      // failure — any other non-success shape (a bare 500's {"detail":...}
+      // with no scan_failed flag, an OpenAI error, a timeout) fell through
+      // to the success branch below and cached a broken/undefined analysis
+      // as if it were real. Now any response that isn't HTTP-ok AND
+      // explicitly success:true is treated as a failure, never cached.
+      else if (!res.ok || !data.success) setError(data.message || data.detail || 'Website analyze nahi ho paya — try again.')
       else { setResult(data); localStorage.setItem(LS_KEY_ANALYZE, JSON.stringify(data)); setFromCache(false) }
     } catch { setError('Backend se connect nahi ho paya.') }
     setLoading(false)

@@ -275,6 +275,8 @@ export default function VoiceOutreachReview() {
       if (data.success) {
         toast.success(`Approved ${data.succeeded.length} eligible prospect(s).`)
         load()
+      } else {
+        toast.error(data.detail || 'Could not approve eligible prospects.')
       }
     } catch { toast.error('Backend se connect nahi ho paya.') }
   }

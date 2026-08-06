@@ -1,5 +1,6 @@
 import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
+import { useToast } from './ToastContext'
 import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
 
 
@@ -9,6 +10,7 @@ const statusBg   = { 'New': '#D4AF3712', 'Contacted': '#F59E0B12', 'Converted': 
 
 function Leads() {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  const toast = useToast()
   const [leads, setLeads] = useState([])
   const [stats, setStats] = useState({})
   const [showForm, setShowForm] = useState(false)
@@ -17,11 +19,25 @@ function Leads() {
 
   const BASE = BACKEND
 
+  // Post-audit fix (Item 4a): these two swallowed every failure, which was
+  // indistinguishable from a genuinely empty account — a tenant with real
+  // leads and a backend hiccup saw the exact same "Abhi koi lead nahi hai"
+  // empty state as a tenant with zero leads.
   async function loadLeads() {
-    try { const res = await apiFetch(`${BASE}/leads`); const d = await res.json(); setLeads(d.leads) } catch {}
+    try {
+      const res = await apiFetch(`${BASE}/leads`)
+      const d = await res.json()
+      if (res.ok) setLeads(d.leads || [])
+      else toast.error(d.message || d.detail || 'Could not load leads.')
+    } catch { toast.error('Backend se connect nahi ho paya — leads load nahi hue.') }
   }
   async function loadStats() {
-    try { const res = await apiFetch(`${BASE}/leads/stats`); setStats(await res.json()) } catch {}
+    try {
+      const res = await apiFetch(`${BASE}/leads/stats`)
+      const d = await res.json()
+      if (res.ok) setStats(d)
+      else toast.error(d.message || d.detail || 'Could not load lead stats.')
+    } catch { toast.error('Backend se connect nahi ho paya — stats load nahi hue.') }
   }
   async function handleAddLead() {
     if (!form.name || !form.phone) { alert('Naam aur phone zaroori hai!'); return }
@@ -33,9 +49,26 @@ function Leads() {
     } catch { alert('Lead add nahi hua') }
     setLoading(false)
   }
+  // Post-audit fix (Item 4a): had no try/catch at all — a failed PUT left
+  // the <select> showing whatever option the user just clicked (native DOM
+  // selection) even though nothing was actually saved, since no re-render
+  // ever occurred to snap the controlled value back. Now every exit path
+  // reloads the real persisted state and a failure surfaces a toast instead
+  // of leaving a silently-wrong value on screen.
   async function updateStatus(id, status) {
-    await apiFetch(`${BASE}/leads/${id}?status=${status}`, { method: 'PUT' })
-    loadLeads()
+    try {
+      const res = await apiFetch(`${BASE}/leads/${id}?status=${status}`, { method: 'PUT' })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok && data.success) {
+        toast.success('Status updated.')
+      } else {
+        toast.error(data.message || data.detail || 'Could not update status.')
+      }
+    } catch {
+      toast.error('Backend se connect nahi ho paya — status save nahi hua.')
+    } finally {
+      loadLeads()
+    }
   }
 
   useEffect(() => { loadLeads(); loadStats() }, [])
