@@ -7,6 +7,7 @@ import { GOLD, card, cardInner, BONE, MUTED, RED, GREEN, SLATE_M, SLATE_L } from
 import PageShell from './PageShell'
 import PageHeader from './PageHeader'
 import RevenueEngineSubNav from './RevenueEngineSubNav'
+import RevenueEngineProfileBanner from './RevenueEngineProfileBanner'
 
 const REC_ICON = { CALL: PhoneCall, FOLLOW_LATER: Clock3, IGNORE: Ban }
 const REC_COLOR = { CALL: GREEN, FOLLOW_LATER: GOLD, IGNORE: MUTED }
@@ -46,6 +47,8 @@ export default function RevenueEngineToday() {
           </button>
         }
       />
+
+      <RevenueEngineProfileBanner prospects={prospects} requireBlocked={false} />
 
       <div style={{ display: 'flex', gap: '10px', marginBottom: '18px', flexWrap: 'wrap' }}>
         {[

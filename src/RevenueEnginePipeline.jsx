@@ -6,6 +6,7 @@ import { GOLD, card, cardInner, BONE, MUTED, RED, GREEN, SLATE_M, SLATE_L } from
 import PageShell from './PageShell'
 import PageHeader from './PageHeader'
 import RevenueEngineSubNav from './RevenueEngineSubNav'
+import RevenueEngineProfileBanner from './RevenueEngineProfileBanner'
 
 const WEAKNESS_LABELS = {
   no_website: 'No Website', poor_reviews: 'Poor Reviews', low_review_count: 'Few Reviews',
@@ -134,6 +135,8 @@ export default function RevenueEnginePipeline() {
           </button>
         }
       />
+
+      <RevenueEngineProfileBanner prospects={prospects} />
 
       {isRunning && (
         <div style={{ ...card, padding: '18px', marginBottom: '16px' }}>
