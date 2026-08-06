@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import CityInput, { getLastCity } from './CityInput'
 
 const LS_KEY_VIS = 'adsoh_visibility_result'
-import { Eye, Copy, Check, ChevronDown, ChevronUp, Zap, Search, Bot, MapPin, FileText } from 'lucide-react'
+import { Eye, Copy, Check, ChevronDown, ChevronUp, Zap, Search, Bot, MapPin, FileText, AlertCircle } from 'lucide-react'
 import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
 import PageShell from './PageShell'
 import PageHeader from './PageHeader'
@@ -174,6 +174,7 @@ export default function VisibilityIntelligence() {
   const [result, setResult]               = useState(null)
   const [expanded, setExpanded]           = useState('seo')
   const [fromCache, setFromCache]         = useState(false)
+  const [unverified, setUnverified]       = useState(null)
 
   useEffect(() => {
     try { const s = localStorage.getItem(LS_KEY_VIS); if (s) { setResult(JSON.parse(s)); setFromCache(true) } } catch {}
@@ -184,7 +185,7 @@ export default function VisibilityIntelligence() {
 
   async function handleAnalyse() {
     if (!url.trim()) { setError('Website URL daalo.'); return }
-    setError(''); setLoading(true); setResult(null); setExpanded('seo')
+    setError(''); setLoading(true); setResult(null); setUnverified(null); setExpanded('seo')
     try {
       const res  = await apiFetch(`${BACKEND}/visibility-intelligence`, {
         method: 'POST',
@@ -192,8 +193,16 @@ export default function VisibilityIntelligence() {
         body: JSON.stringify({ url: url.trim(), industry: resolvedIndustry, city }),
       })
       const data = await res.json()
-      if (data.success) { setResult(data); localStorage.setItem(LS_KEY_VIS, JSON.stringify(data)); setFromCache(false) }
-      else setError(data.error || 'Analysis failed. Dobara try karo.')
+      if (data.data_verified === false) {
+        // Crawl was blocked/unreachable — never cache or render this as if
+        // it were a real scored audit (that's the exact bug this fixes).
+        setUnverified(data)
+        localStorage.removeItem(LS_KEY_VIS)
+      } else if (data.success) {
+        setResult(data); localStorage.setItem(LS_KEY_VIS, JSON.stringify(data)); setFromCache(false)
+      } else {
+        setError(data.error || 'Analysis failed. Dobara try karo.')
+      }
     } catch { setError('Backend se connect nahi ho paya.') }
     setLoading(false)
   }
@@ -270,6 +279,18 @@ export default function VisibilityIntelligence() {
         <div style={{ maxWidth: '820px', width: '100%', background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '9px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>Showing previous result · Generate new report to refresh</p>
           <button onClick={() => { localStorage.removeItem(LS_KEY_VIS); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: MUTED, textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
+        </div>
+      )}
+
+      {unverified && !loading && (
+        <div style={{ maxWidth: '640px', width: '100%', ...card, padding: '22px', display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+          <AlertCircle size={20} color={GOLD} style={{ flexShrink: 0, marginTop: '1px' }} />
+          <div>
+            <p style={{ margin: '0 0 6px', fontSize: '14px', fontWeight: '700', color: BONE }}>
+              Couldn't verify this site — no audit generated
+            </p>
+            <p style={{ margin: 0, fontSize: '13px', color: MUTED, lineHeight: 1.6 }}>{unverified.message}</p>
+          </div>
         </div>
       )}
 

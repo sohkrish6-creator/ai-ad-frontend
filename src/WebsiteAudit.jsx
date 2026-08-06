@@ -175,6 +175,7 @@ export default function WebsiteAudit() {
   const [result, setResult]               = useState(null)
   const [expanded, setExpanded]           = useState(null)
   const [fromCache, setFromCache]         = useState(false)
+  const [unverified, setUnverified]       = useState(null)
 
   useEffect(() => {
     try { const s = localStorage.getItem(LS_KEY_WEBSITE); if (s) { setResult(JSON.parse(s)); setFromCache(true) } } catch {}
@@ -185,7 +186,7 @@ export default function WebsiteAudit() {
 
   async function handleAudit() {
     if (!url.trim()) { setError('Website URL daalo.'); return }
-    setError(''); setLoading(true); setResult(null); setExpanded(null)
+    setError(''); setLoading(true); setResult(null); setUnverified(null); setExpanded(null)
     try {
       const res  = await apiFetch(`${BACKEND}/website-intelligence`, {
         method: 'POST',
@@ -193,8 +194,16 @@ export default function WebsiteAudit() {
         body: JSON.stringify({ url: url.trim(), industry: resolvedIndustry, city }),
       })
       const data = await res.json()
-      if (data.success) { setResult(data); localStorage.setItem(LS_KEY_WEBSITE, JSON.stringify(data)); setFromCache(false) }
-      else setError(data.error || 'Audit failed. Dobara try karo.')
+      if (data.data_verified === false) {
+        // Crawl was blocked/unreachable — never cache or render this as if
+        // it were a real scored audit (that's the exact bug this fixes).
+        setUnverified(data)
+        localStorage.removeItem(LS_KEY_WEBSITE)
+      } else if (data.success) {
+        setResult(data); localStorage.setItem(LS_KEY_WEBSITE, JSON.stringify(data)); setFromCache(false)
+      } else {
+        setError(data.error || 'Audit failed. Dobara try karo.')
+      }
     } catch { setError('Backend se connect nahi ho paya.') }
     setLoading(false)
   }
@@ -325,6 +334,18 @@ export default function WebsiteAudit() {
         <div style={{ maxWidth: '800px', width: '100%', background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '7px', padding: '9px 16px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>Showing previous result · Generate new report to refresh</p>
           <button onClick={() => { localStorage.removeItem(LS_KEY_WEBSITE); setResult(null); setFromCache(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: MUTED, textDecoration: 'underline', padding: '0 2px' }}>Clear</button>
+        </div>
+      )}
+
+      {unverified && !loading && (
+        <div style={{ maxWidth: '640px', width: '100%', ...card, padding: '22px', display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+          <AlertCircle size={20} color={GOLD} style={{ flexShrink: 0, marginTop: '1px' }} />
+          <div>
+            <p style={{ margin: '0 0 6px', fontSize: '14px', fontWeight: '700', color: BONE }}>
+              Couldn't verify this site — no audit generated
+            </p>
+            <p style={{ margin: 0, fontSize: '13px', color: MUTED, lineHeight: 1.6 }}>{unverified.message}</p>
+          </div>
         </div>
       )}
 
