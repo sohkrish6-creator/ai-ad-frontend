@@ -23,6 +23,8 @@ export default function VoiceOutreachBatchBuilder() {
   const [error, setError]                 = useState('')
   const [rescoring, setRescoring]         = useState(false)
   const [regenerating, setRegenerating]   = useState(false)
+  const [rescorePreview, setRescorePreview] = useState(null) // {eligible_count, estimated_cost_usd, default_limit, max_limit} once fetched, or 'loading'/'error'
+  const [rescoreLimit, setRescoreLimit]   = useState(100)
 
   const resolvedIndustry = industry === 'Other' ? industryOther : industry
 
@@ -49,16 +51,41 @@ export default function VoiceOutreachBatchBuilder() {
     setLoading(false)
   }
 
-  async function handleRescore() {
-    setRescoring(true)
+  // Post-audit fix (Item 5): this used to run unbounded — a tenant with
+  // thousands of uncalled prospects across old scans would trigger
+  // hundreds of real (billed) GPT calls in a single click with zero
+  // warning. Now a click first fetches the real count + a rough cost
+  // estimate and shows an inline confirmation (same "expand in place"
+  // pattern as Account.jsx's Delete Account) before anything runs, and the
+  // actual run is capped server-side so one click can never run away.
+  async function handleRescoreClick() {
+    setRescorePreview('loading')
     try {
-      const res = await apiFetch(`${BACKEND}/voice-outreach/rescore-existing`, { method: 'POST' })
+      const res = await apiFetch(`${BACKEND}/voice-outreach/rescore-existing/preview`)
       const data = await res.json()
       if (data.success) {
-        toast.success(
-          `Rescored ${data.prospects_rescored} prospect(s) — ${data.score_changed} score change(s), `
+        setRescorePreview(data)
+        setRescoreLimit(Math.min(data.eligible_count, data.default_limit) || data.default_limit)
+      } else {
+        setRescorePreview('error')
+        toast.error(data.detail || 'Could not check how many prospects need rescoring.')
+      }
+    } catch {
+      setRescorePreview('error')
+      toast.error('Backend se connect nahi ho paya.')
+    }
+  }
+
+  async function handleRescoreConfirm() {
+    setRescoring(true)
+    try {
+      const res = await apiFetch(`${BACKEND}/voice-outreach/rescore-existing?limit=${rescoreLimit}`, { method: 'POST' })
+      const data = await res.json()
+      if (data.success) {
+        const base = `Rescored ${data.prospects_rescored} prospect(s) — ${data.score_changed} score change(s), `
           + `${data.reverted_to_pending} reverted to pending review.`
-        )
+        toast.success(data.remaining > 0 ? `${base} ${data.remaining} more remaining — run again to continue.` : base)
+        setRescorePreview(null)
       } else {
         toast.error(data.detail || 'Could not rescore.')
       }
@@ -149,18 +176,63 @@ export default function VoiceOutreachBatchBuilder() {
         </button>
       </div>
 
-      <div style={{ ...card, padding: '14px 16px', marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-        <p style={{ margin: 0, fontSize: '12px', color: MUTED, lineHeight: 1.5, maxWidth: '460px' }}>
-          Rescores every not-yet-called prospect with the corrected site-fetch classifier (a real GPT call — not
-          free, and one-time, never automatic). Approved prospects whose score drops too low revert to pending review.
-        </p>
-        <button onClick={handleRescore} disabled={rescoring} style={{
-          display: 'flex', alignItems: 'center', gap: '6px', background: 'transparent',
-          border: `1px solid ${SLATE_L}`, color: MUTED, padding: '9px 16px', borderRadius: '7px',
-          fontSize: '12.5px', fontWeight: '600', cursor: rescoring ? 'not-allowed' : 'pointer', flexShrink: 0,
-        }}>
-          <RefreshCw size={13} /> {rescoring ? 'Rescoring...' : 'Rescore Existing Prospects'}
-        </button>
+      <div style={{ ...card, padding: '14px 16px', marginTop: '16px' }}>
+        {!rescorePreview || rescorePreview === 'error' ? (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+            <p style={{ margin: 0, fontSize: '12px', color: MUTED, lineHeight: 1.5, maxWidth: '460px' }}>
+              Rescores every not-yet-called prospect with the corrected site-fetch classifier (a real GPT call — not
+              free, and one-time, never automatic). Approved prospects whose score drops too low revert to pending review.
+            </p>
+            <button onClick={handleRescoreClick} style={{
+              display: 'flex', alignItems: 'center', gap: '6px', background: 'transparent',
+              border: `1px solid ${SLATE_L}`, color: MUTED, padding: '9px 16px', borderRadius: '7px',
+              fontSize: '12.5px', fontWeight: '600', cursor: 'pointer', flexShrink: 0,
+            }}>
+              <RefreshCw size={13} /> Rescore Existing Prospects
+            </button>
+          </div>
+        ) : rescorePreview === 'loading' ? (
+          <p style={{ margin: 0, fontSize: '12.5px', color: MUTED }}>Checking how many prospects need rescoring...</p>
+        ) : rescorePreview.eligible_count === 0 ? (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+            <p style={{ margin: 0, fontSize: '12.5px', color: MUTED }}>No not-yet-called prospects need rescoring right now.</p>
+            <button onClick={() => setRescorePreview(null)} style={{ background: 'transparent', border: `1px solid ${SLATE_L}`, color: MUTED, padding: '7px 14px', borderRadius: '7px', fontSize: '12px', cursor: 'pointer' }}>Close</button>
+          </div>
+        ) : (
+          <div>
+            <p style={{ margin: '0 0 10px', fontSize: '13px', color: BONE, lineHeight: 1.6 }}>
+              <b>{rescorePreview.eligible_count}</b> prospect{rescorePreview.eligible_count === 1 ? '' : 's'} not yet called
+              can be rescored — estimated cost <b>${rescorePreview.estimated_cost_usd.toFixed(4)}</b> (rough, gpt-4o-mini rates).
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px', flexWrap: 'wrap' }}>
+              <label style={{ ...lbl, margin: 0 }}>Rescore up to</label>
+              <input
+                type="number" min="1" max={Math.min(rescorePreview.eligible_count, rescorePreview.max_limit)}
+                value={rescoreLimit}
+                onChange={e => setRescoreLimit(Math.max(1, Math.min(Number(e.target.value) || 1, rescorePreview.max_limit)))}
+                style={{ ...inp, width: '90px' }}
+              />
+              <span style={{ fontSize: '12px', color: MUTED }}>
+                of {rescorePreview.eligible_count} this run (cap {rescorePreview.max_limit}) — the rest can be rescored in a follow-up run.
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button onClick={handleRescoreConfirm} disabled={rescoring} style={{
+                display: 'flex', alignItems: 'center', gap: '6px', background: rescoring ? SLATE_M : GOLD,
+                border: 'none', color: rescoring ? MUTED : '#0B0B0D', padding: '9px 18px', borderRadius: '7px',
+                fontSize: '12.5px', fontWeight: '700', cursor: rescoring ? 'not-allowed' : 'pointer',
+              }}>
+                <RefreshCw size={13} /> {rescoring ? 'Rescoring...' : `Confirm — Rescore ${rescoreLimit}`}
+              </button>
+              <button onClick={() => setRescorePreview(null)} disabled={rescoring} style={{
+                background: 'transparent', border: `1px solid ${SLATE_L}`, color: MUTED,
+                padding: '9px 16px', borderRadius: '7px', fontSize: '12.5px', cursor: rescoring ? 'not-allowed' : 'pointer',
+              }}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div style={{ ...card, padding: '14px 16px', marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>

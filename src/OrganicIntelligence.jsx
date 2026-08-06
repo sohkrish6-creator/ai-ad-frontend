@@ -486,8 +486,13 @@ export default function OrganicIntelligence() {
               <RefreshCw size={11} className={recRefreshing ? 'spin' : ''} /> Regenerate
             </button>
           </div>
-          {!recommendations ? (
-            <p style={{ fontSize: '13px', color: MUTED, margin: 0 }}>No insights yet.</p>
+          {!recommendations || recommendations.no_data ? (
+            // Post-audit fix (Item 5): the backend no longer auto-generates
+            // on a plain page load when there's no cache — this is the
+            // honest "nothing generated yet" state instead of a blank
+            // narrative, and Regenerate above is the only thing that
+            // triggers the real (billed) GPT call.
+            <p style={{ fontSize: '13px', color: MUTED, margin: 0 }}>No insights yet — click Regenerate to generate them.</p>
           ) : (
             <>
               <p style={{ fontSize: '13px', color: BONE, lineHeight: '1.6', margin: '0 0 14px' }}>{recommendations.narrative}</p>
