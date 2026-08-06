@@ -60,9 +60,50 @@ import SettingsHub from './SettingsHub'
 import Nav from './Nav'
 import { ToastProvider } from './ToastContext'
 import CommandPalette from './CommandPalette'
+import { RefreshCw } from 'lucide-react'
+import { INK, GOLD, BONE, MUTED, SLATE, SLATE_L, FONT_BODY } from './ds'
+
+// Post-audit fix (Item 3): loading used to render `null` unconditionally,
+// so a Supabase getSession() failure (network blip, outage, storage read
+// error) left the whole app on a permanent blank page — no error, no
+// retry, nothing a user would recognize as a failure rather than their
+// own connection being broken. AuthContext now surfaces `authError`
+// (including a timeout on a hung request) and a `retry()` that re-runs
+// the real check.
+function AuthErrorScreen({ authError, retry }) {
+  return (
+    <div style={{
+      minHeight: '100vh', background: INK, color: BONE, fontFamily: FONT_BODY,
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px',
+    }}>
+      <div style={{
+        maxWidth: '380px', width: '100%', background: SLATE, border: `1px solid ${SLATE_L}`,
+        borderRadius: '10px', padding: '28px', textAlign: 'center',
+      }}>
+        <p style={{ margin: '0 0 8px', fontSize: '15px', fontWeight: '700' }}>Couldn't verify your session</p>
+        <p style={{ margin: '0 0 20px', fontSize: '13px', color: MUTED, lineHeight: 1.5 }}>{authError}</p>
+        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+          <button onClick={retry} style={{
+            display: 'flex', alignItems: 'center', gap: '6px', background: GOLD, border: 'none',
+            color: '#0B0B0D', padding: '9px 16px', borderRadius: '7px', fontSize: '13px', fontWeight: '700', cursor: 'pointer',
+          }}>
+            <RefreshCw size={13} /> Retry
+          </button>
+          <a href="/login" style={{
+            display: 'flex', alignItems: 'center', color: MUTED, padding: '9px 16px', borderRadius: '7px',
+            fontSize: '13px', fontWeight: '600', textDecoration: 'none', border: `1px solid ${SLATE_L}`,
+          }}>
+            Sign in
+          </a>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth()
+  const { user, loading, authError, retry } = useAuth()
+  if (authError) return <AuthErrorScreen authError={authError} retry={retry} />
   if (loading) return null
   if (!user) return <Navigate to="/login" replace />
   return children
