@@ -9,8 +9,6 @@ import PageHeader from './PageHeader'
 const LS_KEY_ANALYZE = 'adsoh_analyze_result'
 
 function UrlInput() {
-  const [unlocked, setUnlocked] = useState(false)
-  const [accessCode, setAccessCode] = useState('')
   const [url, setUrl] = useState('')
   const [businessType, setBusinessType] = useState('')
   const [budget, setBudget] = useState('')
@@ -123,24 +121,6 @@ function UrlInput() {
   }
 
   const isMobile = window.innerWidth < 768
-
-  // Password Screen
-  if (!unlocked) return (
-    <div style={{ minHeight: '100vh', background: INK, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px', boxSizing: 'border-box' }}>
-      <div style={{ ...card, padding: '32px 24px', width: '100%', maxWidth: '320px', textAlign: 'center' }}>
-        <div style={{ width: '48px', height: '48px', background: SLATE_M, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px', fontSize: '22px' }}>🔐</div>
-        <h2 style={{ color: BONE, fontSize: '16px', fontWeight: '600', margin: '0 0 6px' }}>AI Analyzer</h2>
-        <p style={{ color: MUTED, fontSize: '13px', margin: '0 0 22px' }}>Access code daalo</p>
-        <input type="password" value={accessCode} onChange={e => setAccessCode(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') { if (accessCode === 'sohscape2024') setUnlocked(true); else alert('Wrong access code!') } }}
-          placeholder="••••••••" style={{ ...inputSt, marginBottom: '10px', textAlign: 'center' }} />
-        <button onClick={() => { if (accessCode === 'sohscape2024') setUnlocked(true); else alert('Wrong access code!') }}
-          style={{ width: '100%', padding: '11px', borderRadius: '7px', border: 'none', background: '#171717', color: '#fff', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
-          Unlock
-        </button>
-      </div>
-    </div>
-  )
 
   // Loading
   if (loading) return (
