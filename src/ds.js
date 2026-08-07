@@ -24,7 +24,7 @@ export const SLATE_L   = '#1F2430'   // was a lighter fill, now border-subtle �
 export const SLATE_M   = '#0E1116'   // now bg-inset (wells, inputs, table headers)
 export const GREEN     = '#34D399'   // now success
 export const RED       = '#FB7185'   // now danger
-export const MUTED     = '#6B7385'   // now text-tertiary
+export const MUTED     = '#7A8299'   // now text-tertiary — 4.77:1 on bg-surface, clears WCAG AA (4.5:1)
 
 export const FONT_DISPLAY = "'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif" // Fraunces retired — one family, real weight range
 export const FONT_BODY    = "'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif"
