@@ -1,4 +1,5 @@
-/* ── Design Tokens ─────────────────────────────────────────────────────── */
+/* ── Design Tokens (legacy — superseded by the palette below, kept only ──
+   until every inline `var(--ink)` etc. reference is migrated in Step 3) ── */
 :root {
   --ink:          #0B0B0D;
   --bone:         #EDEAE3;
@@ -15,6 +16,93 @@
   --font-display: 'Fraunces', Georgia, serif;
   --font-body:    'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-mono:    'IBM Plex Mono', 'Menlo', 'Monaco', monospace;
+}
+
+/* ── Design Tokens — Visual Redesign (2026) ───────────────────────────────
+   Source of truth for the new look. src/ds.js exports JS mirrors of the
+   color values below (same names as before — INK, BONE, GOLD, etc. — so
+   every one of the 60 files importing from ds.js picks up the new palette
+   automatically without a prop or structural change anywhere). */
+:root {
+  /* Surfaces */
+  --bg-base:        #0B0D12;
+  --bg-surface:      #12151C;
+  --bg-raised:       #191D26;
+  --bg-inset:        #0E1116;
+
+  /* Borders */
+  --border-subtle:   #1F2430;
+  --border-strong:   #2C3342;
+
+  /* Text */
+  --text-primary:    #E8EAF0;
+  --text-secondary:  #A0A7B8;
+  --text-tertiary:   #6B7385;
+
+  /* Accent (violet) — primary action / active nav only, never decorative */
+  --accent:          #7C6CF5;
+  --accent-hover:    #8F82F7;
+  --accent-muted:    rgba(124,108,245,0.12);
+
+  /* Semantic */
+  --success:         #34D399;
+  --warning:          #FBBF24;
+  --danger:           #FB7185;
+  --info:             #38BDF8;
+  --success-muted:    rgba(52,211,153,0.12);
+  --warning-muted:    rgba(251,191,36,0.12);
+  --danger-muted:     rgba(251,113,133,0.12);
+  --info-muted:       rgba(56,189,248,0.12);
+
+  /* Type scale (font-family stays --font-body / --font-mono above) */
+  --text-display:     32px;
+  --text-display-lh:  40px;
+  --text-heading:     20px;
+  --text-heading-lh:  28px;
+  --text-body:        15px;
+  --text-body-lh:     24px;
+  --text-body-sm:     13px;
+  --text-body-sm-lh:  20px;
+  --text-label:       12px;
+  --text-label-lh:    16px;
+  --text-metric:       28px;
+  --text-metric-lh:    32px;
+  --text-metric-lg:    44px;
+  --text-metric-lg-lh: 48px;
+
+  /* Spacing (8pt base, 4 allowed for tight inline) */
+  --space-4:  4px;
+  --space-8:  8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-48: 48px;
+  --space-64: 64px;
+
+  /* Radius */
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   14px;
+  --radius-xl:   20px;
+  --radius-full: 9999px;
+
+  /* Elevation */
+  --elevation-1: 0 1px 2px rgba(0,0,0,.4);
+  --elevation-2: 0 4px 16px rgba(0,0,0,.5);
+  --elevation-3: 0 16px 48px rgba(0,0,0,.6);
+}
+
+/* Digits that line up in columns (metrics, tables, prices) never wobble */
+.tabular-nums { font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* ── Base Reset ────────────────────────────────────────────────────────── */
