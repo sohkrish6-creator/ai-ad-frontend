@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Search } from 'lucide-react'
-
-const GOLD = '#C9A227'
+import { ACCENT, BG_SURFACE, BG_RAISED, BORDER_SUBTLE, TEXT_PRIMARY, TEXT_TERTIARY, FONT_BODY, radius, elevation } from './ds'
 
 // Kept in sync with every route in App.jsx — this list going stale (it was
 // missing Voice Outreach, Revenue Engine, and half a dozen others before
@@ -117,63 +117,74 @@ export default function CommandPalette() {
     }
   }
 
-  if (!open) return null
-
   return (
-    <div
-      onClick={() => setOpen(false)}
-      style={{
-        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 200000,
-        display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '12vh',
-      }}
-    >
-      <style>{`.cmdk-box { transition: box-shadow 0.15s ease; } .cmdk-box:focus-within { box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 0 2px ${GOLD}; }`}</style>
-      <div className="cmdk-box" onClick={e => e.stopPropagation()} style={{
-        width: '100%', maxWidth: '560px', margin: '0 16px', background: '#23242B', borderRadius: '12px',
-        boxShadow: '0 28px 64px rgba(0,0,0,0.7)', overflow: 'hidden', border: '1px solid #2E2F38',
-        fontFamily: "'Inter', -apple-system, system-ui, sans-serif",
-      }}>
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 18px',
-          borderBottom: '1px solid #2E2F38',
-        }}>
-          <Search size={16} color="#8A8A92" />
-          <input
-            ref={inputRef}
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            onKeyDown={handleInputKeyDown}
-            placeholder="Jump to a page..."
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          transition={{ duration: 0.12 }}
+          onClick={() => setOpen(false)}
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(5,6,9,0.6)', zIndex: 200000,
+            display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '12vh',
+          }}
+        >
+          <style>{`.cmdk-box { transition: box-shadow 0.15s ease; } .cmdk-box:focus-within { box-shadow: ${elevation[3]}, 0 0 0 2px ${ACCENT}; }`}</style>
+          <motion.div
+            className="cmdk-box"
+            initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.12 }}
+            onClick={e => e.stopPropagation()}
             style={{
-              flex: 1, background: 'transparent', border: 'none', outline: 'none',
-              color: '#EDEAE3', fontSize: '15px', fontFamily: 'inherit',
-              boxShadow: 'none',
+              width: '100%', maxWidth: '560px', margin: '0 16px', background: `${BG_SURFACE}E8`,
+              backdropFilter: 'blur(20px)', borderRadius: radius.lg,
+              boxShadow: elevation[3], overflow: 'hidden', border: `1px solid ${BORDER_SUBTLE}`,
+              fontFamily: FONT_BODY,
             }}
-          />
-          <kbd style={{ fontSize: '11px', color: '#8A8A92', border: '1px solid #2E2F38', borderRadius: '4px', padding: '2px 6px', background: '#1A1B22' }}>Esc</kbd>
-        </div>
-        <div style={{ maxHeight: '360px', overflowY: 'auto', padding: '8px' }}>
-          {filtered.length === 0 ? (
-            <p style={{ color: '#8A8A92', fontSize: '13px', padding: '16px', textAlign: 'center', margin: 0 }}>No matches</p>
-          ) : (
-            filtered.map((p, i) => (
-              <div
-                key={p.path}
-                onClick={() => go(p.path)}
-                onMouseEnter={() => setActiveIndex(i)}
+          >
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 18px',
+              borderBottom: `1px solid ${BORDER_SUBTLE}`,
+            }}>
+              <Search size={16} color={TEXT_TERTIARY} />
+              <input
+                ref={inputRef}
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                onKeyDown={handleInputKeyDown}
+                placeholder="Jump to a page..."
                 style={{
-                  padding: '10px 14px', borderRadius: '7px', fontSize: '13.5px', cursor: 'pointer',
-                  color: i === activeIndex ? '#0B0B0D' : '#EDEAE3',
-                  background: i === activeIndex ? GOLD : 'transparent',
-                  fontWeight: i === activeIndex ? '700' : '400',
+                  flex: 1, background: 'transparent', border: 'none', outline: 'none',
+                  color: TEXT_PRIMARY, fontSize: '15px', fontFamily: 'inherit',
+                  boxShadow: 'none',
                 }}
-              >
-                {p.label}
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-    </div>
+              />
+              <kbd style={{ fontSize: '11px', color: TEXT_TERTIARY, border: `1px solid ${BORDER_SUBTLE}`, borderRadius: radius.sm, padding: '2px 6px', background: BG_RAISED }}>Esc</kbd>
+            </div>
+            <div style={{ maxHeight: '360px', overflowY: 'auto', padding: '8px' }}>
+              {filtered.length === 0 ? (
+                <p style={{ color: TEXT_TERTIARY, fontSize: '13px', padding: '16px', textAlign: 'center', margin: 0 }}>No matches</p>
+              ) : (
+                filtered.map((p, i) => (
+                  <div
+                    key={p.path}
+                    onClick={() => go(p.path)}
+                    onMouseEnter={() => setActiveIndex(i)}
+                    style={{
+                      padding: '10px 14px', borderRadius: radius.sm, fontSize: '13.5px', cursor: 'pointer',
+                      color: i === activeIndex ? '#0B0D12' : TEXT_PRIMARY,
+                      background: i === activeIndex ? ACCENT : 'transparent',
+                      fontWeight: i === activeIndex ? '700' : '400',
+                    }}
+                  >
+                    {p.label}
+                  </div>
+                ))
+              )}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }

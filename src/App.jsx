@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import ErrorBoundary from './ErrorBoundary'
 import { AuthProvider, useAuth } from './AuthContext'
 import Login from './Login'
@@ -57,11 +57,12 @@ import MarketingHub from './MarketingHub'
 import IntelligenceHub from './IntelligenceHub'
 import AnalyticsHub from './AnalyticsHub'
 import SettingsHub from './SettingsHub'
-import Nav from './Nav'
+import Nav, { getNavCollapsed, sidebarContentOffset } from './Nav'
+import TopBar from './TopBar'
 import { ToastProvider } from './ToastContext'
 import CommandPalette from './CommandPalette'
 import { RefreshCw } from 'lucide-react'
-import { INK, GOLD, BONE, MUTED, SLATE, SLATE_L, FONT_BODY } from './ds'
+import { BG_BASE, ACCENT, TEXT_PRIMARY, TEXT_SECONDARY, BG_SURFACE, BORDER_SUBTLE, FONT_BODY, radius } from './ds'
 
 // Post-audit fix (Item 3): loading used to render `null` unconditionally,
 // so a Supabase getSession() failure (network blip, outage, storage read
@@ -73,25 +74,25 @@ import { INK, GOLD, BONE, MUTED, SLATE, SLATE_L, FONT_BODY } from './ds'
 function AuthErrorScreen({ authError, retry }) {
   return (
     <div style={{
-      minHeight: '100vh', background: INK, color: BONE, fontFamily: FONT_BODY,
+      minHeight: '100vh', background: BG_BASE, color: TEXT_PRIMARY, fontFamily: FONT_BODY,
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px',
     }}>
       <div style={{
-        maxWidth: '380px', width: '100%', background: SLATE, border: `1px solid ${SLATE_L}`,
-        borderRadius: '10px', padding: '28px', textAlign: 'center',
+        maxWidth: '380px', width: '100%', background: BG_SURFACE, border: `1px solid ${BORDER_SUBTLE}`,
+        borderRadius: radius.lg, padding: '28px', textAlign: 'center',
       }}>
         <p style={{ margin: '0 0 8px', fontSize: '15px', fontWeight: '700' }}>Couldn't verify your session</p>
-        <p style={{ margin: '0 0 20px', fontSize: '13px', color: MUTED, lineHeight: 1.5 }}>{authError}</p>
+        <p style={{ margin: '0 0 20px', fontSize: '13px', color: TEXT_SECONDARY, lineHeight: 1.5 }}>{authError}</p>
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
           <button onClick={retry} style={{
-            display: 'flex', alignItems: 'center', gap: '6px', background: GOLD, border: 'none',
-            color: '#0B0B0D', padding: '9px 16px', borderRadius: '7px', fontSize: '13px', fontWeight: '700', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: '6px', background: ACCENT, border: 'none',
+            color: '#0B0D12', padding: '9px 16px', borderRadius: radius.md, fontSize: '13px', fontWeight: '700', cursor: 'pointer',
           }}>
             <RefreshCw size={13} /> Retry
           </button>
           <a href="/login" style={{
-            display: 'flex', alignItems: 'center', color: MUTED, padding: '9px 16px', borderRadius: '7px',
-            fontSize: '13px', fontWeight: '600', textDecoration: 'none', border: `1px solid ${SLATE_L}`,
+            display: 'flex', alignItems: 'center', color: TEXT_SECONDARY, padding: '9px 16px', borderRadius: radius.md,
+            fontSize: '13px', fontWeight: '600', textDecoration: 'none', border: `1px solid ${BORDER_SUBTLE}`,
           }}>
             Sign in
           </a>
@@ -117,26 +118,54 @@ function ScrollToTop() {
 
 const AUTH_PATHS = new Set(['/login', '/signup', '/forgot-password'])
 
+// Single subtle background layer — a fixed radial gradient (accent at 4%
+// opacity, anchored top-left) plus a 2% noise overlay via inline SVG.
+// "Felt, not noticed" per the redesign spec: one layer, not an effect
+// stack, and it sits behind everything (z-index -1, non-interactive).
+const NOISE_SVG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E`
+
+function AppBackground() {
+  return (
+    <div aria-hidden="true" style={{
+      position: 'fixed', inset: 0, zIndex: -1, pointerEvents: 'none',
+      background: `radial-gradient(1100px circle at 0% 0%, ${ACCENT}0A, transparent 60%), ${BG_BASE}`,
+    }}>
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: `url("${NOISE_SVG}")`, opacity: 0.02 }} />
+    </div>
+  )
+}
+
 function Layout() {
   const location = useLocation()
   const isAuthPage = AUTH_PATHS.has(location.pathname)
   const showNav = !isAuthPage && location.pathname !== '/'
   const isMobile = window.innerWidth < 768
+  const [collapsed, setCollapsed] = useState(getNavCollapsed)
+
+  useEffect(() => {
+    function onCollapse(e) { setCollapsed(e.detail) }
+    window.addEventListener('adsoh:nav-collapsed', onCollapse)
+    return () => window.removeEventListener('adsoh:nav-collapsed', onCollapse)
+  }, [])
+
+  const contentOffset = showNav && !isMobile ? sidebarContentOffset(collapsed) : 0
 
   return (
     <div>
       <ScrollToTop />
+      <AppBackground />
       {showNav && <Nav />}
       {!isAuthPage && <CommandPalette />}
       <div style={{
-        marginLeft: showNav && !isMobile ? '220px' : '0',
+        marginLeft: `${contentOffset}px`,
         paddingTop: showNav && isMobile ? '48px' : '0',
         minHeight: '100vh',
-        background: 'var(--ink)',
         overflowX: 'hidden',
-        width: showNav && !isMobile ? 'calc(100% - 220px)' : '100%',
+        width: `calc(100% - ${contentOffset}px)`,
         boxSizing: 'border-box',
+        transition: 'margin-left 0.16s ease, width 0.16s ease',
       }}>
+        {showNav && !isMobile && <TopBar />}
         <ErrorBoundary>
         <Routes>
           {/* Public auth routes */}

@@ -1,9 +1,16 @@
 import { useState, useEffect } from 'react'
-import { INK, BONE, FONT_BODY } from './ds'
+import { TEXT_PRIMARY, FONT_BODY } from './ds'
 
 /**
  * PageShell — standard outer wrapper for every page.
- * Handles: dark background, consistent max-width, responsive padding.
+ * Handles: consistent max-width, responsive padding.
+ *
+ * Visual redesign: no longer paints its own opaque background — App.jsx's
+ * AppBackground (a fixed radial-gradient + noise layer behind the whole
+ * shell) shows through instead, matching the Linear/Raycast pattern where
+ * the page canvas is subtly tinted and only cards/panels are opaque
+ * surfaces on top. Individual `card`/`cardInner` (ds.js) still render
+ * opaque against this.
  *
  * Usage:
  *   <PageShell>
@@ -29,10 +36,9 @@ export default function PageShell({ children, maxWidth = '1100px', noPad = false
   return (
     <div style={{
       minHeight: '100vh',
-      background: INK,
-      color: BONE,
+      color: TEXT_PRIMARY,
       fontFamily: FONT_BODY,
-      padding: noPad ? 0 : (isMobile ? '24px 16px 48px' : '40px 32px 60px'),
+      padding: noPad ? 0 : (isMobile ? '24px 16px 48px' : '32px 32px 60px'),
       maxWidth,
       width: '100%',
       boxSizing: 'border-box',

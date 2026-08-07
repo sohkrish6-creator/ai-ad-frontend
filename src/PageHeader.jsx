@@ -1,10 +1,18 @@
-import { BONE, MUTED, FONT_DISPLAY, FONT_BODY } from './ds'
-import PulseLedger from './PulseLedger'
+import { TEXT_PRIMARY, TEXT_SECONDARY, BORDER_SUBTLE, FONT_BODY } from './ds'
 
 /**
  * PageHeader — consistent page title block used on every page.
- * Title (Fraunces) left-aligned, sub line below, optional right-side slot,
- * always followed by a PulseLedger divider.
+ * Title (Inter Display scale) left-aligned, sub line below, optional
+ * right-side slot, a plain hairline rule beneath.
+ *
+ * Visual redesign: the PulseLedger animated seismograph-tick divider that
+ * used to run under every single page title was retired — "boldness spent
+ * in exactly one place: the data," per the redesign direction, and a
+ * pulsing decorative element under every heading on every page reads as
+ * exactly the opposite of "quiet instrument panel." A plain border-subtle
+ * rule carries the same "section is done, content begins" signal without
+ * the noise. PulseLedger.jsx itself is untouched — SectionHeader.jsx still
+ * uses it for in-page sub-dividers.
  *
  * Usage:
  *   <PageHeader
@@ -22,16 +30,16 @@ export default function PageHeader({ title, sub, action, style = {} }) {
       }}>
         <div>
           <h1 style={{
-            fontFamily: FONT_DISPLAY,
-            fontSize: '26px', fontWeight: '700',
-            margin: '0 0 5px', letterSpacing: '-0.5px',
-            color: BONE, lineHeight: 1.2,
+            fontFamily: FONT_BODY,
+            fontSize: '32px', fontWeight: '600',
+            margin: '0 0 5px', letterSpacing: '-0.02em',
+            color: TEXT_PRIMARY, lineHeight: '40px',
           }}>
             {title}
           </h1>
           {sub && (
             <p style={{
-              color: MUTED, fontSize: '13px', margin: 0,
+              color: TEXT_SECONDARY, fontSize: '13px', margin: 0,
               fontFamily: FONT_BODY, lineHeight: 1.5,
             }}>
               {sub}
@@ -40,7 +48,7 @@ export default function PageHeader({ title, sub, action, style = {} }) {
         </div>
         {action && <div style={{ flexShrink: 0 }}>{action}</div>}
       </div>
-      <PulseLedger goldPositions={[2, 9, 17]} />
+      <div style={{ height: '1px', background: BORDER_SUBTLE }} />
     </div>
   )
 }
