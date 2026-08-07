@@ -34,10 +34,6 @@ export const links = [
 
 export const settingsLink = { path: '/settings', label: 'Settings', Icon: Settings2, match: ['/settings', '/account', '/google-ads', '/meta-test'] }
 
-function isActive(link, pathname) {
-  return link.match.some(p => pathname === p || pathname.startsWith(p + '/'))
-}
-
 // Longest matching prefix across every nav item (5 hubs + Settings) wins —
 // so e.g. /google-ads/dashboard (Marketing) doesn't get shadowed by the
 // shorter /google-ads (Settings) prefix.

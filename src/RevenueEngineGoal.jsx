@@ -3,10 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import { Rocket, Sparkles } from 'lucide-react'
 import { useToast } from './ToastContext'
 import { BACKEND, apiFetch } from './lib/api'
-import { GOLD, card, lbl, inp, BONE, MUTED, RED, SLATE_M, SLATE_L } from './ds'
+import { TEXT_PRIMARY, TEXT_TERTIARY, ACCENT, BG_INSET, errBox, inp, lbl, radius } from './ds'
 import PageShell from './PageShell'
 import PageHeader from './PageHeader'
 import RevenueEngineSubNav from './RevenueEngineSubNav'
+import Card from './components/ui/Card'
+import Input from './components/ui/Input'
+import Button from './components/ui/Button'
 
 export default function RevenueEngineGoal() {
   const navigate = useNavigate()
@@ -71,74 +74,54 @@ export default function RevenueEngineGoal() {
     <PageShell maxWidth="720px">
       <RevenueEngineSubNav />
       <PageHeader
-        title="Revenue Engine"
+        title="Discover"
         sub="Tell it what you need — a segment to prospect, or a revenue target — and it builds the plan."
       />
 
-      <div style={{ ...card, padding: '24px' }}>
-        {error && (
-          <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid rgba(196,69,58,0.3)', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: RED, fontSize: '13px' }}>
-            {error}
-          </div>
-        )}
+      <Card>
+        <Card.Body>
+          {error && <div style={{ ...errBox, marginBottom: '16px' }}>{error}</div>}
 
-        <label style={lbl}>What do you need?</label>
-        <textarea
-          value={text} onChange={e => setText(e.target.value)}
-          placeholder='e.g. "I need 5 hotel clients in Jaipur" or "I want ₹5 lakh revenue this month"'
-          style={{ ...inp, minHeight: '90px', resize: 'vertical', fontFamily: 'inherit', marginBottom: '14px' }}
-        />
+          <label style={lbl}>What do you need?</label>
+          <textarea
+            value={text} onChange={e => setText(e.target.value)}
+            placeholder='e.g. "I need 5 hotel clients in Jaipur" or "I want ₹5 lakh revenue this month"'
+            style={{ ...inp, minHeight: '90px', resize: 'vertical', fontFamily: 'inherit', marginBottom: '14px' }}
+          />
 
-        <button onClick={handleParse} disabled={parsing} style={{
-          display: 'flex', alignItems: 'center', gap: '8px', background: parsing ? SLATE_M : GOLD,
-          border: `1px solid ${parsing ? SLATE_L : GOLD}`, color: parsing ? MUTED : '#0B0B0D',
-          padding: '11px 20px', borderRadius: '8px', fontSize: '13.5px', fontWeight: '700',
-          cursor: parsing ? 'not-allowed' : 'pointer', marginBottom: goal ? '20px' : 0,
-        }}>
-          <Sparkles size={15} /> {parsing ? 'Understanding...' : 'Understand Goal'}
-        </button>
+          <Button variant="primary" size="md" icon={Sparkles} loading={parsing} onClick={handleParse} style={{ marginBottom: goal ? '20px' : 0 }}>
+            {parsing ? 'Understanding...' : 'Understand Goal'}
+          </Button>
 
-        {goal && (
-          <div style={{ ...card, background: SLATE_M, padding: '16px', marginBottom: '18px' }}>
-            <p style={{ margin: '0 0 10px', fontSize: '11px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Understood as
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginBottom: goal.needs_clarification ? '10px' : 0 }}>
-              <div>
-                <label style={lbl}>Industry</label>
-                <input value={goal.industry || ''} onChange={e => setGoal(g => ({ ...g, industry: e.target.value }))} placeholder="required" style={inp} />
-              </div>
-              <div>
-                <label style={lbl}>City</label>
-                <input value={goal.city || ''} onChange={e => setGoal(g => ({ ...g, city: e.target.value }))} placeholder="optional" style={inp} />
-              </div>
-            </div>
-            <p style={{ margin: '10px 0 0', fontSize: '12px', color: BONE }}>
-              {goal.goal_type === 'revenue'
-                ? `Revenue goal: ₹${(goal.target_amount || 0).toLocaleString('en-IN')} this month.`
-                : `Segment goal: ${goal.target_count ? `${goal.target_count} clients` : 'as many qualified prospects as possible'}.`}
-            </p>
-            {goal.needs_clarification && !goal.industry && (
-              <p style={{ margin: '8px 0 0', fontSize: '11.5px', color: GOLD }}>
-                Add an industry above before starting.
+          {goal && (
+            <div style={{ background: BG_INSET, borderRadius: radius.md, padding: '16px', marginBottom: '18px' }}>
+              <p style={{ margin: '0 0 10px', fontSize: '11px', fontWeight: '700', color: TEXT_TERTIARY, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                Understood as
               </p>
-            )}
-          </div>
-        )}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginBottom: goal.needs_clarification ? '10px' : 0 }}>
+                <Input label="Industry" value={goal.industry || ''} onChange={e => setGoal(g => ({ ...g, industry: e.target.value }))} placeholder="required" />
+                <Input label="City" value={goal.city || ''} onChange={e => setGoal(g => ({ ...g, city: e.target.value }))} placeholder="optional" />
+              </div>
+              <p style={{ margin: '10px 0 0', fontSize: '12px', color: TEXT_PRIMARY }}>
+                {goal.goal_type === 'revenue'
+                  ? `Revenue goal: ₹${(goal.target_amount || 0).toLocaleString('en-IN')} this month.`
+                  : `Segment goal: ${goal.target_count ? `${goal.target_count} clients` : 'as many qualified prospects as possible'}.`}
+              </p>
+              {goal.needs_clarification && !goal.industry && (
+                <p style={{ margin: '8px 0 0', fontSize: '11.5px', color: ACCENT }}>
+                  Add an industry above before starting.
+                </p>
+              )}
+            </div>
+          )}
 
-        {goal && (
-          <button onClick={handleStart} disabled={starting || !goal.industry} style={{
-            display: 'flex', alignItems: 'center', gap: '8px', width: '100%', justifyContent: 'center',
-            background: (starting || !goal.industry) ? SLATE_M : GOLD,
-            border: `1px solid ${(starting || !goal.industry) ? SLATE_L : GOLD}`,
-            color: (starting || !goal.industry) ? MUTED : '#0B0B0D',
-            padding: '13px 20px', borderRadius: '8px', fontSize: '14.5px', fontWeight: '700',
-            cursor: (starting || !goal.industry) ? 'not-allowed' : 'pointer',
-          }}>
-            <Rocket size={16} /> {starting ? 'Starting Quick Scan...' : 'Start Quick Scan'}
-          </button>
-        )}
-      </div>
+          {goal && (
+            <Button variant="primary" size="lg" icon={Rocket} loading={starting} disabled={!goal.industry} onClick={handleStart} style={{ width: '100%' }}>
+              {starting ? 'Starting Quick Scan...' : 'Start Quick Scan'}
+            </Button>
+          )}
+        </Card.Body>
+      </Card>
     </PageShell>
   )
 }

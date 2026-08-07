@@ -1,12 +1,18 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { Clock, PhoneCall, Users, ChevronRight } from 'lucide-react'
+import { Clock, PhoneCall, Users, ChevronRight, Inbox, Radar } from 'lucide-react'
 import { BACKEND, apiFetch } from './lib/api'
-import { GOLD, card, cardInner, BONE, MUTED, RED, GREEN, SLATE_M, SLATE_L } from './ds'
+import { TEXT_PRIMARY, TEXT_SECONDARY, TEXT_TERTIARY, ACCENT, BG_INSET, DANGER, DANGER_MUTED, errBox, scoreColor, radius } from './ds'
 import PageShell from './PageShell'
 import PageHeader from './PageHeader'
 import RevenueEngineSubNav from './RevenueEngineSubNav'
 import RevenueEngineProfileBanner from './RevenueEngineProfileBanner'
+import Card from './components/ui/Card'
+import Button from './components/ui/Button'
+import Badge from './components/ui/Badge'
+import MetricCard from './components/ui/MetricCard'
+import EmptyState from './components/ui/EmptyState'
+import Skeleton from './components/ui/Skeleton'
 
 const WEAKNESS_LABELS = {
   no_website: 'No Website', poor_reviews: 'Poor Reviews', low_review_count: 'Few Reviews',
@@ -15,15 +21,11 @@ const WEAKNESS_LABELS = {
   site_unreachable: 'Site Unreachable',
 }
 
-const REC_STYLE = {
-  CALL:         { bg: 'rgba(63,166,107,0.14)', color: GREEN, label: 'Call' },
-  FOLLOW_LATER: { bg: 'rgba(201,162,39,0.14)', color: GOLD,  label: 'Follow Later' },
-  IGNORE:       { bg: SLATE_M,                 color: MUTED, label: 'Ignore' },
-}
+const REC_VARIANT = { CALL: 'success', FOLLOW_LATER: 'warning', IGNORE: 'neutral' }
+const REC_LABEL = { CALL: 'Call', FOLLOW_LATER: 'Follow Later', IGNORE: 'Ignore' }
 
 function RecBadge({ rec }) {
-  const s = REC_STYLE[rec] || REC_STYLE.IGNORE
-  return <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '10.5px', fontWeight: '700', background: s.bg, color: s.color }}>{s.label}</span>
+  return <Badge variant={REC_VARIANT[rec] || 'neutral'}>{REC_LABEL[rec] || rec}</Badge>
 }
 
 export default function RevenueEnginePipeline() {
@@ -77,21 +79,28 @@ export default function RevenueEnginePipeline() {
         <RevenueEngineSubNav />
         <PageHeader title="Pipeline" sub="Pick a Quick Scan run to review, or start a new one from the Goal page." />
         {batches.length === 0 ? (
-          <div style={{ ...card, padding: '24px', textAlign: 'center', color: MUTED, fontSize: '13px' }}>
-            No Quick Scan runs yet — start one from the Goal page.
-          </div>
+          <Card>
+            <EmptyState
+              icon={Radar}
+              headline="No Quick Scan runs yet"
+              description="Start one from the Goal page to discover and qualify real local prospects."
+              action={{ label: 'Go to Discover', onClick: () => navigate('/revenue-engine') }}
+            />
+          </Card>
         ) : batches.map(b => (
-          <button key={b.id} onClick={() => navigate(`/revenue-engine/pipeline?batch=${b.id}`)} style={{
-            ...card, display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%',
-            padding: '14px 16px', marginBottom: '8px', cursor: 'pointer', border: `1px solid ${SLATE_L}`,
-            color: BONE, textAlign: 'left', fontFamily: 'inherit',
-          }}>
-            <div>
-              <p style={{ margin: 0, fontSize: '13px', fontWeight: '600' }}>{b.industry}{b.city ? ` in ${b.city}` : ''}</p>
-              <p style={{ margin: '2px 0 0', fontSize: '11px', color: MUTED }}>{b.status} · {b.total_qualified || 0}/{b.total_found || 0} qualified</p>
-            </div>
-            <ChevronRight size={16} color={MUTED} />
-          </button>
+          <Card key={b.id} hoverable style={{ marginBottom: '8px' }}>
+            <button onClick={() => navigate(`/revenue-engine/pipeline?batch=${b.id}`)} style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%',
+              padding: '14px 16px', cursor: 'pointer', border: 'none', background: 'transparent',
+              color: TEXT_PRIMARY, textAlign: 'left', fontFamily: 'inherit',
+            }}>
+              <div>
+                <p style={{ margin: 0, fontSize: '13px', fontWeight: '600' }}>{b.industry}{b.city ? ` in ${b.city}` : ''}</p>
+                <p style={{ margin: '2px 0 0', fontSize: '11px', color: TEXT_TERTIARY }}>{b.status} · {b.total_qualified || 0}/{b.total_found || 0} qualified</p>
+              </div>
+              <ChevronRight size={16} color={TEXT_TERTIARY} />
+            </button>
+          </Card>
         ))}
       </PageShell>
     )
@@ -102,7 +111,7 @@ export default function RevenueEnginePipeline() {
       <PageShell maxWidth="960px">
         <RevenueEngineSubNav />
         <PageHeader title="Pipeline" sub="" />
-        <div style={{ ...card, padding: '24px', textAlign: 'center', color: RED }}>{error}</div>
+        <div style={errBox}>{error}</div>
       </PageShell>
     )
   }
@@ -112,6 +121,10 @@ export default function RevenueEnginePipeline() {
       <PageShell maxWidth="960px">
         <RevenueEngineSubNav />
         <PageHeader title="Pipeline" sub="Loading..." />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '16px' }}>
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} variant="rect" height="76px" />)}
+        </div>
+        <Skeleton variant="rect" height="80px" count={3} style={{ marginBottom: '8px' }} />
       </PageShell>
     )
   }
@@ -127,87 +140,73 @@ export default function RevenueEnginePipeline() {
         title="Pipeline"
         sub={`${batch.industry}${batch.city ? ' in ' + batch.city : ''}`}
         action={
-          <button onClick={() => navigate('/revenue-engine/today')} style={{
-            display: 'flex', alignItems: 'center', gap: '6px', background: GOLD, border: 'none',
-            color: '#0B0B0D', padding: '9px 16px', borderRadius: '7px', fontSize: '13px', fontWeight: '700', cursor: 'pointer',
-          }}>
-            <PhoneCall size={14} /> Go to Today's Tasks
-          </button>
+          <Button variant="primary" icon={PhoneCall} onClick={() => navigate('/revenue-engine/today')}>
+            Go to Today's Tasks
+          </Button>
         }
       />
 
       <RevenueEngineProfileBanner prospects={prospects} />
 
       {isRunning && (
-        <div style={{ ...card, padding: '18px', marginBottom: '16px' }}>
+        <Card style={{ padding: '18px', marginBottom: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-            <Clock size={15} color={GOLD} />
-            <p style={{ margin: 0, fontSize: '13px', fontWeight: '600', color: BONE }}>{batch.current_step || 'Working...'}</p>
+            <Clock size={15} color={ACCENT} />
+            <p style={{ margin: 0, fontSize: '13px', fontWeight: '600', color: TEXT_PRIMARY }}>{batch.current_step || 'Working...'}</p>
           </div>
-          <div style={{ height: '8px', borderRadius: '4px', background: SLATE_M, overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${batch.progress_pct || 0}%`, background: GOLD, borderRadius: '4px', transition: 'width 0.4s ease' }} />
+          <div style={{ height: '8px', borderRadius: radius.sm, background: BG_INSET, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${batch.progress_pct || 0}%`, background: ACCENT, borderRadius: radius.sm, transition: 'width 0.4s ease' }} />
           </div>
-        </div>
+        </Card>
       )}
 
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '18px', flexWrap: 'wrap' }}>
-        {[
-          { label: 'Scanned', value: batch.total_found || 0 },
-          { label: 'High Opportunity', value: high },
-          { label: 'Call-First', value: callFirst },
-          { label: 'Qualified', value: batch.total_qualified || 0 },
-        ].map(s => (
-          <div key={s.label} style={{ ...cardInner, padding: '12px 16px', flex: '1 1 140px' }}>
-            <p style={{ margin: '0 0 3px', fontSize: '9px', fontWeight: '700', color: MUTED, textTransform: 'uppercase' }}>{s.label}</p>
-            <p style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: BONE }}>{s.value}</p>
-          </div>
-        ))}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px', marginBottom: '18px' }}>
+        <MetricCard label="Scanned" value={batch.total_found || 0} />
+        <MetricCard label="High Opportunity" value={high} />
+        <MetricCard label="Call-First" value={callFirst} />
+        <MetricCard label="Qualified" value={batch.total_qualified || 0} />
       </div>
 
       {batch.status === 'succeeded' && prospects.length === 0 && (
-        <div style={{ ...card, padding: '24px', textAlign: 'center', color: MUTED, fontSize: '13px' }}>
-          No prospects found for this search.
-        </div>
+        <Card>
+          <EmptyState icon={Inbox} headline="No prospects found for this search" description="Try a broader industry or a different city from the Goal page." action={{ label: 'Back to Discover', onClick: () => navigate('/revenue-engine') }} />
+        </Card>
       )}
 
       {prospects.map(p => (
-        <div key={p.id} style={{ ...card, padding: '14px 18px', marginBottom: '8px' }}>
+        <Card key={p.id} hoverable style={{ padding: '14px 18px', marginBottom: '8px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', flexWrap: 'wrap', marginBottom: '6px' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: BONE }}>{p.business_name}</p>
+                <p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: TEXT_PRIMARY }}>{p.business_name}</p>
                 <RecBadge rec={p.recommendation} />
               </div>
-              <p style={{ margin: '3px 0 0', fontSize: '11px', color: MUTED }}>{p.address}</p>
+              <p style={{ margin: '3px 0 0', fontSize: '11px', color: TEXT_TERTIARY }}>{p.address}</p>
             </div>
-            <button onClick={() => navigate(`/revenue-engine/lead/${p.id}`)} style={{
-              display: 'flex', alignItems: 'center', gap: '5px', background: 'transparent',
-              border: `1px solid ${GOLD}`, color: GOLD, padding: '6px 13px', borderRadius: '6px',
-              fontSize: '12px', fontWeight: '700', cursor: 'pointer', flexShrink: 0,
-            }}>
-              <Users size={13} /> Open Workspace
-            </button>
+            <Button variant="secondary" size="sm" icon={Users} onClick={() => navigate(`/revenue-engine/lead/${p.id}`)} style={{ flexShrink: 0 }}>
+              Open Workspace
+            </Button>
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', fontSize: '11.5px', color: MUTED, marginBottom: '8px' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', fontSize: '11.5px', color: TEXT_TERTIARY, marginBottom: '8px' }}>
             <span>⭐ {p.google_rating ?? '—'} ({p.total_reviews || 0} reviews)</span>
-            <span>Opportunity {p.opportunity_score ?? '—'}/100</span>
-            <span>Need {p.need_score ?? '—'}/100</span>
+            <span>Opportunity <b className="tabular-nums" style={{ color: scoreColor(p.opportunity_score) }}>{p.opportunity_score ?? '—'}/100</b></span>
+            <span>Need <b className="tabular-nums" style={{ color: scoreColor(p.need_score) }}>{p.need_score ?? '—'}/100</b></span>
             <span>Closing (est.) {p.estimated_call_success ?? '—'}</span>
           </div>
           {(p.weaknesses || []).length > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: p.reason ? '8px' : 0 }}>
               {p.weaknesses.map((w, i) => (
                 <span key={w + i} style={{
-                  padding: '3px 9px', borderRadius: '4px', fontSize: '10.5px', fontWeight: '600',
-                  background: 'rgba(196,69,58,0.10)', color: RED, border: '1px solid rgba(196,69,58,0.25)',
+                  padding: '3px 9px', borderRadius: radius.sm, fontSize: '10.5px', fontWeight: '600',
+                  background: DANGER_MUTED, color: DANGER, border: `1px solid rgba(251,113,133,0.25)`,
                 }}>
                   {WEAKNESS_LABELS[w] || w}
                 </span>
               ))}
             </div>
           )}
-          {p.reason && <p style={{ margin: 0, fontSize: '12px', color: BONE, lineHeight: 1.5 }}>{p.reason}</p>}
-        </div>
+          {p.reason && <p style={{ margin: 0, fontSize: '12px', color: TEXT_SECONDARY, lineHeight: 1.5 }}>{p.reason}</p>}
+        </Card>
       ))}
     </PageShell>
   )

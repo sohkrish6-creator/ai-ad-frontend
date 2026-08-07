@@ -1,12 +1,19 @@
 import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import { useToast } from './ToastContext'
-import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+import { UserPlus, Users } from 'lucide-react'
+import { TEXT_PRIMARY, TEXT_TERTIARY, ACCENT, WARNING, SUCCESS, DANGER, radius } from './ds'
+import PageShell from './PageShell'
+import PageHeader from './PageHeader'
+import Card from './components/ui/Card'
+import Button from './components/ui/Button'
+import Input from './components/ui/Input'
+import Select from './components/ui/Select'
+import MetricCard from './components/ui/MetricCard'
+import Table from './components/ui/Table'
 
-
-
-const statusColor = { 'New': '#D4AF37', 'Contacted': '#F59E0B', 'Converted': '#22C55E', 'Lost': '#EF4444' }
-const statusBg   = { 'New': '#D4AF3712', 'Contacted': '#F59E0B12', 'Converted': '#22C55E12', 'Lost': '#EF444412' }
+const STATUS_VARIANT = { New: 'accent', Contacted: 'warning', Converted: 'success', Lost: 'danger' }
+const STATUS_OPTIONS = ['New', 'Contacted', 'Converted', 'Lost']
 
 function Leads() {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
@@ -15,6 +22,7 @@ function Leads() {
   const [stats, setStats] = useState({})
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [tableLoading, setTableLoading] = useState(true)
   const [form, setForm] = useState({ name: '', phone: '', email: '', source: 'whatsapp', message: '', campaign: '' })
 
   const BASE = BACKEND
@@ -30,6 +38,7 @@ function Leads() {
       if (res.ok) setLeads(d.leads || [])
       else toast.error(d.message || d.detail || 'Could not load leads.')
     } catch { toast.error('Backend se connect nahi ho paya — leads load nahi hue.') }
+    setTableLoading(false)
   }
   async function loadStats() {
     try {
@@ -81,105 +90,89 @@ function Leads() {
   ]
 
   return (
-    <div style={{ minHeight: '100vh', background: INK, padding: isMobile ? '28px 16px' : '40px 36px', maxWidth: '1040px', width: '100%', boxSizing: 'border-box' }}>
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px', flexWrap: 'wrap', gap: '12px' }}>
-        <div>
-          <h1 style={{ fontSize: '22px', fontWeight: '600', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Leads</h1>
-          <p style={{ color: MUTED, fontSize: '13px', margin: 0 }}>Saare leads ek jagah</p>
-        </div>
-        <button onClick={() => setShowForm(true)} style={{ background: '#171717', border: 'none', color: '#fff', padding: '8px 18px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
-          + New Lead
-        </button>
-      </div>
+    <PageShell maxWidth="1040px">
+      <PageHeader
+        title="Leads"
+        sub="Saare leads ek jagah"
+        action={<Button variant="primary" icon={UserPlus} onClick={() => setShowForm(true)}>New Lead</Button>}
+      />
 
       {/* KPI row */}
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: '8px', marginBottom: '16px' }}>
-        {kpis.map(k => (
-          <div key={k.label} style={{ ...card, padding: '18px 16px' }}>
-            <p style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', color: MUTED, margin: '0 0 10px' }}>{k.label}</p>
-            <p style={{ fontSize: '28px', fontWeight: '600', letterSpacing: '-1.5px', color: BONE, margin: 0, lineHeight: 1 }}>{k.value}</p>
-          </div>
-        ))}
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: '10px', marginBottom: '18px' }}>
+        {kpis.map(k => <MetricCard key={k.label} label={k.label} value={k.value} />)}
       </div>
 
       {/* Add lead form */}
       {showForm && (
-        <div style={{ ...card, padding: '24px', marginBottom: '16px', borderColor: '#E5DABB' }}>
-          <h3 style={{ fontSize: '14px', fontWeight: '600', margin: '0 0 20px', color: BONE }}>New Lead</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '14px' }}>
-            {[['Naam *', 'name', 'text', 'Lead ka naam'], ['Phone *', 'phone', 'tel', '+91 98765 43210'], ['Email', 'email', 'email', 'email@example.com']].map(([l, k, t, ph]) => (
-              <div key={k}>
-                <label style={lbl}>{l}</label>
-                <input type={t} value={form[k]} onChange={e => setForm({ ...form, [k]: e.target.value })} placeholder={ph} style={inputSt} />
+        <Card style={{ marginBottom: '16px' }}>
+          <Card.Body>
+            <h3 style={{ fontSize: '14px', fontWeight: '600', margin: '0 0 20px', color: TEXT_PRIMARY }}>New Lead</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '14px' }}>
+              {[['Naam *', 'name', 'text', 'Lead ka naam'], ['Phone *', 'phone', 'tel', '+91 98765 43210'], ['Email', 'email', 'email', 'email@example.com']].map(([l, k, t, ph]) => (
+                <Input key={k} label={l} type={t} value={form[k]} onChange={e => setForm({ ...form, [k]: e.target.value })} placeholder={ph} />
+              ))}
+              <Select label="Source" value={form.source} onChange={e => setForm({ ...form, source: e.target.value })}
+                options={[{ value: 'whatsapp', label: 'WhatsApp' }, { value: 'website', label: 'Website' }, { value: 'form', label: 'Form' }]} />
+              <div style={{ gridColumn: isMobile ? '1' : '1 / -1' }}>
+                <Input label="Message" value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} placeholder="Lead ne kya poochha..." />
               </div>
-            ))}
-            <div>
-              <label style={lbl}>Source</label>
-              <select value={form.source} onChange={e => setForm({ ...form, source: e.target.value })} style={inputSt}>
-                <option value="whatsapp">WhatsApp</option>
-                <option value="website">Website</option>
-                <option value="form">Form</option>
-              </select>
             </div>
-            <div style={{ gridColumn: isMobile ? '1' : '1 / -1' }}>
-              <label style={lbl}>Message</label>
-              <input value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} placeholder="Lead ne kya poochha..." style={inputSt} />
+            <div style={{ display: 'flex', gap: '10px', marginTop: '18px' }}>
+              <Button variant="primary" loading={loading} onClick={handleAddLead}>Save Lead</Button>
+              <Button variant="secondary" onClick={() => setShowForm(false)}>Cancel</Button>
             </div>
-          </div>
-          <div style={{ display: 'flex', gap: '10px', marginTop: '18px' }}>
-            <button onClick={handleAddLead} disabled={loading} style={{ background: '#171717', border: 'none', color: '#fff', padding: '10px 22px', borderRadius: '7px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
-              {loading ? 'Saving...' : 'Save Lead'}
-            </button>
-            <button onClick={() => setShowForm(false)} style={{ background: 'transparent', border: `1px solid ${SLATE_L}`, color: MUTED, padding: '10px 18px', borderRadius: '7px', fontSize: '13px', cursor: 'pointer' }}>
-              Cancel
-            </button>
-          </div>
-        </div>
+          </Card.Body>
+        </Card>
       )}
 
       {/* Leads table */}
-      <div style={{ ...card, overflow: 'hidden', boxShadow: 'none' }}>
-        <div style={{ padding: '14px 20px', borderBottom: '1px solid #EAEAEA' }}>
-          <p style={{ fontSize: '13px', fontWeight: '600', margin: 0, color: BONE }}>All Leads ({leads.length})</p>
-        </div>
-
-        {leads.length === 0 ? (
-          <div style={{ padding: '48px', textAlign: 'center' }}>
-            <p style={{ color: MUTED, fontSize: '14px', margin: '0 0 4px' }}>Abhi koi lead nahi hai</p>
-            <p style={{ color: MUTED, fontSize: '13px', margin: 0 }}>"+ New Lead" se pehla lead add karo</p>
-          </div>
-        ) : (
-          leads.map((lead, i) => (
-            <div key={lead.id} style={{ padding: '14px 20px', borderBottom: i < leads.length - 1 ? '1px solid #F5F5F5' : 'none', display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: SLATE_M, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ fontSize: '13px', color: MUTED }}>{lead.name?.[0]?.toUpperCase() || '?'}</span>
+      <Table
+        loading={tableLoading}
+        rowKey={lead => lead.id}
+        rows={leads}
+        empty={{
+          icon: Users,
+          headline: 'Abhi koi lead nahi hai',
+          description: '"+ New Lead" se pehla lead add karo.',
+          action: { label: 'New Lead', onClick: () => setShowForm(true) },
+        }}
+        columns={[
+          {
+            key: 'name', label: `Name`, render: lead => (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(124,108,245,0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ fontSize: '11.5px', color: ACCENT, fontWeight: 700 }}>{lead.name?.[0]?.toUpperCase() || '?'}</span>
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ margin: 0, fontWeight: '500', fontSize: '13.5px', color: TEXT_PRIMARY }}>{lead.name}</p>
+                  <p style={{ margin: 0, color: TEXT_TERTIARY, fontSize: '11.5px' }}>
+                    {lead.phone}{lead.email ? ` · ${lead.email}` : ''}{lead.source ? ` · ${lead.source}` : ''}
+                  </p>
+                  {lead.message && <p style={{ margin: '2px 0 0', color: TEXT_TERTIARY, fontSize: '11.5px', fontStyle: 'italic', maxWidth: '360px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>"{lead.message}"</p>}
+                </div>
               </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ margin: '0 0 2px', fontWeight: '500', fontSize: '14px', color: BONE }}>{lead.name}</p>
-                <p style={{ margin: 0, color: MUTED, fontSize: '12px' }}>
-                  {lead.phone}{lead.email ? ` · ${lead.email}` : ''}{lead.source ? ` · ${lead.source}` : ''}
-                </p>
-                {lead.message && <p style={{ margin: '3px 0 0', color: MUTED, fontSize: '12px', fontStyle: 'italic', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>"{lead.message}"</p>}
-              </div>
-              <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <p style={{ margin: '0 0 6px', fontSize: '11px', color: MUTED }}>{lead.created_at}</p>
-                <select
-                  value={lead.status}
-                  onChange={e => updateStatus(lead.id, e.target.value)}
-                  style={{ padding: '3px 10px', borderRadius: '20px', border: `1px solid ${statusColor[lead.status]}40`, background: statusBg[lead.status], color: statusColor[lead.status], fontSize: '11px', fontWeight: '600', cursor: 'pointer', outline: 'none' }}
-                >
-                  <option value="New">New</option>
-                  <option value="Contacted">Contacted</option>
-                  <option value="Converted">Converted</option>
-                  <option value="Lost">Lost</option>
-                </select>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
+            ),
+          },
+          { key: 'created_at', label: 'Created', width: '140px', render: lead => <span style={{ color: TEXT_TERTIARY, fontSize: '12px' }}>{lead.created_at}</span> },
+          {
+            key: 'status', label: 'Status', width: '140px', render: lead => (
+              <select
+                value={lead.status}
+                onChange={e => updateStatus(lead.id, e.target.value)}
+                style={{
+                  padding: '4px 10px', borderRadius: radius.full, border: 'none', outline: 'none', cursor: 'pointer',
+                  fontSize: '11px', fontWeight: '700',
+                  background: { accent: 'rgba(124,108,245,0.12)', warning: 'rgba(251,191,36,0.12)', success: 'rgba(52,211,153,0.12)', danger: 'rgba(251,113,133,0.12)' }[STATUS_VARIANT[lead.status]],
+                  color: { accent: ACCENT, warning: WARNING, success: SUCCESS, danger: DANGER }[STATUS_VARIANT[lead.status]],
+                }}
+              >
+                {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            ),
+          },
+        ]}
+      />
+    </PageShell>
   )
 }
 

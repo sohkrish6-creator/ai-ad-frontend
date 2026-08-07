@@ -41,7 +41,7 @@ function useCountUp(target, durationMs = 400) {
  * for dashboard hero numbers (44px, animated count-up on mount); default
  * size is the dense in-page stat-grid variant (28px, no animation).
  */
-export default function MetricCard({ label, value, delta, sparkline, icon: Icon, size = 'md', style = {} }) {
+export default function MetricCard({ label, value, delta, sparkline, icon: Icon, size = 'md', valueColor, style = {} }) {
   const animated = useCountUp(size === 'lg' ? value : null)
   const display = size === 'lg' && typeof value === 'number' ? animated : value
   const deltaColor = delta?.direction === 'down' ? DANGER : SUCCESS
@@ -63,7 +63,7 @@ export default function MetricCard({ label, value, delta, sparkline, icon: Icon,
           className="tabular-nums"
           style={{
             fontSize: size === 'lg' ? '44px' : '28px', lineHeight: size === 'lg' ? '48px' : '32px',
-            fontWeight: size === 'lg' ? 650 : 600, color: TEXT_PRIMARY, margin: 0,
+            fontWeight: size === 'lg' ? 650 : 600, color: valueColor || TEXT_PRIMARY, margin: 0,
           }}
         >
           {display}
