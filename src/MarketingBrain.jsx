@@ -44,24 +44,24 @@ const MEDIA_SECTIONS = [
   { num: 8, key: 'industry_benchmarks',      header: 'INDUSTRY BENCHMARKS:',      title: 'Benchmarks',           sub: 'CTR, CPC, CPA, conversion rate ranges for this industry' },
 ]
 
-function parseMediaPlan(text) {
-  if (!text) return {}
-  const headers = MEDIA_SECTIONS.map(s => s.header)
-  const result = {}
-  headers.forEach((header, i) => {
-    const nextHeader = headers[i + 1]
-    const startMatch = text.search(new RegExp(header.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'))
-    if (startMatch === -1) { result[MEDIA_SECTIONS[i].key] = ''; return }
-    const contentStart = startMatch + header.length
-    const remaining = text.slice(contentStart)
-    const endMatch = nextHeader ? remaining.search(new RegExp(nextHeader.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')) : -1
-    result[MEDIA_SECTIONS[i].key] = (endMatch === -1 ? remaining : remaining.slice(0, endMatch)).trim()
-  })
-  return result
+// The backend now returns media_buying_plan as an already-structured
+// { section_key: text } dict (P0.3 — one canonical generator, no more
+// text-blob-to-parse). Everything downstream of getContent() still expects
+// a single string (renderBlock's .split('\n'), PDF export, clipboard copy),
+// so flatten the dict back into the same header-labeled text block those
+// consumers already handle, rather than touching every consumer.
+function mediaPlanDictToText(plan) {
+  if (!plan || typeof plan !== 'object') return ''
+  return MEDIA_SECTIONS
+    .map(({ key, header }) => (plan[key] ? `${header}\n${plan[key]}` : ''))
+    .filter(Boolean)
+    .join('\n\n')
 }
 
 function getContent(result, key, fallback) {
-  return result?.sections?.[key] || (fallback ? result?.[fallback] : null) || null
+  const raw = result?.sections?.[key] || (fallback ? result?.[fallback] : null) || null
+  if (key === 'media_buying_plan' && raw && typeof raw === 'object') return mediaPlanDictToText(raw)
+  return raw
 }
 
 function CopyBtn({ onClick, copied }) {
@@ -328,10 +328,10 @@ function MarketingBrain() {
       tt(`Budget: ₹${parseInt(budget).toLocaleString('en-IN')}/mo  ·  Goal: ${goal}`, W / 2, 118, { sz: 9, col: C.muted, align: 'center' })
       tt(new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }), W / 2, 128, { sz: 8, col: C.muted, align: 'center' })
 
-      // Sections
-      const parsed = parseMediaPlan(mediaPlan)
+      // Sections — mediaPlan arrives from the backend as an already-parsed
+      // { section_key: text } dict (P0.3), no text-blob parsing needed.
       MEDIA_SECTIONS.forEach(({ num, key, title }) => {
-        const content = parsed[key]
+        const content = mediaPlan[key]
         if (!content) return
         addPage(); sectionHeader(num, title)
         wrapText(content, M, { sz: 8.5, col: C.mid })
@@ -690,7 +690,6 @@ function MarketingBrain() {
 
       {/* Media Buying Plan Results */}
       {mediaPlan && (() => {
-        const parsed = parseMediaPlan(mediaPlan)
         return (
           <>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '28px 0 16px', flexWrap: 'wrap', gap: '10px' }}>
@@ -708,7 +707,7 @@ function MarketingBrain() {
               </div>
             </div>
             {MEDIA_SECTIONS.map(({ num, key, title, sub }) => {
-              const content = parsed[key]
+              const content = mediaPlan[key]
               if (!content) return null
               const isGold = [3, 7, 12, 13].includes(num)
               return (
