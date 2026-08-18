@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { Clock, PhoneCall, Users, ChevronRight, Inbox, Radar } from 'lucide-react'
+import { Clock, PhoneCall, Users, ChevronRight, Inbox, Radar, FileText, FileSpreadsheet } from 'lucide-react'
 import { BACKEND, apiFetch } from './lib/api'
 import { TEXT_PRIMARY, TEXT_SECONDARY, TEXT_TERTIARY, ACCENT, BG_INSET, DANGER, DANGER_MUTED, errBox, scoreColor, radius } from './ds'
 import PageShell from './PageShell'
@@ -13,6 +13,7 @@ import Badge from './components/ui/Badge'
 import MetricCard from './components/ui/MetricCard'
 import EmptyState from './components/ui/EmptyState'
 import Skeleton from './components/ui/Skeleton'
+import { downloadProspectCallSheetDocx, downloadProspectCallLogXlsx } from './lib/prospectExport'
 
 const WEAKNESS_LABELS = {
   no_website: 'No Website', poor_reviews: 'Poor Reviews', low_review_count: 'Few Reviews',
@@ -28,6 +29,38 @@ function RecBadge({ rec }) {
   return <Badge variant={REC_VARIANT[rec] || 'neutral'}>{REC_LABEL[rec] || rec}</Badge>
 }
 
+// This pipeline's prospects already went through _voice_match_service
+// server-side (matched_weakness/matched_service), so unlike Prospect
+// Discovery there's no separate "invented, unfiltered" value to fix here —
+// this just maps the same normalized shape lib/prospectExport.js expects.
+// matched_service is a raw service KEY (e.g. "website_development"); the
+// tenant's service_catalog (from /voice-outreach/settings) translates it
+// to a display label the same way Settings itself does.
+function toExportProspects(prospects, serviceCatalog) {
+  const svcLabel = Object.fromEntries((serviceCatalog || []).map(s => [s.key, s.label]))
+  return (prospects || []).map(p => {
+    const gapCode = p.matched_weakness || (p.weaknesses || [])[0] || null
+    return {
+      name: p.business_name, address: p.address, phone: p.phone_e164 || p.phone_raw,
+      rating: p.google_rating, reviews: p.total_reviews, score: p.opportunity_score,
+      classification: p.priority === 'high' ? 'hot' : p.priority === 'medium' ? 'warm' : 'cold',
+      detectedGap: gapCode ? (WEAKNESS_LABELS[gapCode] || gapCode) : 'None detected',
+      sohscapeAngle: p.matched_service ? (svcLabel[p.matched_service] || p.matched_service) : 'No service fit',
+      expectedLtv: p.estimated_roi, closingProbability: p.estimated_call_success,
+    }
+  })
+}
+
+async function fetchTenantSettings() {
+  try {
+    const res = await apiFetch(`${BACKEND}/voice-outreach/settings`)
+    const data = await res.json()
+    return data.success ? (data.settings || {}) : {}
+  } catch {
+    return {}
+  }
+}
+
 export default function RevenueEnginePipeline() {
   const [params] = useSearchParams()
   const navigate = useNavigate()
@@ -37,6 +70,8 @@ export default function RevenueEnginePipeline() {
   const [batch, setBatch] = useState(null)
   const [prospects, setProspects] = useState([])
   const [error, setError] = useState('')
+  const [docxLoading, setDocxLoading] = useState(false)
+  const [xlsxLoading, setXlsxLoading] = useState(false)
 
   const load = useCallback(async () => {
     if (!batchId) {
@@ -133,6 +168,32 @@ export default function RevenueEnginePipeline() {
   const high = prospects.filter(p => p.priority === 'high').length
   const callFirst = prospects.filter(p => p.recommendation === 'CALL').length
 
+  async function handleDownloadDocx() {
+    setDocxLoading(true)
+    try {
+      const settings = await fetchTenantSettings()
+      await downloadProspectCallSheetDocx({
+        industry: batch.industry, city: batch.city, businessName: settings.business_name,
+        prospects: toExportProspects(prospects, settings.service_catalog),
+      })
+    } finally {
+      setDocxLoading(false)
+    }
+  }
+
+  async function handleDownloadXlsx() {
+    setXlsxLoading(true)
+    try {
+      const settings = await fetchTenantSettings()
+      await downloadProspectCallLogXlsx({
+        industry: batch.industry, city: batch.city,
+        prospects: toExportProspects(prospects, settings.service_catalog),
+      })
+    } finally {
+      setXlsxLoading(false)
+    }
+  }
+
   return (
     <PageShell maxWidth="960px">
       <RevenueEngineSubNav />
@@ -140,9 +201,21 @@ export default function RevenueEnginePipeline() {
         title="Pipeline"
         sub={`${batch.industry}${batch.city ? ' in ' + batch.city : ''}`}
         action={
-          <Button variant="primary" icon={PhoneCall} onClick={() => navigate('/revenue-engine/today')}>
-            Go to Today's Tasks
-          </Button>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {prospects.length > 0 && (
+              <>
+                <Button variant="secondary" size="sm" icon={FileText} loading={docxLoading} onClick={handleDownloadDocx}>
+                  Download DOCX
+                </Button>
+                <Button variant="secondary" size="sm" icon={FileSpreadsheet} loading={xlsxLoading} onClick={handleDownloadXlsx}>
+                  Download Excel
+                </Button>
+              </>
+            )}
+            <Button variant="primary" icon={PhoneCall} onClick={() => navigate('/revenue-engine/today')}>
+              Go to Today's Tasks
+            </Button>
+          </div>
         }
       />
 

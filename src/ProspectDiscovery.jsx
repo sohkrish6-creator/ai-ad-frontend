@@ -1,13 +1,14 @@
 import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Crosshair, Copy, Check, ExternalLink, Phone, MapPin, TrendingUp, Flame, Thermometer, Snowflake, Radar, History, X, PlusCircle } from 'lucide-react'
+import { Crosshair, Copy, Check, ExternalLink, Phone, MapPin, TrendingUp, Flame, Thermometer, Snowflake, Radar, History, X, PlusCircle, FileText, FileSpreadsheet } from 'lucide-react'
 import CityInput, { getLastCity } from './CityInput'
 import { useToast } from './ToastContext'
 import { useLoadingSteps } from './useLoadingSteps'
 import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO, BG_RAISED, TEXT_SECONDARY, WARNING, INFO, SUCCESS_MUTED, WARNING_MUTED, DANGER_MUTED, INFO_MUTED } from './ds'
 import PageShell from './PageShell'
 import PageHeader from './PageHeader'
+import { downloadProspectCallSheetDocx, downloadProspectCallLogXlsx } from './lib/prospectExport'
 
 
 
@@ -97,6 +98,55 @@ function buildHotCopyText(hotProspects) {
     `   ✅ Service: ${p.recommended_service || '—'}\n` +
     `   💬 Opening Line: "${p.suggested_opening_line || '—'}"\n`
   ).join('\n---\n\n')
+}
+
+// Export builders take a normalized shape (see lib/prospectExport.js) —
+// this maps this page's own prospect fields into it, and always exports
+// the FULL scanned list (not just the active hot/warm/cold tab), sorted by
+// score inside the builder, matching the spec's "Prospect table sorted by
+// score, Hot rows highlighted" for the whole scan, not one filtered view.
+function toExportProspects(prospects) {
+  return (prospects || []).map(p => ({
+    rank: p.rank, name: p.name, address: p.address, phone: p.phone,
+    rating: p.google_rating, reviews: p.total_reviews, score: p.opportunity_score,
+    classification: p.classification, detectedGap: p.weakness_found, sohscapeAngle: p.recommended_service,
+    expectedLtv: p.expected_ltv, closingProbability: p.closing_probability,
+  }))
+}
+
+async function fetchTenantBusinessName() {
+  try {
+    const res = await apiFetch(`${BACKEND}/voice-outreach/settings`)
+    const data = await res.json()
+    return data.success ? (data.settings?.business_name || '') : ''
+  } catch {
+    return ''
+  }
+}
+
+function ExportBtn({ label, icon: Icon, onClick }) {
+  const [busy, setBusy] = useState(false)
+  const toast = useToast()
+  async function handle() {
+    if (busy) return
+    setBusy(true)
+    try {
+      await onClick()
+    } catch {
+      toast.error('Could not generate the file.')
+    }
+    setBusy(false)
+  }
+  return (
+    <button
+      onClick={handle}
+      disabled={busy}
+      style={{ display: 'flex', alignItems: 'center', gap: '4px', background: SLATE_M, border: `1px solid ${SLATE_L}`, color: busy ? MUTED : TEXT_SECONDARY, padding: '4px 10px', borderRadius: '5px', fontSize: '11px', fontWeight: '600', cursor: busy ? 'not-allowed' : 'pointer', flexShrink: 0, whiteSpace: 'nowrap', fontFamily: 'inherit' }}
+    >
+      <Icon size={10} />
+      {busy ? 'Generating…' : label}
+    </button>
+  )
 }
 
 export function ProspectCard({ p, isMobile, industry, city }) {
@@ -522,7 +572,27 @@ export default function ProspectDiscovery() {
                 {alreadyDiscoveredTotal > 0 && ` · ${alreadyDiscoveredTotal} already discovered in past scans (not re-shown)`}
               </p>
             </div>
-            <CopyBtn text={buildHotCopyText(hot)} label="Copy Hot Prospects" />
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <CopyBtn text={buildHotCopyText(hot)} label="Copy Hot Prospects" />
+              <ExportBtn
+                label="Download DOCX"
+                icon={FileText}
+                onClick={async () => {
+                  const businessName = await fetchTenantBusinessName()
+                  await downloadProspectCallSheetDocx({
+                    industry: d.industry, city: d.city, source: d.data_source, businessName,
+                    prospects: toExportProspects(all),
+                  })
+                }}
+              />
+              <ExportBtn
+                label="Download Excel"
+                icon={FileSpreadsheet}
+                onClick={async () => {
+                  await downloadProspectCallLogXlsx({ industry: d.industry, city: d.city, prospects: toExportProspects(all) })
+                }}
+              />
+            </div>
           </div>
 
           {/* Summary bar */}
