@@ -5,7 +5,7 @@ import { Crosshair, Copy, Check, ExternalLink, Phone, MapPin, TrendingUp, Flame,
 import CityInput, { getLastCity } from './CityInput'
 import { useToast } from './ToastContext'
 import { useLoadingSteps } from './useLoadingSteps'
-import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO, BG_RAISED, TEXT_SECONDARY, WARNING, INFO, SUCCESS_MUTED, WARNING_MUTED, DANGER_MUTED, INFO_MUTED } from './ds'
 import PageShell from './PageShell'
 import PageHeader from './PageHeader'
 
@@ -40,7 +40,7 @@ export const INDUSTRIES = [
 ]
 
 function Shimmer({ h = '14px', w = '100%' }) {
-  return <div style={{ height: h, width: w, borderRadius: '4px', background: 'linear-gradient(90deg,#F0F0F0 25%,#E8E8E8 50%,#F0F0F0 75%)', backgroundSize: '400px 100%', animation: 'shimmer 1.2s ease-in-out infinite' }} />
+  return <div style={{ height: h, width: w, borderRadius: '4px', background: `linear-gradient(90deg,${SLATE_L} 25%,${SLATE_M} 50%,${SLATE_L} 75%)`, backgroundSize: '400px 100%', animation: 'shimmer 1.2s ease-in-out infinite' }} />
 }
 
 function CopyBtn({ text, label = 'Copy' }) {
@@ -49,7 +49,7 @@ function CopyBtn({ text, label = 'Copy' }) {
   return (
     <button
       onClick={() => { navigator.clipboard.writeText(text); setCopied(true); toast.success('Copied!'); setTimeout(() => setCopied(false), 2000) }}
-      style={{ display: 'flex', alignItems: 'center', gap: '4px', background: copied ? '#16A34A' : '#F5F5F5', border: '1px solid ' + (copied ? '#16A34A' : '#E5E5E5'), color: copied ? '#fff' : '#666', padding: '4px 10px', borderRadius: '5px', fontSize: '11px', fontWeight: '600', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}
+      style={{ display: 'flex', alignItems: 'center', gap: '4px', background: copied ? SUCCESS_MUTED : SLATE_M, border: '1px solid ' + (copied ? 'rgba(52,211,153,0.3)' : SLATE_L), color: copied ? GREEN : TEXT_SECONDARY, padding: '4px 10px', borderRadius: '5px', fontSize: '11px', fontWeight: '600', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}
     >
       {copied ? <Check size={10} /> : <Copy size={10} />}
       {copied ? 'Copied!' : label}
@@ -57,18 +57,24 @@ function CopyBtn({ text, label = 'Copy' }) {
   )
 }
 
+// Semantic hot/warm/cold styling — muted-tint background + solid text, the
+// same dark-theme-safe pattern as ds.js's errBox/okBox (tint composited
+// over a dark surface keeps real contrast; a near-white bg with light text
+// on it does not). Shared by ClassBadge, the rank circle, ScoreBar, the
+// filter tabs, and the summary bar — one definition, not five copies.
+const CLASS_STYLES = {
+  hot:  { bg: DANGER_MUTED,  border: 'rgba(251,113,133,0.32)', color: RED,     icon: '🔥', label: 'Hot' },
+  warm: { bg: WARNING_MUTED, border: 'rgba(251,191,36,0.32)',  color: WARNING, icon: '🌡️', label: 'Warm' },
+  cold: { bg: INFO_MUTED,    border: 'rgba(56,189,248,0.32)',  color: INFO,    icon: '🧊', label: 'Cold' },
+}
+
 function ClassBadge({ c }) {
-  const map = {
-    hot:  { bg: '#FEF2F2', color: RED, border: '#FECDD3', icon: '🔥', label: 'Hot' },
-    warm: { bg: '#FFFBEB', color: '#D97706', border: '#FDE68A', icon: '🌡️', label: 'Warm' },
-    cold: { bg: '#EFF6FF', color: '#1D4ED8', border: '#BFDBFE', icon: '🧊', label: 'Cold' },
-  }
-  const s = map[(c || '').toLowerCase()] || map.cold
+  const s = CLASS_STYLES[(c || '').toLowerCase()] || CLASS_STYLES.cold
   return <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '10px', fontWeight: '700', background: s.bg, color: s.color, border: `1px solid ${s.border}` }}>{s.icon} {s.label}</span>
 }
 
 function ScoreBar({ score }) {
-  const color = score >= 75 ? '#BE123C' : score >= 50 ? '#D97706' : '#1D4ED8'
+  const color = score >= 75 ? RED : score >= 50 ? WARNING : INFO
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
       <div style={{ flex: 1, height: '6px', borderRadius: '3px', background: SLATE_L, overflow: 'hidden' }}>
@@ -109,8 +115,8 @@ export function ProspectCard({ p, isMobile, industry, city }) {
     <div style={{ ...card, padding: isMobile ? '14px 12px' : '18px', marginBottom: '10px' }}>
       {/* Header row */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '12px' }}>
-        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: p.opportunity_score >= 75 ? '#FEF2F2' : p.opportunity_score >= 50 ? '#FFFBEB' : '#EFF6FF', border: `2px solid ${p.opportunity_score >= 75 ? '#FECDD3' : p.opportunity_score >= 50 ? '#FDE68A' : '#BFDBFE'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <span style={{ fontSize: '11px', fontWeight: '700', color: p.opportunity_score >= 75 ? '#BE123C' : p.opportunity_score >= 50 ? '#D97706' : '#1D4ED8' }}>{p.rank}</span>
+        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: (p.opportunity_score >= 75 ? CLASS_STYLES.hot : p.opportunity_score >= 50 ? CLASS_STYLES.warm : CLASS_STYLES.cold).bg, border: `2px solid ${(p.opportunity_score >= 75 ? CLASS_STYLES.hot : p.opportunity_score >= 50 ? CLASS_STYLES.warm : CLASS_STYLES.cold).border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <span style={{ fontSize: '11px', fontWeight: '700', color: (p.opportunity_score >= 75 ? CLASS_STYLES.hot : p.opportunity_score >= 50 ? CLASS_STYLES.warm : CLASS_STYLES.cold).color }}>{p.rank}</span>
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '3px' }}>
@@ -137,12 +143,12 @@ export function ProspectCard({ p, isMobile, industry, city }) {
       {/* Tags row */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px' }}>
         {p.weakness_found && (
-          <span style={{ padding: '3px 9px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', background: '#FEF2F2', color: RED, border: '1px solid #FECDD3' }}>
+          <span style={{ padding: '3px 9px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', background: DANGER_MUTED, color: RED, border: '1px solid rgba(251,113,133,0.32)' }}>
             ❌ {p.weakness_found}
           </span>
         )}
         {p.recommended_service && (
-          <span style={{ padding: '3px 9px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', background: '#FFFDF5', color: '#92400E', border: `1px solid ${GOLD}50` }}>
+          <span style={{ padding: '3px 9px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', background: SUCCESS_MUTED, color: GREEN, border: '1px solid rgba(52,211,153,0.32)' }}>
             ✅ {p.recommended_service}
           </span>
         )}
@@ -155,26 +161,28 @@ export function ProspectCard({ p, isMobile, industry, city }) {
           { label: 'Expected LTV', value: p.expected_ltv },
           { label: 'Mktg Maturity', value: p.marketing_maturity },
         ].map(m => (
-          <div key={m.label} style={{ background: INK, borderRadius: '6px', padding: '8px 10px', border: '1px solid #F0F0F0' }}>
+          <div key={m.label} style={{ ...cardInner, padding: '8px 10px' }}>
             <p style={{ margin: '0 0 2px', fontSize: '10px', fontWeight: '700', color: MUTED, textTransform: 'uppercase' }}>{m.label}</p>
             <p style={{ margin: 0, fontSize: '12px', fontWeight: '600', color: BONE, textTransform: 'capitalize' }}>{m.value || '—'}</p>
           </div>
         ))}
       </div>
 
-      {/* Why Contact */}
+      {/* Why Contact — raised dark surface + left accent border, never a
+          light background (that combined with the page's light-on-dark
+          text tokens like BONE/GOLD was unreadable — the original bug). */}
       {p.why_contact && (
-        <div style={{ background: '#F9FAFB', borderRadius: '6px', padding: '9px 12px', marginBottom: '10px', border: '1px solid #F0F0F0' }}>
-          <p style={{ margin: '0 0 2px', fontSize: '10px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Why Contact</p>
+        <div style={{ background: BG_RAISED, borderLeft: `3px solid ${GOLD}`, borderRadius: '6px', padding: '9px 12px', marginBottom: '10px' }}>
+          <p style={{ margin: '0 0 2px', fontSize: '12px', fontWeight: '700', color: TEXT_SECONDARY, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Why Contact</p>
           <p style={{ margin: 0, fontSize: '12.5px', color: BONE, lineHeight: '1.45' }}>{p.why_contact}</p>
         </div>
       )}
 
-      {/* Suggested Opening Line */}
+      {/* Suggested Opening Line — same raised-surface treatment */}
       {p.suggested_opening_line && (
-        <div style={{ background: '#FFFDF5', border: `1.5px solid ${GOLD}40`, borderRadius: '7px', padding: '10px 12px', marginBottom: '10px' }}>
+        <div style={{ background: BG_RAISED, borderLeft: `3px solid ${GOLD}`, borderRadius: '7px', padding: '10px 12px', marginBottom: '10px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', marginBottom: '4px' }}>
-            <p style={{ margin: 0, fontSize: '10px', fontWeight: '700', color: GOLD, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Suggested Opening Line</p>
+            <p style={{ margin: 0, fontSize: '12px', fontWeight: '700', color: TEXT_SECONDARY, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Suggested Opening Line</p>
             <CopyBtn text={p.suggested_opening_line} label="Copy" />
           </div>
           <p style={{ margin: 0, fontSize: '12.5px', color: BONE, lineHeight: '1.5', fontStyle: 'italic' }}>"{p.suggested_opening_line}"</p>
@@ -184,16 +192,16 @@ export function ProspectCard({ p, isMobile, industry, city }) {
       {/* Footer row */}
       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
         {p.phone && (
-          <a href={'tel:' + p.phone} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#555', textDecoration: 'none', background: SLATE_M, border: `1px solid ${SLATE_L}`, padding: '4px 10px', borderRadius: '5px' }}>
+          <a href={'tel:' + p.phone} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: TEXT_SECONDARY, textDecoration: 'none', background: SLATE_M, border: `1px solid ${SLATE_L}`, padding: '4px 10px', borderRadius: '5px' }}>
             <Phone size={11} /> {p.phone}
           </a>
         )}
         {p.website && (
-          <a href={p.website.startsWith('http') ? p.website : 'https://' + p.website} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#1D4ED8', textDecoration: 'none', background: '#EFF6FF', border: '1px solid #BFDBFE', padding: '4px 10px', borderRadius: '5px' }}>
+          <a href={p.website.startsWith('http') ? p.website : 'https://' + p.website} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: INFO, textDecoration: 'none', background: INFO_MUTED, border: '1px solid rgba(56,189,248,0.32)', padding: '4px 10px', borderRadius: '5px' }}>
             <ExternalLink size={11} /> Website
           </a>
         )}
-        <button onClick={openSocialAudit} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: GOLD, textDecoration: 'none', background: '#FFFDF5', border: `1px solid ${GOLD}50`, padding: '4px 10px', borderRadius: '5px', cursor: 'pointer', fontFamily: 'inherit' }}>
+        <button onClick={openSocialAudit} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: GOLD, textDecoration: 'none', background: SLATE_M, border: `1px solid ${GOLD_BDR}`, padding: '4px 10px', borderRadius: '5px', cursor: 'pointer', fontFamily: 'inherit' }}>
           <Radar size={11} /> Social Audit
         </button>
       </div>
@@ -255,9 +263,9 @@ export default function ProspectDiscovery() {
   const all  = d.prospects          || []
 
   const TABS = [
-    { key: 'hot',  label: '🔥 Hot',  count: hot.length,  color: RED, bg: '#FEF2F2',  border: '#FECDD3' },
-    { key: 'warm', label: '🌡️ Warm', count: warm.length, color: '#D97706', bg: '#FFFBEB',  border: '#FDE68A' },
-    { key: 'cold', label: '🧊 Cold', count: cold.length, color: '#1D4ED8', bg: '#EFF6FF',  border: '#BFDBFE' },
+    { ...CLASS_STYLES.hot,  key: 'hot',  label: '🔥 Hot',  count: hot.length },
+    { ...CLASS_STYLES.warm, key: 'warm', label: '🌡️ Warm', count: warm.length },
+    { ...CLASS_STYLES.cold, key: 'cold', label: '🧊 Cold', count: cold.length },
   ]
   const tabData = activeTab === 'hot' ? hot : activeTab === 'warm' ? warm : cold
 
@@ -269,11 +277,11 @@ export default function ProspectDiscovery() {
       {/* Form */}
       <div style={{ maxWidth: '640px', width: '100%' }}>
         <div style={{ ...card, padding: isMobile ? '20px 16px' : '26px', marginBottom: '16px' }}>
-          {error && <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: RED, fontSize: '13px' }}>{error}</div>}
+          {error && <div style={{ background: DANGER_MUTED, border: '1px solid rgba(251,113,133,0.32)', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: RED, fontSize: '13px' }}>{error}</div>}
 
           <div style={{ marginBottom: '14px' }}>
-            <label style={lbl}>Industry <span style={{ color: '#DC2626', fontWeight: '700' }}>*</span></label>
-            <select value={industry} onChange={e => setIndustry(e.target.value)} style={{ ...inp, color: industry ? '#171717' : '#999' }}>
+            <label style={lbl}>Industry <span style={{ color: RED, fontWeight: '700' }}>*</span></label>
+            <select value={industry} onChange={e => setIndustry(e.target.value)} style={{ ...inp, color: industry ? BONE : MUTED }}>
               <option value="">— Select industry to search —</option>
               {INDUSTRIES.map(o => <option key={o} value={o}>{o}</option>)}
             </select>
@@ -304,7 +312,7 @@ export default function ProspectDiscovery() {
 
           <button onClick={handleFind} disabled={loading} style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%',
-            background: loading ? '#E5E5E5' : GOLD, border: 'none', color: loading ? '#999' : '#fff',
+            background: loading ? SLATE_M : GOLD, border: loading ? `1px solid ${SLATE_L}` : 'none', color: loading ? MUTED : INK,
             padding: '12px 24px', borderRadius: '8px', fontSize: '14px', fontWeight: '600',
             cursor: loading ? 'not-allowed' : 'pointer',
           }}>
@@ -324,7 +332,7 @@ export default function ProspectDiscovery() {
             `Scoring all prospects with AI${maxProspects > 20 ? ' (larger scans take a bit longer)' : ''}...`,
           ].map((label, i) => (
             <div key={i} style={{ ...card, padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-              <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: '#FFFBF0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: SLATE_M, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <span style={{ fontSize: '11px', fontWeight: '700', color: GOLD }}>{i + 1}</span>
               </div>
               <div style={{ flex: 1 }}>
@@ -365,8 +373,8 @@ export default function ProspectDiscovery() {
             {[
               { label: 'Total Found', value: d.total_found || all.length, color: BONE },
               { label: '🔥 Hot',       value: hot.length,                 color: RED },
-              { label: '🌡️ Warm',      value: warm.length,                color: '#D97706' },
-              { label: '🧊 Cold',      value: cold.length,                color: '#1D4ED8' },
+              { label: '🌡️ Warm',      value: warm.length,                color: WARNING },
+              { label: '🧊 Cold',      value: cold.length,                color: INFO },
             ].map(m => (
               <div key={m.label} style={{ ...card, padding: '12px', textAlign: 'center' }}>
                 <p style={{ margin: '0 0 2px', fontSize: '10px', fontWeight: '700', color: MUTED, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{m.label}</p>
@@ -375,12 +383,14 @@ export default function ProspectDiscovery() {
             ))}
           </div>
 
-          {/* Top Opportunity */}
+          {/* Top Opportunity — same raised-surface treatment as Why Contact
+              / Suggested Opening Line (this block lives at page level, not
+              inside ProspectCard, but must never diverge from that style). */}
           {d.top_opportunity && (
-            <div style={{ background: '#FFFDF5', border: `1.5px solid ${GOLD}`, borderRadius: '8px', padding: '14px 18px', marginBottom: '12px' }}>
+            <div style={{ background: BG_RAISED, borderLeft: `3px solid ${GOLD}`, borderRadius: '8px', padding: '14px 18px', marginBottom: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '5px' }}>
                 <TrendingUp size={14} color={GOLD} />
-                <p style={{ margin: 0, fontSize: '11px', fontWeight: '700', color: GOLD, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Top Opportunity</p>
+                <p style={{ margin: 0, fontSize: '12px', fontWeight: '700', color: TEXT_SECONDARY, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Top Opportunity</p>
               </div>
               <p style={{ margin: 0, fontSize: '13.5px', color: BONE, lineHeight: '1.5' }}>{d.top_opportunity}</p>
             </div>
@@ -395,12 +405,12 @@ export default function ProspectDiscovery() {
                 style={{
                   padding: '8px 16px', borderRadius: '7px', fontSize: '13px', fontWeight: '600',
                   cursor: 'pointer', border: '1.5px solid',
-                  background: activeTab === t.key ? t.bg : '#fff',
-                  borderColor: activeTab === t.key ? t.border : '#E5E5E5',
-                  color: activeTab === t.key ? t.color : '#888',
+                  background: activeTab === t.key ? t.bg : SLATE_M,
+                  borderColor: activeTab === t.key ? t.border : SLATE_L,
+                  color: activeTab === t.key ? t.color : MUTED,
                 }}
               >
-                {t.label} <span style={{ marginLeft: '4px', background: activeTab === t.key ? t.border : '#F0F0F0', borderRadius: '10px', padding: '1px 6px', fontSize: '11px' }}>{t.count}</span>
+                {t.label} <span style={{ marginLeft: '4px', background: SLATE_M, color: activeTab === t.key ? t.color : MUTED, borderRadius: '10px', padding: '1px 6px', fontSize: '11px' }}>{t.count}</span>
               </button>
             ))}
           </div>
