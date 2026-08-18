@@ -1,7 +1,7 @@
 import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Crosshair, Copy, Check, ExternalLink, Phone, MapPin, TrendingUp, Flame, Thermometer, Snowflake, Radar } from 'lucide-react'
+import { Crosshair, Copy, Check, ExternalLink, Phone, MapPin, TrendingUp, Flame, Thermometer, Snowflake, Radar, History, X, PlusCircle } from 'lucide-react'
 import CityInput, { getLastCity } from './CityInput'
 import { useToast } from './ToastContext'
 import { useLoadingSteps } from './useLoadingSteps'
@@ -224,9 +224,61 @@ export default function ProspectDiscovery() {
   const [fromCache, setFromCache]         = useState(false)
   const [activeTab, setActiveTab]         = useState('hot')
 
+  // Post-audit fix: scan history + "Find more" (re-scanning used to return
+  // identical businesses every time, and only the single latest scan was
+  // ever kept — an earlier one vanished the moment a new scan ran).
+  const [historyOpen, setHistoryOpen]     = useState(false)
+  const [historyList, setHistoryList]     = useState([])
+  const [historyLoading, setHistoryLoading] = useState(false)
+  const [scanMaxUsed, setScanMaxUsed]     = useState(15)     // highest max_prospects requested so far for the current query
+  const [alreadyDiscoveredTotal, setAlreadyDiscoveredTotal] = useState(0)
+  const [findMoreLoading, setFindMoreLoading] = useState(false)
+
   useEffect(() => {
     try { const s = localStorage.getItem(LS_KEY); if (s) { setResult(JSON.parse(s)); setFromCache(true) } } catch {}
   }, [])
+
+  async function loadHistory() {
+    setHistoryLoading(true)
+    try {
+      const res = await apiFetch(`${BACKEND}/prospect-discovery/history`)
+      const data = await res.json()
+      setHistoryList(data.success ? data.history : [])
+    } catch {
+      setHistoryList([])
+    }
+    setHistoryLoading(false)
+  }
+
+  function toggleHistory() {
+    const next = !historyOpen
+    setHistoryOpen(next)
+    if (next) loadHistory()
+  }
+
+  async function viewHistoryScan(id) {
+    setHistoryLoading(true)
+    try {
+      const res = await apiFetch(`${BACKEND}/prospect-discovery/history/${id}`)
+      const data = await res.json()
+      if (data.success) {
+        setResult({ success: true, google_places_used: true, data: data.data })
+        setFromCache(false)
+        setAlreadyDiscoveredTotal(data.data.already_discovered_count || 0)
+        setScanMaxUsed(data.data.prospects?.length || 15)
+        const d = data.data
+        const firstTab = d.hot_prospects?.length ? 'hot' : d.warm_prospects?.length ? 'warm' : 'cold'
+        setActiveTab(firstTab)
+        setHistoryOpen(false)
+        toast.success('Loaded past scan')
+      } else {
+        toast.error(data.error || 'Could not load that scan.')
+      }
+    } catch {
+      toast.error('Backend se connect nahi ho paya.')
+    }
+    setHistoryLoading(false)
+  }
 
   const resolvedIndustry = industry === 'Other' ? industryOther : industry
 
@@ -245,6 +297,8 @@ export default function ProspectDiscovery() {
         setResult(data)
         localStorage.setItem(LS_KEY, JSON.stringify(data))
         setFromCache(false)
+        setScanMaxUsed(maxProspects)
+        setAlreadyDiscoveredTotal(data.data?.already_discovered_count || 0)
         const firstTab = data.data?.hot_prospects?.length ? 'hot' : data.data?.warm_prospects?.length ? 'warm' : 'cold'
         setActiveTab(firstTab)
         toast.success('Done!')
@@ -254,6 +308,66 @@ export default function ProspectDiscovery() {
       }
     } catch { setError('Backend se connect nahi ho paya.'); toast.error('Backend se connect nahi ho paya.') }
     setLoading(false)
+  }
+
+  // Post-audit fix: re-running the identical query used to return the
+  // identical top businesses every time (Google's ranking for a fixed
+  // query+location is stable) — "Find more" re-scans at a HIGHER
+  // max_prospects so Places pagination actually reaches further down the
+  // ranked list, and the backend's own dedup (against every past scan for
+  // this industry+city, not just this session) guarantees nothing shown
+  // already reappears. Appends to the existing list rather than replacing
+  // it, so a "Find more" click never loses what's already on screen.
+  async function handleFindMore() {
+    if (!resolvedIndustry || !result) return
+    setFindMoreLoading(true)
+    const nextMax = scanMaxUsed + 20
+    try {
+      const res = await apiFetch(`${BACKEND}/prospect-discovery`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ industry: resolvedIndustry, city, max_prospects: nextMax }),
+      })
+      const data = await res.json()
+      if (!data.success) {
+        toast.error(data.error || 'Could not find more prospects.')
+        setFindMoreLoading(false)
+        return
+      }
+      const newOnes = data.data?.prospects || []
+      const newAlready = data.data?.already_discovered_count || 0
+      setScanMaxUsed(nextMax)
+      setAlreadyDiscoveredTotal(prev => prev + newAlready)
+      if (newOnes.length === 0) {
+        toast.success(
+          newAlready > 0
+            ? `No new businesses — Google Places has no more unseen results for this search right now.`
+            : `No new businesses found for this search.`
+        )
+        setFindMoreLoading(false)
+        return
+      }
+      setResult(prev => {
+        const prevData = prev?.data || {}
+        const mergedProspects = [...(prevData.prospects || []), ...newOnes]
+        const merged = {
+          ...prevData,
+          prospects: mergedProspects,
+          hot_prospects:  mergedProspects.filter(p => (p.classification || '').toLowerCase() === 'hot'),
+          warm_prospects: mergedProspects.filter(p => (p.classification || '').toLowerCase() === 'warm'),
+          cold_prospects: mergedProspects.filter(p => (p.classification || '').toLowerCase() === 'cold'),
+          total_found: mergedProspects.length,
+          already_discovered_count: (prevData.already_discovered_count || 0) + newAlready,
+        }
+        const next = { ...prev, data: merged }
+        localStorage.setItem(LS_KEY, JSON.stringify(next))
+        return next
+      })
+      toast.success(`Found ${newOnes.length} new business${newOnes.length === 1 ? '' : 'es'}${newAlready ? ` (${newAlready} already discovered)` : ''}`)
+    } catch {
+      toast.error('Backend se connect nahi ho paya.')
+    }
+    setFindMoreLoading(false)
   }
 
   const d   = result?.data          || {}
@@ -272,7 +386,49 @@ export default function ProspectDiscovery() {
   return (
     <PageShell maxWidth="960px">
       <style>{`@keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }`}</style>
-      <PageHeader title="Prospect Discovery" sub="Find real local businesses on Google Maps and score them as marketing agency prospects." />
+      <PageHeader
+        title="Prospect Discovery"
+        sub="Find real local businesses on Google Maps and score them as marketing agency prospects."
+        action={
+          <button onClick={toggleHistory} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: historyOpen ? SLATE_M : 'transparent', border: `1px solid ${SLATE_L}`, color: TEXT_SECONDARY, padding: '9px 16px', borderRadius: '7px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}>
+            <History size={14} /> Past Scans
+          </button>
+        }
+      />
+
+      {/* History panel — every past scan, oldest data never lost, click to
+          view its exact original results without re-running anything. */}
+      {historyOpen && (
+        <div style={{ ...card, maxWidth: '640px', width: '100%', padding: '16px 18px', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+            <p style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: BONE }}>Past Scans</p>
+            <button onClick={() => setHistoryOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: MUTED, padding: '2px' }}><X size={15} /></button>
+          </div>
+          {historyLoading ? (
+            <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>Loading…</p>
+          ) : historyList.length === 0 ? (
+            <p style={{ margin: 0, fontSize: '12px', color: MUTED }}>No past scans yet — run a search to start building history.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '340px', overflowY: 'auto' }}>
+              {historyList.map(h => (
+                <button
+                  key={h.id}
+                  onClick={() => viewHistoryScan(h.id)}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', textAlign: 'left', background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '6px', padding: '9px 12px', cursor: 'pointer', fontFamily: 'inherit' }}
+                >
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ margin: '0 0 2px', fontSize: '12.5px', fontWeight: '600', color: BONE }}>{h.industry} in {h.city || 'India'}</p>
+                    <p style={{ margin: 0, fontSize: '11px', color: MUTED }}>
+                      {h.result_count} found{h.already_discovered_count ? ` · ${h.already_discovered_count} already known` : ''} · {new Date(h.created_at.endsWith('Z') ? h.created_at : h.created_at + 'Z').toLocaleString()}
+                    </p>
+                  </div>
+                  <span style={{ fontSize: '11px', color: GOLD, flexShrink: 0, fontWeight: '600' }}>View →</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Form */}
       <div style={{ maxWidth: '640px', width: '100%' }}>
@@ -363,6 +519,7 @@ export default function ProspectDiscovery() {
               <p style={{ margin: '2px 0 0', fontSize: '11px', color: MUTED }}>
                 Query: "{d.search_query_used}" · Source: {d.data_source}
                 {result.google_places_used ? ' ✓' : ' (mock data — add GOOGLE_PLACES_API_KEY)'}
+                {alreadyDiscoveredTotal > 0 && ` · ${alreadyDiscoveredTotal} already discovered in past scans (not re-shown)`}
               </p>
             </div>
             <CopyBtn text={buildHotCopyText(hot)} label="Copy Hot Prospects" />
@@ -423,6 +580,23 @@ export default function ProspectDiscovery() {
           ) : (
             tabData.map(p => <ProspectCard key={p.rank || p.name} p={p} isMobile={isMobile} industry={resolvedIndustry} city={city} />)
           )}
+
+          {/* Find more — re-scans deeper (higher max_prospects) and appends
+              only genuinely new businesses; the backend excludes anything
+              already surfaced in ANY past scan of this exact industry+city. */}
+          <button
+            onClick={handleFindMore}
+            disabled={findMoreLoading}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', width: '100%',
+              background: 'transparent', border: `1.5px dashed ${SLATE_L}`, color: findMoreLoading ? MUTED : GOLD,
+              padding: '12px', borderRadius: '8px', fontSize: '13px', fontWeight: '600',
+              cursor: findMoreLoading ? 'not-allowed' : 'pointer', marginTop: '4px', fontFamily: 'inherit',
+            }}
+          >
+            <PlusCircle size={14} />
+            {findMoreLoading ? 'Searching deeper…' : 'Find More'}
+          </button>
 
         </div>
       )}
