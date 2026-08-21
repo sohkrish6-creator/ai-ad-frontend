@@ -15,6 +15,13 @@ import { downloadProspectCallSheetDocx, downloadProspectCallLogXlsx } from './li
 const LS_KEY  = 'adsoh_prospect_result'
 const SIE_PREFILL_LS_KEY = 'adsoh_social_intel_prefill'
 
+// Mirrors the backend's _MAX_SAFE_PROSPECTS (main.py, prospect_discovery) —
+// a scan above this gets rejected with a clear error rather than risking
+// the memory spike that caused a production OOM restart. Kept here too so
+// "Find More" can stop gracefully at the ceiling instead of eventually
+// firing a request that's guaranteed to fail.
+const PROSPECT_SCAN_MAX = 60
+
 // Rotating status text, not a live progress counter — a single request/
 // response call has no real incremental count to report mid-flight (that
 // would need converting this into a background-task+polling flow), so
@@ -370,8 +377,12 @@ export default function ProspectDiscovery() {
   // it, so a "Find more" click never loses what's already on screen.
   async function handleFindMore() {
     if (!resolvedIndustry || !result) return
+    if (scanMaxUsed >= PROSPECT_SCAN_MAX) {
+      toast.error(`Scans are capped at ${PROSPECT_SCAN_MAX} prospects at a time to keep the service stable.`)
+      return
+    }
     setFindMoreLoading(true)
-    const nextMax = scanMaxUsed + 20
+    const nextMax = Math.min(scanMaxUsed + 20, PROSPECT_SCAN_MAX)
     try {
       const res = await apiFetch(`${BACKEND}/prospect-discovery`, {
         method: 'POST',
@@ -653,19 +664,24 @@ export default function ProspectDiscovery() {
 
           {/* Find more — re-scans deeper (higher max_prospects) and appends
               only genuinely new businesses; the backend excludes anything
-              already surfaced in ANY past scan of this exact industry+city. */}
+              already surfaced in ANY past scan of this exact industry+city.
+              Disabled at PROSPECT_SCAN_MAX rather than left to fire a
+              request that's guaranteed to be rejected by the backend's own
+              memory-safety cap. */}
           <button
             onClick={handleFindMore}
-            disabled={findMoreLoading}
+            disabled={findMoreLoading || scanMaxUsed >= PROSPECT_SCAN_MAX}
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', width: '100%',
-              background: 'transparent', border: `1.5px dashed ${SLATE_L}`, color: findMoreLoading ? MUTED : GOLD,
+              background: 'transparent', border: `1.5px dashed ${SLATE_L}`,
+              color: (findMoreLoading || scanMaxUsed >= PROSPECT_SCAN_MAX) ? MUTED : GOLD,
               padding: '12px', borderRadius: '8px', fontSize: '13px', fontWeight: '600',
-              cursor: findMoreLoading ? 'not-allowed' : 'pointer', marginTop: '4px', fontFamily: 'inherit',
+              cursor: (findMoreLoading || scanMaxUsed >= PROSPECT_SCAN_MAX) ? 'not-allowed' : 'pointer',
+              marginTop: '4px', fontFamily: 'inherit',
             }}
           >
             <PlusCircle size={14} />
-            {findMoreLoading ? 'Searching deeper…' : 'Find More'}
+            {findMoreLoading ? 'Searching deeper…' : scanMaxUsed >= PROSPECT_SCAN_MAX ? `Scan limit reached (${PROSPECT_SCAN_MAX} max)` : 'Find More'}
           </button>
 
         </div>
