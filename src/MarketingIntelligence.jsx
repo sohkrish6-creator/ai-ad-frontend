@@ -1,10 +1,10 @@
 import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
-import { Download } from 'lucide-react'
+import { Download, SearchX, AlertTriangle } from 'lucide-react'
 import { useLoadingSteps } from './useLoadingSteps'
 import {
   GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inputSt,
-  INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED,
+  INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, WARNING,
   FONT_BODY, FONT_DISPLAY,
 } from './ds'
 import PageShell from './PageShell'
@@ -46,7 +46,7 @@ const BASE_TABS = [
 // ── Inline helpers ────────────────────────────────────────────────────────────
 
 function ConfBadge({ n }) {
-  if (!n) return null
+  if (n == null) return null
   const color = n >= 75 ? GREEN : n >= 50 ? GOLD : RED
   return (
     <span style={{ fontSize: '11px', fontWeight: '600', color, background: `${color}18`,
@@ -56,18 +56,38 @@ function ConfBadge({ n }) {
   )
 }
 
-function TrustRow({ confidence, evidence, data_source, data_label }) {
-  if (!confidence && !evidence && !data_source) return null
+// Post-audit fix: confidence_guard.py (backend) now attaches a computed
+// data_label (VERIFIED/INFERRED/UNVERIFIED/NO_DATA) to every section it
+// guards — never trusting the model's self-reported confidence number.
+// Color communicates trust level at a glance; DataLabelBadge.reason (from
+// confidence_reason) is exposed as a hover title so "why" is one hover
+// away instead of only visible in the raw JSON export.
+const _DATA_LABEL_STYLE = {
+  VERIFIED:   { color: GREEN,   bg: 'rgba(52,199,89,0.10)',  border: 'rgba(52,199,89,0.3)' },
+  INFERRED:   { color: GOLD,    bg: GOLD_DIM,                border: GOLD_BDR },
+  UNVERIFIED: { color: WARNING, bg: 'rgba(251,191,36,0.10)', border: 'rgba(251,191,36,0.3)' },
+  NO_DATA:    { color: RED,     bg: 'rgba(196,69,58,0.10)',  border: 'rgba(196,69,58,0.3)' },
+}
+
+export function DataLabelBadge({ label, reason }) {
+  if (!label) return null
+  const s = _DATA_LABEL_STYLE[label] || { color: GOLD, bg: GOLD_DIM, border: GOLD_BDR }
+  return (
+    <span title={reason || undefined} style={{ fontSize: '11px', color: s.color, fontWeight: '700',
+      background: s.bg, border: `1px solid ${s.border}`, borderRadius: '4px', padding: '2px 7px',
+      textTransform: 'uppercase', letterSpacing: '0.04em', cursor: reason ? 'help' : 'default' }}>
+      {label.replace(/_/g, ' ')}
+    </span>
+  )
+}
+
+function TrustRow({ confidence, evidence, data_source, data_label, confidence_reason }) {
+  if (!confidence && !evidence && !data_source && !data_label) return null
   return (
     <div style={{ marginTop: '16px', paddingTop: '14px', borderTop: `1px solid ${SLATE_L}`,
       display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
-      {confidence && <ConfBadge n={confidence} />}
-      {data_label && (
-        <span style={{ fontSize: '11px', color: GOLD, fontWeight: '600', background: GOLD_DIM,
-          border: `1px solid ${GOLD_BDR}`, borderRadius: '4px', padding: '2px 7px' }}>
-          {data_label}
-        </span>
-      )}
+      {data_label ? <DataLabelBadge label={data_label} reason={confidence_reason} /> : null}
+      {confidence != null && <ConfBadge n={confidence} />}
       {evidence && <span style={{ fontSize: '11px', color: MUTED }}>{evidence}</span>}
       {data_source && <span style={{ fontSize: '11px', color: MUTED, opacity: 0.7 }}>· {data_source}</span>}
     </div>
@@ -129,7 +149,7 @@ function OverviewSection({ d }) {
         </div>
       )}
       <TagList label="Key Products / Services" items={d.key_products_services} />
-      <TrustRow confidence={d.confidence} evidence={d.evidence} data_source={d.data_source} />
+      <TrustRow confidence={d.confidence} evidence={d.evidence} data_source={d.data_source} data_label={d.data_label} confidence_reason={d.confidence_reason} />
     </SWrap>
   )
 }
@@ -145,7 +165,7 @@ function DNASection({ d }) {
       <FRow label="Distribution Model"  value={d.distribution_model} />
       <FRow label="Culture Signals"     value={d.company_culture_signals} />
       <TagList label="Unique Differentiators" items={d.unique_differentiators} />
-      <TrustRow confidence={d.confidence} evidence={d.evidence} data_source={d.data_source} />
+      <TrustRow confidence={d.confidence} evidence={d.evidence} data_source={d.data_source} data_label={d.data_label} confidence_reason={d.confidence_reason} />
     </SWrap>
   )
 }
@@ -265,7 +285,7 @@ function AudienceSection({ d }) {
       <FRow label="Geography Focus"        value={d.geography_focus} />
       <TagList label="Pain Points Addressed" items={d.pain_points_addressed} />
       <TagList label="Buying Triggers"       items={d.buying_triggers} />
-      <TrustRow confidence={d.confidence} evidence={d.evidence} data_source={d.data_source} data_label={d.data_label} />
+      <TrustRow confidence={d.confidence} evidence={d.evidence} data_source={d.data_source} data_label={d.data_label} confidence_reason={d.confidence_reason} />
     </SWrap>
   )
 }
@@ -296,7 +316,7 @@ function ChannelsSection({ d }) {
       <FRow label="Email Marketing"     value={d.email_marketing} />
       <FRow label="Offline Presence"    value={d.offline_presence} />
       <FRow label="Partnerships"        value={d.partnerships} />
-      <TrustRow confidence={d.confidence} evidence={d.evidence} data_source={d.data_source} />
+      <TrustRow confidence={d.confidence} evidence={d.evidence} data_source={d.data_source} data_label={d.data_label} confidence_reason={d.confidence_reason} />
     </SWrap>
   )
 }
@@ -311,7 +331,7 @@ function AdvertisingSection({ d }) {
       <TagList label="CTA Patterns"         items={d.cta_patterns} />
       <FRow label="Estimated Spend"         value={d.estimated_spend} />
       <FRow label="Seasonal Patterns"       value={d.seasonal_patterns} />
-      <TrustRow confidence={d.confidence} evidence={d.evidence} data_source={d.data_source} />
+      <TrustRow confidence={d.confidence} evidence={d.evidence} data_source={d.data_source} data_label={d.data_label} confidence_reason={d.confidence_reason} />
     </SWrap>
   )
 }
@@ -331,7 +351,7 @@ function SEOSection({ d }) {
       <FRow label="Backlink Quality"            value={d.backlink_quality} />
       <FRow label="Local SEO"                   value={d.local_seo} />
       <TagList label="Keyword Themes"           items={d.keyword_themes} />
-      <TrustRow confidence={d.confidence} evidence={d.evidence} data_source={d.data_source} />
+      <TrustRow confidence={d.confidence} evidence={d.evidence} data_source={d.data_source} data_label={d.data_label} confidence_reason={d.confidence_reason} />
     </SWrap>
   )
 }
@@ -379,7 +399,7 @@ function CreativesSection({ d }) {
       <FRow label="Copywriting Style"     value={d.copywriting_style} />
       <TagList label="Ad Creative Patterns" items={d.ad_creative_patterns} />
       <TagList label="Hook Formulas"        items={d.hook_formulas} />
-      <TrustRow confidence={d.confidence} evidence={d.evidence} data_source={d.data_source} />
+      <TrustRow confidence={d.confidence} evidence={d.evidence} data_source={d.data_source} data_label={d.data_label} confidence_reason={d.confidence_reason} />
     </SWrap>
   )
 }
@@ -393,7 +413,7 @@ function OffersSection({ d }) {
       <FRow label="Upsell Signals"     value={d.upsell_signals} />
       <TagList label="Promotions Observed" items={d.promotions_observed} />
       <TagList label="Lead Magnets"        items={d.lead_magnets} />
-      <TrustRow confidence={d.confidence} evidence={d.evidence} data_source={d.data_source} />
+      <TrustRow confidence={d.confidence} evidence={d.evidence} data_source={d.data_source} data_label={d.data_label} confidence_reason={d.confidence_reason} />
     </SWrap>
   )
 }
@@ -418,7 +438,7 @@ function FunnelsSection({ d }) {
         ) : null)}
       </div>
       <FRow label="Referral Program" value={d.referral_program} />
-      <TrustRow confidence={d.confidence} evidence={d.evidence} data_source={d.data_source} />
+      <TrustRow confidence={d.confidence} evidence={d.evidence} data_source={d.data_source} data_label={d.data_label} confidence_reason={d.confidence_reason} />
     </SWrap>
   )
 }
@@ -665,37 +685,78 @@ function ActionPlanSection({ d }) {
   )
 }
 
-function Empty({ msg }) {
+export function Empty({ msg }) {
   return <div style={{ ...card, padding: '24px', color: MUTED, fontSize: '13px', textAlign: 'center' }}>
     {msg || 'No data available for this section.'}
   </div>
 }
 
+// Post-audit fix: a section the model returned with every finding field
+// empty and an unverified/missing data_source used to render as a normal,
+// confident-looking card (just with its FRow/TagList children individually
+// hiding themselves) — the actual user-facing harm from the ResMed
+// incident. confidence_guard.py labels these NO_DATA server-side;
+// SectionRouter intercepts before reaching the section's normal render
+// and shows this explicit state instead of a card that only LOOKS empty.
+export function NotResearchedState({ reason }) {
+  return (
+    <div style={{ ...card, padding: '32px 24px', textAlign: 'center' }}>
+      <SearchX size={26} color={MUTED} style={{ marginBottom: '12px' }} />
+      <p style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: '600', color: BONE }}>Not researched</p>
+      <p style={{ margin: 0, fontSize: '12.5px', color: MUTED, maxWidth: '440px', marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.5 }}>
+        No verifiable data was found for this section — shown honestly as unresearched rather than a low-confidence guess.
+      </p>
+      {reason && (
+        <p style={{ margin: '10px 0 0', fontSize: '11px', color: MUTED, opacity: 0.7, fontStyle: 'italic' }}>{reason}</p>
+      )}
+    </div>
+  )
+}
+
 // ── Tab nav ───────────────────────────────────────────────────────────────────
 
-function TabBar({ tabs, active, onChange }) {
+export function TabBar({ tabs, active, onChange, sections }) {
+  const s = sections || {}
   return (
     <div style={{ display: 'flex', gap: '4px', overflowX: 'auto', paddingBottom: '2px',
       marginBottom: '20px', borderBottom: `1px solid ${SLATE_L}`,
       scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-      {tabs.map(t => (
-        <button key={t.key} onClick={() => onChange(t.key)} style={{
-          padding: '7px 14px', borderRadius: '6px 6px 0 0', border: 'none', cursor: 'pointer',
-          fontSize: '12px', fontWeight: active === t.key ? '600' : '400', fontFamily: FONT_BODY,
-          color: active === t.key ? BONE : MUTED,
-          background: active === t.key ? SLATE : 'transparent',
-          borderBottom: active === t.key ? `2px solid ${GOLD}` : '2px solid transparent',
-          whiteSpace: 'nowrap', flexShrink: 0, transition: 'color 0.12s',
-        }}>{t.label}</button>
-      ))}
+      {tabs.map(t => {
+        // So "6 of 18 sections have no data" is visible from the nav
+        // itself, not only after clicking into each tab.
+        const isNoData = s[t.key]?.data_label === 'NO_DATA'
+        return (
+          <button key={t.key} onClick={() => onChange(t.key)} title={isNoData ? 'Not researched — no data found' : undefined} style={{
+            padding: '7px 14px', borderRadius: '6px 6px 0 0', border: 'none', cursor: 'pointer',
+            fontSize: '12px', fontWeight: active === t.key ? '600' : '400', fontFamily: FONT_BODY,
+            color: active === t.key ? BONE : isNoData ? RED : MUTED,
+            background: active === t.key ? SLATE : 'transparent',
+            borderBottom: active === t.key ? `2px solid ${GOLD}` : '2px solid transparent',
+            whiteSpace: 'nowrap', flexShrink: 0, transition: 'color 0.12s',
+            display: 'flex', alignItems: 'center', gap: '5px',
+          }}>
+            {t.label}
+            {isNoData && <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: RED, flexShrink: 0 }} />}
+          </button>
+        )
+      })}
     </div>
   )
 }
 
 // ── Main section router ───────────────────────────────────────────────────────
 
-function SectionRouter({ tabKey, sections }) {
+export function SectionRouter({ tabKey, sections }) {
   const s = sections || {}
+  // Generic — fires only for sections confidence_guard.py actually
+  // guarded (a top-level dict with a data_label of NO_DATA). Sections it
+  // doesn't touch (lists like competitors/lessons, or dicts with no
+  // self-reported confidence like social/swot) simply have no data_label
+  // here and fall through to their normal renderer unchanged.
+  const current = s[tabKey]
+  if (current && typeof current === 'object' && !Array.isArray(current) && current.data_label === 'NO_DATA') {
+    return <NotResearchedState reason={current.confidence_reason} />
+  }
   switch (tabKey) {
     case 'overview':             return <OverviewSection d={s.overview} />
     case 'business_dna':         return <DNASection d={s.business_dna} />
@@ -811,6 +872,8 @@ export default function MarketingIntelligence() {
       ? [...BASE_TABS, { key: 'apply_to_my_business', label: 'Apply to My Biz' }, { key: 'action_plan', label: 'Action Plan' }]
       : BASE_TABS
 
+    const quality = result._quality  // undefined for cached pre-fix reports — every render below is optional-chained
+
     return (
       <PageShell maxWidth="1100px">
         {fromCache && (
@@ -822,13 +885,39 @@ export default function MarketingIntelligence() {
           </div>
         )}
 
+        {/* Post-audit fix: needs_review must be visible somewhere a user
+            will actually see it, not only inside the raw JSON export —
+            this is the ResMed incident's whole point: a report that looks
+            fully confident on screen while several sections found
+            nothing. */}
+        {quality?.needs_review && (
+          <div style={{ background: 'rgba(196,69,58,0.08)', border: '1px solid rgba(196,69,58,0.3)', borderRadius: '7px',
+            padding: '11px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <AlertTriangle size={16} color={RED} style={{ flexShrink: 0 }} />
+            <p style={{ margin: 0, fontSize: '12.5px', color: BONE, lineHeight: 1.5 }}>
+              <strong>Review before using externally</strong> — {quality.sections_by_label?.NO_DATA || 0} section(s) found no verifiable
+              data and {quality.sections_by_label?.UNVERIFIED || 0} could not be verified. Check the sections marked below.
+            </p>
+          </div>
+        )}
+
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
           marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
-            <h1 style={{ fontFamily: FONT_DISPLAY, fontSize: '26px', fontWeight: '700', color: BONE,
-              margin: '0 0 4px', letterSpacing: '-0.5px' }}>
-              {result.company_name}
-            </h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '4px' }}>
+              <h1 style={{ fontFamily: FONT_DISPLAY, fontSize: '26px', fontWeight: '700', color: BONE,
+                margin: 0, letterSpacing: '-0.5px' }}>
+                {result.company_name}
+              </h1>
+              {quality != null && (
+                <span title={`${quality.sections_guarded} section(s) checked — averaged across VERIFIED/INFERRED/UNVERIFIED/NO_DATA`} style={{
+                  fontSize: '11px', fontWeight: '700', color: quality.overall_confidence >= 60 ? GREEN : quality.overall_confidence >= 30 ? WARNING : RED,
+                  background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '20px', padding: '3px 10px', cursor: 'help',
+                }}>
+                  {quality.overall_confidence}% overall confidence
+                </span>
+              )}
+            </div>
             <p style={{ color: MUTED, fontSize: '13px', margin: 0 }}>Marketing Intelligence Report</p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
@@ -844,7 +933,7 @@ export default function MarketingIntelligence() {
           </div>
         </div>
 
-        <TabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
+        <TabBar tabs={tabs} active={activeTab} onChange={setActiveTab} sections={result.sections} />
         <SectionRouter tabKey={activeTab} sections={result.sections} />
       </PageShell>
     )
