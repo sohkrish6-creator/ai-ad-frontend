@@ -6,9 +6,13 @@
 // Callers normalize their own page's prospect objects into:
 //   { rank, name, address, phone, rating, reviews, score, classification,
 //     detectedGap, sohscapeAngle, expectedLtv, closingProbability }
-// expectedLtv/closingProbability are optional (model-output estimates —
-// only Prospect Discovery currently has them) and are always rendered with
-// an explicit "(Est.)" label, never as verified numbers.
+// expectedLtv/closingProbability are optional and always rendered with an
+// explicit "(Est.)" label. expectedLtv is grounded in the tenant's own
+// rate card (real price × the prospect's matched service) when one is
+// configured, 'Not configured' otherwise — never a fabricated figure.
+// closingProbability has no equivalent real signal to ground it in, so it
+// stays a capped model estimate (never higher than the prospect's own
+// opportunity_score).
 import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
   WidthType, ShadingType, HeadingLevel, VerticalAlign,
@@ -157,7 +161,7 @@ export async function buildProspectCallSheetDocxBlob({ industry, city, source, b
 
         ...(hasEstimates ? [new Paragraph({
           spacing: { before: 220 },
-          children: [new TextRun({ text: 'Expected LTV and Closing Probability shown on-screen are model-generated estimates, not verified figures.', italics: true, size: 16, color: '777777' })],
+          children: [new TextRun({ text: 'Expected LTV is based on your own rate card for the matched service ("Not configured" if no rate is set). Closing Probability is a model-generated estimate, not a verified figure.', italics: true, size: 16, color: '777777' })],
         })] : []),
       ],
     }],
@@ -220,7 +224,7 @@ export async function buildProspectCallLogXlsxBlob({ prospects }) {
       sohscapeAngle: safe(p.sohscapeAngle, ''),
       phone: safe(p.phone, ''),
       address: safe(p.address, ''),
-      expectedLtv: safe(p.expectedLtv, ''),
+      expectedLtv: safe(p.expectedLtv, 'Not configured'),
       closingProbability: safe(p.closingProbability, ''),
       calledDate: '',
       outcome: '',

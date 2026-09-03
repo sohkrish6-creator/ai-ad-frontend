@@ -516,15 +516,20 @@ function ProspectCardWithUrl({ prospect, batch, businessUrl, onAction, estCost, 
         </div>
       )}
 
+      {/* Est. ROI is grounded in this tenant's own rate card for the
+          matched service (real figure) or explicitly "Not configured" —
+          never a fabricated number, never a silent "—" that reads the
+          same as "no data". Call Success has no equivalent real signal,
+          so it stays a capped model estimate. */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '10px' }}>
         {[
-          { label: 'Est. ROI', value: prospect.estimated_roi },
-          { label: 'Call Success', value: prospect.estimated_call_success },
-          { label: 'Est. Cost/Call', value: estCost ? `₹${estCost} (${estMinutes}m)` : '—' },
+          { label: 'Est. ROI', value: prospect.estimated_roi || 'Not configured', muted: !prospect.estimated_roi },
+          { label: 'Call Success (Est.)', value: prospect.estimated_call_success, muted: false },
+          { label: 'Est. Cost/Call', value: estCost ? `₹${estCost} (${estMinutes}m)` : '—', muted: false },
         ].map(m => (
           <div key={m.label} style={{ background: SLATE_M, borderRadius: '6px', padding: '7px 10px', border: `1px solid ${SLATE_L}` }}>
             <p style={{ margin: '0 0 2px', fontSize: '9px', fontWeight: '700', color: MUTED, textTransform: 'uppercase' }}>{m.label}</p>
-            <p style={{ margin: 0, fontSize: '12px', fontWeight: '600', color: BONE }}>{m.value || '—'}</p>
+            <p style={{ margin: 0, fontSize: '12px', fontWeight: '600', color: m.muted ? MUTED : BONE }}>{m.value || '—'}</p>
           </div>
         ))}
       </div>

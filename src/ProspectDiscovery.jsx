@@ -102,7 +102,7 @@ function buildHotCopyText(hotProspects) {
       `   📍 ${p.address || '—'}\n` +
       `   📞 ${p.phone || '—'}  |  🌐 ${p.website || 'No website'}\n` +
       `   ⭐ ${p.google_rating || '—'} (${p.total_reviews || 0} reviews)\n` +
-      `   🎯 Score: ${p.opportunity_score}/100  |  LTV: ${p.expected_ltv || '—'}\n` +
+      `   🎯 Score: ${p.opportunity_score}/100  |  Est. LTV: ${p.pricing_configured ? p.expected_ltv : 'pricing not configured — set your rates in Settings'}\n` +
       `   ❌ Weakness: ${p.weakness_found || '—'}\n` +
       // Post-audit fix: a ✅ on "No service fit" contradicts itself — this
       // marker means "here's what to pitch", not "here's a gap you can't
@@ -229,16 +229,25 @@ export function ProspectCard({ p, isMobile, industry, city }) {
         )}
       </div>
 
-      {/* Stats row */}
+      {/* Stats row. Expected LTV is grounded in this tenant's own rate card
+          for the matched service — real figure when one's configured,
+          explicit "Not configured" (never a fabricated number, never a
+          silent blank) otherwise. Closing Prob has no equivalent real
+          signal, so it stays a capped model estimate — both labeled
+          "(Est.)" either way, matching the DOCX/Excel export convention. */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '10px' }}>
         {[
-          { label: 'Closing Prob', value: p.closing_probability },
-          { label: 'Expected LTV', value: p.expected_ltv },
-          { label: 'Mktg Maturity', value: p.marketing_maturity },
+          { label: 'Closing Prob (Est.)', value: p.closing_probability, muted: false },
+          {
+            label: 'Expected LTV (Est.)',
+            value: p.pricing_configured ? p.expected_ltv : 'Not configured',
+            muted: !p.pricing_configured,
+          },
+          { label: 'Mktg Maturity', value: p.marketing_maturity, muted: false },
         ].map(m => (
           <div key={m.label} style={{ ...cardInner, padding: '8px 10px' }}>
             <p style={{ margin: '0 0 2px', fontSize: '10px', fontWeight: '700', color: MUTED, textTransform: 'uppercase' }}>{m.label}</p>
-            <p style={{ margin: 0, fontSize: '12px', fontWeight: '600', color: BONE, textTransform: 'capitalize' }}>{m.value || '—'}</p>
+            <p style={{ margin: 0, fontSize: '12px', fontWeight: '600', color: m.muted ? MUTED : BONE, textTransform: m.muted ? 'none' : 'capitalize' }}>{m.value || '—'}</p>
           </div>
         ))}
       </div>
