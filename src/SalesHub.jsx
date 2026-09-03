@@ -13,7 +13,7 @@ export default function SalesHub() {
           label: 'Pipeline & Queue',
           links: [
             { label: 'Pipeline', path: '/revenue-engine/pipeline', desc: 'Every prospect, funnel view, priority-ranked.', Icon: Table2 },
-            { label: "Today's Queue", path: '/revenue-engine/today', desc: 'Call/message list for today — deep-links to the workspace.', Icon: ListChecks },
+            { label: "Today's Priorities", path: '/revenue-engine/today', desc: 'Call/message list for today — deep-links to the workspace.', Icon: ListChecks },
             { label: 'CRM / Leads', path: '/leads', desc: 'All leads across every channel.', Icon: Users },
           ],
         },

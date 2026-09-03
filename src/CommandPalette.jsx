@@ -19,7 +19,7 @@ export const COMMAND_PALETTE_PAGES = [
   { label: 'Settings',               path: '/settings' },
   // Sales
   { label: 'Sales — Pipeline',                 path: '/revenue-engine/pipeline' },
-  { label: "Sales — Today's Queue",            path: '/revenue-engine/today' },
+  { label: "Sales — Today's Priorities",       path: '/revenue-engine/today' },
   { label: 'Sales — Goal / Discover',          path: '/revenue-engine' },
   { label: 'Leads (CRM)',                      path: '/leads' },
   { label: 'Prospect Discovery',               path: '/prospects' },
