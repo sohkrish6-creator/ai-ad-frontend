@@ -1,10 +1,11 @@
 import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import CityInput, { getLastCity } from './CityInput'
 
 const LS_KEY_OUTREACH = 'adsoh_outreach_result'
-import { MessageSquare, Copy, Check, ChevronRight } from 'lucide-react'
-import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
+import { MessageSquare, Copy, Check, ChevronRight, Settings } from 'lucide-react'
+import { GOLD, GOLD_DIM, GOLD_BDR, card, cardInner, lbl, inp, inputSt, pageStyle, pagePad, INK, BONE, SLATE, SLATE_L, SLATE_M, MUTED, GREEN, RED, WARNING, WARNING_MUTED, BG_RAISED, TEXT_SECONDARY, FONT_BODY, FONT_DISPLAY, FONT_MONO } from './ds'
 import PageShell from './PageShell'
 import PageHeader from './PageHeader'
 
@@ -165,6 +166,8 @@ export default function OutreachAI() {
   const [result, setResult]               = useState(null)
   const [activeTab, setActiveTab]         = useState('whatsapp')
   const [fromCache, setFromCache]         = useState(false)
+  const [blockedReason, setBlockedReason] = useState('')
+  const navigate = useNavigate()
 
   useEffect(() => {
     try { const s = localStorage.getItem(LS_KEY_OUTREACH); if (s) { setResult(JSON.parse(s)); setFromCache(true) } } catch {}
@@ -175,7 +178,7 @@ export default function OutreachAI() {
 
   async function handleGenerate() {
     if (!resolvedIndustry) { setError('Industry select karo.'); return }
-    setError(''); setLoading(true); setResult(null); setActiveTab('whatsapp')
+    setError(''); setBlockedReason(''); setLoading(true); setResult(null); setActiveTab('whatsapp')
     try {
       const res  = await apiFetch(`${BACKEND}/outreach-ai`, {
         method: 'POST',
@@ -190,7 +193,7 @@ export default function OutreachAI() {
       })
       const data = await res.json()
       if (data.success) { setResult(data); localStorage.setItem(LS_KEY_OUTREACH, JSON.stringify(data)); setFromCache(false) }
-      else setError(data.message || data.error || 'Generation failed. Dobara try karo.')
+      else { setBlockedReason(data.blocked_reason || ''); setError(data.message || data.error || 'Generation failed. Dobara try karo.') }
     } catch { setError('Backend se connect nahi ho paya.') }
     setLoading(false)
   }
@@ -359,7 +362,16 @@ export default function OutreachAI() {
       {/* Input */}
       <div style={{ maxWidth: '640px', width: '100%' }}>
         <div style={{ ...card, padding: isMobile ? '20px 16px' : '26px', marginBottom: '10px' }}>
-          {error && <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: RED, fontSize: '13px' }}>{error}</div>}
+          {error && blockedReason === 'services_not_configured' && (
+            <div style={{ background: BG_RAISED, borderLeft: `3px solid ${WARNING}`, borderRadius: '7px', padding: '10px 12px', marginBottom: '16px' }}>
+              <p style={{ margin: '0 0 4px', fontSize: '12px', fontWeight: '700', color: TEXT_SECONDARY, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Services Not Configured</p>
+              <p style={{ margin: '0 0 8px', fontSize: '12.5px', color: BONE, lineHeight: '1.45' }}>{error}</p>
+              <button onClick={() => navigate('/voice-outreach/settings')} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: WARNING, textDecoration: 'none', background: WARNING_MUTED, border: '1px solid rgba(251,191,36,0.32)', padding: '4px 10px', borderRadius: '5px', cursor: 'pointer', fontFamily: 'inherit' }}>
+                <Settings size={11} /> Add services in Business Profile
+              </button>
+            </div>
+          )}
+          {error && blockedReason !== 'services_not_configured' && <div style={{ background: 'rgba(196,69,58,0.10)', border: '1px solid #FECDD3', borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', color: RED, fontSize: '13px' }}>{error}</div>}
 
           <div style={{ marginBottom: '14px' }}>
             <label style={lbl}>Business Website URL <span style={{ color: MUTED, fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
