@@ -1,7 +1,7 @@
 import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Crosshair, Copy, Check, ExternalLink, Phone, MapPin, TrendingUp, Flame, Thermometer, Snowflake, Radar, History, X, PlusCircle, FileText, FileSpreadsheet } from 'lucide-react'
+import { Crosshair, Copy, Check, ExternalLink, Phone, MapPin, TrendingUp, Flame, Thermometer, Snowflake, Radar, History, X, PlusCircle, FileText, FileSpreadsheet, Settings } from 'lucide-react'
 import CityInput, { getLastCity } from './CityInput'
 import { useToast } from './ToastContext'
 import { useLoadingSteps } from './useLoadingSteps'
@@ -95,16 +95,25 @@ function ScoreBar({ score }) {
 
 function buildHotCopyText(hotProspects) {
   if (!hotProspects?.length) return 'No hot prospects found.'
-  return hotProspects.map((p, i) =>
-    `${i + 1}. ${p.name}\n` +
-    `   📍 ${p.address || '—'}\n` +
-    `   📞 ${p.phone || '—'}  |  🌐 ${p.website || 'No website'}\n` +
-    `   ⭐ ${p.google_rating || '—'} (${p.total_reviews || 0} reviews)\n` +
-    `   🎯 Score: ${p.opportunity_score}/100  |  LTV: ${p.expected_ltv || '—'}\n` +
-    `   ❌ Weakness: ${p.weakness_found || '—'}\n` +
-    `   ✅ Service: ${p.recommended_service || '—'}\n` +
-    `   💬 Opening Line: "${p.suggested_opening_line || '—'}"\n`
-  ).join('\n---\n\n')
+  return hotProspects.map((p, i) => {
+    const noFit = p.recommended_service === 'No service fit'
+    return (
+      `${i + 1}. ${p.name}\n` +
+      `   📍 ${p.address || '—'}\n` +
+      `   📞 ${p.phone || '—'}  |  🌐 ${p.website || 'No website'}\n` +
+      `   ⭐ ${p.google_rating || '—'} (${p.total_reviews || 0} reviews)\n` +
+      `   🎯 Score: ${p.opportunity_score}/100  |  LTV: ${p.expected_ltv || '—'}\n` +
+      `   ❌ Weakness: ${p.weakness_found || '—'}\n` +
+      // Post-audit fix: a ✅ on "No service fit" contradicts itself — this
+      // marker means "here's what to pitch", not "here's a gap you can't
+      // act on". Never a fit, no pitch, no invented opening line.
+      (noFit
+        ? `   ⚠️ Service: No service fit — none of your configured services match this gap\n` +
+          `   💬 Opening Line: not generated — configure a matching service in Business Profile first\n`
+        : `   ✅ Service: ${p.recommended_service || '—'}\n` +
+          `   💬 Opening Line: "${p.suggested_opening_line || '—'}"\n`)
+    )
+  }).join('\n---\n\n')
 }
 
 // Export builders take a normalized shape (see lib/prospectExport.js) —
@@ -204,9 +213,18 @@ export function ProspectCard({ p, isMobile, industry, city }) {
             ❌ {p.weakness_found}
           </span>
         )}
-        {p.recommended_service && (
+        {/* Post-audit fix: recommended_service used to always render as a
+            green ✅ "here's what to pitch" badge — including the literal
+            string "No service fit", which is the opposite finding. The
+            icon and label were contradicting each other. */}
+        {p.recommended_service && p.recommended_service !== 'No service fit' && (
           <span style={{ padding: '3px 9px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', background: SUCCESS_MUTED, color: GREEN, border: '1px solid rgba(52,211,153,0.32)' }}>
             ✅ {p.recommended_service}
+          </span>
+        )}
+        {p.recommended_service === 'No service fit' && (
+          <span style={{ padding: '3px 9px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', background: WARNING_MUTED, color: WARNING, border: '1px solid rgba(251,191,36,0.32)' }}>
+            ⚠️ No service fit
           </span>
         )}
       </div>
@@ -243,6 +261,24 @@ export function ProspectCard({ p, isMobile, industry, city }) {
             <CopyBtn text={p.suggested_opening_line} label="Copy" />
           </div>
           <p style={{ margin: 0, fontSize: '12.5px', color: BONE, lineHeight: '1.5', fontStyle: 'italic' }}>"{p.suggested_opening_line}"</p>
+        </div>
+      )}
+
+      {/* No service fit — the backend deliberately sends an empty
+          suggested_opening_line for these (never invents a service to
+          pitch), so the block above is skipped. Explicit state instead of
+          a silently missing card, with the actual fix one click away. */}
+      {p.recommended_service === 'No service fit' && (
+        <div style={{ background: BG_RAISED, borderLeft: `3px solid ${WARNING}`, borderRadius: '7px', padding: '10px 12px', marginBottom: '10px' }}>
+          <p style={{ margin: '0 0 4px', fontSize: '12px', fontWeight: '700', color: TEXT_SECONDARY, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Service Not Configured</p>
+          <p style={{ margin: '0 0 8px', fontSize: '12.5px', color: BONE, lineHeight: '1.45' }}>
+            {p.weakness_found && p.weakness_found !== 'Not detected'
+              ? `${p.weakness_found} detected, but none of your configured services address it — no opening line generated.`
+              : "None of your configured services match this prospect's detected gap — no opening line generated."}
+          </p>
+          <button onClick={() => navigate('/voice-outreach/settings')} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: WARNING, textDecoration: 'none', background: WARNING_MUTED, border: '1px solid rgba(251,191,36,0.32)', padding: '4px 10px', borderRadius: '5px', cursor: 'pointer', fontFamily: 'inherit' }}>
+            <Settings size={11} /> Add services in Business Profile
+          </button>
         </div>
       )}
 
