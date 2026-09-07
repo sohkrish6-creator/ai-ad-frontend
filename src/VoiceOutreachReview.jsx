@@ -27,6 +27,8 @@ const WEAKNESS_LABELS = {
   weak_seo_title:     'Weak SEO Title',
   no_cta:             'No Clear CTA',
   site_unreachable:   'Site Unreachable',
+  no_social_links_on_website: 'No Social Links On Site',
+  weak_social_presence:       'Weak Social Presence',
 }
 
 function PriorityBadge({ priority }) {

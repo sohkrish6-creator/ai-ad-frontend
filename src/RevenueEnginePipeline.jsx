@@ -20,6 +20,7 @@ const WEAKNESS_LABELS = {
   inactive_listing: 'Inactive Listing', missing_tracking: 'No Ad Tracking',
   weak_seo_meta: 'Weak SEO Meta', weak_seo_title: 'Weak SEO Title', no_cta: 'No Clear CTA',
   site_unreachable: 'Site Unreachable',
+  no_social_links_on_website: 'No Social Links On Site', weak_social_presence: 'Weak Social Presence',
 }
 
 const REC_VARIANT = { CALL: 'success', FOLLOW_LATER: 'warning', IGNORE: 'neutral' }
