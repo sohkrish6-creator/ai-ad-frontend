@@ -1,8 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { Clock, PhoneCall, Users, ChevronRight, Inbox, Radar, FileText, FileSpreadsheet, MessageCircle, History } from 'lucide-react'
+import {
+  Clock, PhoneCall, Users, ChevronRight, Inbox, Radar, FileText, FileSpreadsheet,
+  MessageCircle, History, Search, Copy, Check, Flame, Thermometer, Snowflake,
+} from 'lucide-react'
 import { BACKEND, apiFetch } from './lib/api'
-import { TEXT_PRIMARY, TEXT_SECONDARY, TEXT_TERTIARY, ACCENT, BG_INSET, DANGER, DANGER_MUTED, WARNING, errBox, scoreColor, radius } from './ds'
+import {
+  TEXT_PRIMARY, TEXT_SECONDARY, TEXT_TERTIARY, ACCENT, BG_INSET, DANGER, DANGER_MUTED,
+  WARNING, SUCCESS_MUTED, GREEN, INFO, INFO_MUTED, SLATE_M, errBox, scoreColor, radius, inp, lbl,
+} from './ds'
 import PageShell from './PageShell'
 import PageHeader from './PageHeader'
 import RevenueEngineSubNav from './RevenueEngineSubNav'
@@ -15,6 +21,38 @@ import EmptyState from './components/ui/EmptyState'
 import Skeleton from './components/ui/Skeleton'
 import { downloadProspectCallSheetDocx, downloadProspectCallLogXlsx } from './lib/prospectExport'
 import { useToast } from './ToastContext'
+import CityInput, { getLastCity } from './CityInput'
+import { INDUSTRIES } from './ProspectDiscovery'
+
+// Hot/Warm/Cold — grouped from Revenue Engine's own priority field
+// (high/medium/low, already computed by _score_voice_prospect_batch /
+// _voice_cap_priority), not a second classification system ported from
+// legacy Prospect Discovery.
+const CLASS_STYLES = {
+  hot:  { bg: DANGER_MUTED,  border: 'rgba(251,113,133,0.32)', color: DANGER, Icon: Flame,       label: 'Hot' },
+  warm: { bg: 'rgba(251,191,36,0.12)', border: 'rgba(251,191,36,0.32)', color: WARNING, Icon: Thermometer, label: 'Warm' },
+  cold: { bg: INFO_MUTED,    border: 'rgba(56,189,248,0.32)',  color: INFO,   Icon: Snowflake,   label: 'Cold' },
+}
+const PRIORITY_TO_CLASS = { high: 'hot', medium: 'warm', low: 'cold' }
+
+function CopyOpeningLineBtn({ text }) {
+  const [copied, setCopied] = useState(false)
+  const toast = useToast()
+  return (
+    <button
+      onClick={() => { navigator.clipboard.writeText(text); setCopied(true); toast.success('Copied!'); setTimeout(() => setCopied(false), 2000) }}
+      style={{
+        display: 'flex', alignItems: 'center', gap: '4px',
+        background: copied ? SUCCESS_MUTED : SLATE_M, border: `1px solid ${copied ? 'rgba(52,211,153,0.3)' : 'transparent'}`,
+        color: copied ? GREEN : TEXT_SECONDARY, padding: '4px 10px', borderRadius: '5px',
+        fontSize: '11px', fontWeight: '600', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap', fontFamily: 'inherit',
+      }}
+    >
+      {copied ? <Check size={10} /> : <Copy size={10} />}
+      {copied ? 'Copied!' : 'Copy'}
+    </button>
+  )
+}
 
 const WEAKNESS_LABELS = {
   no_website: 'No Website', poor_reviews: 'Poor Reviews', low_review_count: 'Few Reviews',
@@ -97,7 +135,18 @@ export default function RevenueEnginePipeline() {
   const [generating, setGenerating] = useState(false)
   const [genProgress, setGenProgress] = useState({ done: 0, total: 0 })
   const [activeSessionId, setActiveSessionId] = useState(null)
+  const [activeClassTab, setActiveClassTab] = useState('hot')
   const toast = useToast()
+
+  // Discovery form — industry/city dropdowns as a direct alternative to
+  // the free-text Goal page's GPT-parsed segment description. Reuses
+  // Revenue Engine's own /revenue-engine/discover (_run_voice_batch_job),
+  // never legacy's prospect_discovery()/_score_batch.
+  const [discIndustry, setDiscIndustry] = useState('')
+  const [discIndustryOther, setDiscIndustryOther] = useState('')
+  const [discCity, setDiscCity] = useState(getLastCity)
+  const [starting, setStarting] = useState(false)
+  const [findMoreLoading, setFindMoreLoading] = useState(false)
 
   const load = useCallback(async () => {
     if (!batchId) {
@@ -158,7 +207,10 @@ export default function RevenueEnginePipeline() {
   }
 
   function selectAllEligible() {
-    setSelected(new Set(prospects.filter(p => p.whatsapp_eligible).map(p => p.id)))
+    // Scoped to the currently viewed Hot/Warm/Cold tab, not the whole
+    // batch — matches how the tabs are actually used (work the hot list
+    // first, then warm, etc.), not a hidden global select-all.
+    setSelected(new Set(tabbedProspects.filter(p => p.whatsapp_eligible).map(p => p.id)))
   }
 
   async function handleGenerateAndSend() {
@@ -205,18 +257,77 @@ export default function RevenueEnginePipeline() {
     }
   }
 
+  async function startScan(industry, city) {
+    if (!industry) { toast.error('Select an industry first.'); return }
+    setStarting(true)
+    try {
+      const res = await apiFetch(`${BACKEND}/revenue-engine/discover`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ goal_type: 'segment', industry, city: city || '' }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        navigate(`/revenue-engine/pipeline?batch=${data.batch_id}`)
+      } else {
+        toast.error(data.message || data.detail || 'Could not start the scan.')
+      }
+    } catch {
+      toast.error('Backend se connect nahi ho paya.')
+    }
+    setStarting(false)
+  }
+
+  async function handleStartScan() {
+    const resolvedIndustry = discIndustry === 'Other' ? discIndustryOther : discIndustry
+    await startScan(resolvedIndustry, discCity)
+  }
+
+  async function handleFindMore() {
+    setFindMoreLoading(true)
+    await startScan(batch.industry, batch.city)
+    setFindMoreLoading(false)
+  }
+
   if (!batchId) {
     return (
       <PageShell maxWidth="720px">
         <RevenueEngineSubNav />
         <PageHeader title="Pipeline" sub="Pick a Quick Scan run to review, or start a new one from the Goal page." />
+
+        <Card style={{ padding: '20px', marginBottom: '18px' }}>
+          <p style={{ ...lbl, marginBottom: '12px' }}>Start a Quick Scan</p>
+          <div style={{ marginBottom: '12px' }}>
+            <label style={lbl}>Industry <span style={{ color: DANGER, fontWeight: 700 }}>*</span></label>
+            <select value={discIndustry} onChange={e => setDiscIndustry(e.target.value)} style={{ ...inp, color: discIndustry ? TEXT_PRIMARY : TEXT_TERTIARY }}>
+              <option value="">— Select industry to search —</option>
+              {INDUSTRIES.map(o => <option key={o} value={o}>{o}</option>)}
+            </select>
+          </div>
+          {discIndustry === 'Other' && (
+            <div style={{ marginBottom: '12px' }}>
+              <label style={lbl}>Specify Industry</label>
+              <input type="text" value={discIndustryOther} onChange={e => setDiscIndustryOther(e.target.value)} placeholder="e.g. Optical Stores" style={inp} />
+            </div>
+          )}
+          <div style={{ marginBottom: '16px' }}>
+            <label style={lbl}>City</label>
+            <CityInput value={discCity} onChange={setDiscCity} style={inp} placeholder="e.g. Jaipur" />
+          </div>
+          <Button variant="primary" icon={Search} loading={starting} onClick={handleStartScan} style={{ width: '100%' }}>
+            {starting ? 'Starting Quick Scan...' : 'Start Quick Scan'}
+          </Button>
+          <p style={{ margin: '12px 0 0', fontSize: '11.5px', color: TEXT_TERTIARY, textAlign: 'center' }}>
+            Chasing a revenue number instead of a segment? <button onClick={() => navigate('/revenue-engine')} style={{ background: 'none', border: 'none', padding: 0, color: ACCENT, fontSize: '11.5px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline' }}>Describe a goal in your own words</button>.
+          </p>
+        </Card>
+
+        <p style={{ ...lbl, marginBottom: '10px' }}>Past Scans</p>
         {batches.length === 0 ? (
           <Card>
             <EmptyState
               icon={Radar}
               headline="No Quick Scan runs yet"
-              description="Start one from the Goal page to discover and qualify real local prospects."
-              action={{ label: 'Go to Discover', onClick: () => navigate('/revenue-engine') }}
+              description="Start one above to discover and qualify real local prospects."
             />
           </Card>
         ) : batches.map(b => (
@@ -265,6 +376,11 @@ export default function RevenueEnginePipeline() {
   const high = prospects.filter(p => p.priority === 'high').length
   const callFirst = prospects.filter(p => p.recommendation === 'CALL').length
 
+  const hotP  = prospects.filter(p => (PRIORITY_TO_CLASS[p.priority] || 'cold') === 'hot')
+  const warmP = prospects.filter(p => (PRIORITY_TO_CLASS[p.priority] || 'cold') === 'warm')
+  const coldP = prospects.filter(p => (PRIORITY_TO_CLASS[p.priority] || 'cold') === 'cold')
+  const tabbedProspects = activeClassTab === 'hot' ? hotP : activeClassTab === 'warm' ? warmP : coldP
+
   async function handleDownloadDocx() {
     setDocxLoading(true)
     try {
@@ -309,12 +425,21 @@ export default function RevenueEnginePipeline() {
                 </Button>
               </>
             )}
+            <Button variant="secondary" icon={Search} loading={findMoreLoading} onClick={handleFindMore}>
+              Find More
+            </Button>
             <Button variant="primary" icon={PhoneCall} onClick={() => navigate('/revenue-engine/today')}>
               Go to Today's Tasks
             </Button>
           </div>
         }
       />
+
+      {batch.already_discovered_count > 0 && (
+        <p style={{ margin: '-10px 0 16px', fontSize: '11.5px', color: TEXT_TERTIARY }}>
+          {batch.already_discovered_count} business{batch.already_discovered_count === 1 ? '' : 'es'} already discovered in a past scan for this segment were excluded automatically.
+        </p>
+      )}
 
       <RevenueEngineProfileBanner prospects={prospects} />
 
@@ -351,8 +476,29 @@ export default function RevenueEnginePipeline() {
 
       {batch.status === 'succeeded' && prospects.length === 0 && (
         <Card>
-          <EmptyState icon={Inbox} headline="No prospects found for this search" description="Try a broader industry or a different city from the Goal page." action={{ label: 'Back to Discover', onClick: () => navigate('/revenue-engine') }} />
+          <EmptyState icon={Inbox} headline="No prospects found for this search" description="Try a broader industry or a different city." />
         </Card>
+      )}
+
+      {prospects.length > 0 && (
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
+          {[
+            { key: 'hot', list: hotP }, { key: 'warm', list: warmP }, { key: 'cold', list: coldP },
+          ].map(({ key, list }) => {
+            const s = CLASS_STYLES[key]
+            const active = activeClassTab === key
+            return (
+              <button key={key} onClick={() => setActiveClassTab(key)} style={{
+                display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px',
+                borderRadius: radius.md, border: `1px solid ${active ? s.border : 'transparent'}`,
+                background: active ? s.bg : 'transparent', color: active ? s.color : TEXT_TERTIARY,
+                fontSize: '12.5px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+              }}>
+                <s.Icon size={13} /> {s.label} <span className="tabular-nums">({list.length})</span>
+              </button>
+            )
+          })}
+        </div>
       )}
 
       {prospects.length > 0 && (
@@ -378,7 +524,13 @@ export default function RevenueEnginePipeline() {
         </Card>
       )}
 
-      {prospects.map(p => {
+      {prospects.length > 0 && tabbedProspects.length === 0 && (
+        <Card style={{ padding: '24px', textAlign: 'center' }}>
+          <p style={{ margin: 0, fontSize: '13px', color: TEXT_TERTIARY }}>No {CLASS_STYLES[activeClassTab].label.toLowerCase()} prospects in this scan.</p>
+        </Card>
+      )}
+
+      {tabbedProspects.map(p => {
         const ineligibleReason = p.whatsapp_eligible === false
           ? (WHATSAPP_INELIGIBLE_REASON_LABELS[p.whatsapp_ineligible_reason] || p.whatsapp_ineligible_reason)
           : null
@@ -425,7 +577,13 @@ export default function RevenueEnginePipeline() {
               ))}
             </div>
           )}
-          {p.reason && <p style={{ margin: 0, fontSize: '12px', color: TEXT_SECONDARY, lineHeight: 1.5 }}>{p.reason}</p>}
+          {p.reason && <p style={{ margin: p.suggested_opening_line ? '0 0 10px' : 0, fontSize: '12px', color: TEXT_SECONDARY, lineHeight: 1.5 }}>{p.reason}</p>}
+          {p.suggested_opening_line && (
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', background: BG_INSET, borderRadius: radius.sm, padding: '9px 11px' }}>
+              <p style={{ margin: 0, fontSize: '12px', color: TEXT_PRIMARY, lineHeight: 1.5, flex: 1 }}>{p.suggested_opening_line}</p>
+              <CopyOpeningLineBtn text={p.suggested_opening_line} />
+            </div>
+          )}
         </Card>
         )
       })}

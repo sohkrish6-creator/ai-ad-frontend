@@ -503,16 +503,24 @@ export default function ProspectDiscovery() {
         }
       />
 
-      {/* Bulk WhatsApp send lives on the Pipeline (Revenue Engine), not
-          here — this page has no persisted prospect rows to hang a send
-          queue, DNC/cooldown gate, or draft generator off of. One line so
-          it isn't a dead end, not a duplicated feature. */}
-      <p style={{ margin: '-8px 0 16px', fontSize: '12px', color: MUTED }}>
-        Want to send WhatsApp messages in bulk? That's on the{' '}
-        <button onClick={() => navigate('/revenue-engine/pipeline')} style={{ background: 'none', border: 'none', padding: 0, color: GOLD, fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline' }}>
-          Revenue Engine Pipeline
-        </button>.
-      </p>
+      {/* RETIREMENT NOTICE (do not delete this page in this pass — flagged
+          for a later cleanup once the team has fully moved over). Everything
+          this page does — industry/city discovery, Hot/Warm/Cold tabs, the
+          per-prospect suggested opening line, Find More/scan history — now
+          also lives on Revenue Engine's Pipeline, built on Revenue Engine's
+          own batch/scoring pipeline (not this page's _score_batch), plus
+          bulk WhatsApp send and DNC/cooldown gating this page has no
+          persisted prospect store to support. Per the Aug 2026 IA review,
+          this page duplicates Revenue Engine Discover and is marked for
+          retirement — this banner is that mark. */}
+      <div style={{ background: WARNING_MUTED, border: `1px solid rgba(251,191,36,0.32)`, borderRadius: '7px', padding: '11px 14px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+        <p style={{ margin: 0, fontSize: '12px', color: WARNING, flex: 1, minWidth: '220px' }}>
+          This page is marked for retirement — everything here (discovery, Hot/Warm/Cold, opening lines, Find More) plus bulk WhatsApp send now lives on the Revenue Engine Pipeline.
+        </p>
+        <button onClick={() => navigate('/revenue-engine/pipeline')} style={{ background: 'none', border: 'none', padding: 0, color: WARNING, fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline', whiteSpace: 'nowrap' }}>
+          Go to Pipeline →
+        </button>
+      </div>
 
       {/* History panel — every past scan, oldest data never lost, click to
           view its exact original results without re-running anything. */}
