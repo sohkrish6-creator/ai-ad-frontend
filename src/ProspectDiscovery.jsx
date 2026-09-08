@@ -314,6 +314,7 @@ export function ProspectCard({ p, isMobile, industry, city }) {
 export default function ProspectDiscovery() {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
   const toast = useToast()
+  const navigate = useNavigate()
 
   const [industry, setIndustry]           = useState('')
   const [industryOther, setIndustryOther] = useState('')
@@ -501,6 +502,17 @@ export default function ProspectDiscovery() {
           </button>
         }
       />
+
+      {/* Bulk WhatsApp send lives on the Pipeline (Revenue Engine), not
+          here — this page has no persisted prospect rows to hang a send
+          queue, DNC/cooldown gate, or draft generator off of. One line so
+          it isn't a dead end, not a duplicated feature. */}
+      <p style={{ margin: '-8px 0 16px', fontSize: '12px', color: MUTED }}>
+        Want to send WhatsApp messages in bulk? That's on the{' '}
+        <button onClick={() => navigate('/revenue-engine/pipeline')} style={{ background: 'none', border: 'none', padding: 0, color: GOLD, fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline' }}>
+          Revenue Engine Pipeline
+        </button>.
+      </p>
 
       {/* History panel — every past scan, oldest data never lost, click to
           view its exact original results without re-running anything. */}

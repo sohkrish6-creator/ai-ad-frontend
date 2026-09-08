@@ -52,6 +52,7 @@ import RevenueEnginePipeline from './RevenueEnginePipeline'
 import RevenueEngineToday from './RevenueEngineToday'
 import RevenueEngineLeadWorkspace from './RevenueEngineLeadWorkspace'
 import RevenueEngineSettings from './RevenueEngineSettings'
+import WhatsAppOutreachSend from './WhatsAppOutreachSend'
 import SalesHub from './SalesHub'
 import MarketingHub from './MarketingHub'
 import IntelligenceHub from './IntelligenceHub'
@@ -222,6 +223,7 @@ function Layout() {
           <Route path="/revenue-engine/today" element={<ProtectedRoute><RevenueEngineToday /></ProtectedRoute>} />
           <Route path="/revenue-engine/lead/:prospectId" element={<ProtectedRoute><RevenueEngineLeadWorkspace /></ProtectedRoute>} />
           <Route path="/revenue-engine/settings" element={<ProtectedRoute><RevenueEngineSettings /></ProtectedRoute>} />
+          <Route path="/revenue-engine/whatsapp-outreach/:sessionId" element={<ProtectedRoute><WhatsAppOutreachSend /></ProtectedRoute>} />
           <Route path="/sales" element={<ProtectedRoute><SalesHub /></ProtectedRoute>} />
           <Route path="/marketing" element={<ProtectedRoute><MarketingHub /></ProtectedRoute>} />
           <Route path="/intel" element={<ProtectedRoute><IntelligenceHub /></ProtectedRoute>} />
