@@ -257,13 +257,16 @@ export default function RevenueEnginePipeline() {
     }
   }
 
-  async function startScan(industry, city) {
+  async function startScan(industry, city, excludePreviouslyDiscovered) {
     if (!industry) { toast.error('Select an industry first.'); return }
     setStarting(true)
     try {
       const res = await apiFetch(`${BACKEND}/revenue-engine/discover`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ goal_type: 'segment', industry, city: city || '' }),
+        body: JSON.stringify({
+          goal_type: 'segment', industry, city: city || '',
+          exclude_previously_discovered: !!excludePreviouslyDiscovered,
+        }),
       })
       const data = await res.json()
       if (data.success) {
@@ -278,13 +281,16 @@ export default function RevenueEnginePipeline() {
   }
 
   async function handleStartScan() {
+    // A fresh scan from the form must never come back empty just because
+    // this exact segment was scanned before — that de-dup is "Find More"'s
+    // job specifically, not every scan's.
     const resolvedIndustry = discIndustry === 'Other' ? discIndustryOther : discIndustry
-    await startScan(resolvedIndustry, discCity)
+    await startScan(resolvedIndustry, discCity, false)
   }
 
   async function handleFindMore() {
     setFindMoreLoading(true)
-    await startScan(batch.industry, batch.city)
+    await startScan(batch.industry, batch.city, true)
     setFindMoreLoading(false)
   }
 
@@ -474,11 +480,33 @@ export default function RevenueEnginePipeline() {
         <MetricCard label="Qualified" value={batch.total_qualified || 0} />
       </div>
 
-      {batch.status === 'succeeded' && prospects.length === 0 && (
-        <Card>
-          <EmptyState icon={Inbox} headline="No prospects found for this search" description="Try a broader industry or a different city." />
-        </Card>
-      )}
+      {batch.status === 'succeeded' && prospects.length === 0 && (() => {
+        // Distinguish WHY nothing is showing rather than one generic
+        // message for every cause — "no results", "found some but all
+        // already discovered" (Find More), and "found some but all
+        // filtered as chains/duplicates" are different situations needing
+        // different next steps, not the same dead end.
+        const rawFound = batch.raw_found_count || 0
+        const alreadyDiscovered = batch.already_discovered_count || 0
+        const enterpriseFiltered = batch.enterprise_filtered_count || 0
+        let headline = 'No prospects found for this search'
+        let description = 'Try a broader industry or a different city.'
+        if (rawFound === 0) {
+          headline = 'Google Places found nothing for this search'
+          description = `No ${batch.industry || 'matching'} businesses turned up on Google Maps for ${batch.city || 'this area'} — try a broader industry or a different city.`
+        } else if (alreadyDiscovered >= rawFound && alreadyDiscovered > 0) {
+          headline = 'Nothing new — already discovered'
+          description = `Google found ${rawFound} business${rawFound === 1 ? '' : 'es'} for this search, but all ${alreadyDiscovered} were already discovered in an earlier scan for this exact segment. Try a different city, or check the earlier scan from Past Scans.`
+        } else if (enterpriseFiltered >= rawFound && enterpriseFiltered > 0) {
+          headline = 'All results were filtered as chains or duplicates'
+          description = `Google found ${rawFound} business${rawFound === 1 ? '' : 'es'}, but all ${enterpriseFiltered} were filtered out as known chains or duplicate-name locations. Adjust the chain filter in Settings if that's not right for this search.`
+        }
+        return (
+          <Card>
+            <EmptyState icon={Inbox} headline={headline} description={description} />
+          </Card>
+        )
+      })()}
 
       {prospects.length > 0 && (
         <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
