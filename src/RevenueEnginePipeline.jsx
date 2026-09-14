@@ -2,12 +2,12 @@ import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import {
   Clock, PhoneCall, Users, ChevronRight, Inbox, Radar, FileText, FileSpreadsheet,
-  MessageCircle, History, Search, Copy, Check, Flame, Thermometer, Snowflake,
+  MessageCircle, History, Search, Copy, Check, Flame, Thermometer, Snowflake, AlertTriangle,
 } from 'lucide-react'
 import { BACKEND, apiFetch } from './lib/api'
 import {
   TEXT_PRIMARY, TEXT_SECONDARY, TEXT_TERTIARY, ACCENT, BG_INSET, DANGER, DANGER_MUTED,
-  WARNING, SUCCESS_MUTED, GREEN, INFO, INFO_MUTED, SLATE_M, errBox, scoreColor, radius, inp, lbl,
+  WARNING, WARNING_MUTED, SUCCESS_MUTED, GREEN, INFO, INFO_MUTED, SLATE_M, errBox, scoreColor, radius, inp, lbl,
 } from './ds'
 import PageShell from './PageShell'
 import PageHeader from './PageHeader'
@@ -479,6 +479,63 @@ export default function RevenueEnginePipeline() {
         <MetricCard label="Call-First" value={callFirst} />
         <MetricCard label="Qualified" value={batch.total_qualified || 0} />
       </div>
+
+      {/* Permanent scan-funnel diagnostic — always shown for a completed
+          scan, not just when the result looks empty. A batch can find 38
+          businesses and still only ever process 15 of them (the plain Quick
+          Scan form's hardcoded max_prospects=15, with no UI control to
+          raise it) while "Scanned" keeps showing 38 — that used to render
+          as a confusing near-empty result with no indication 23 were never
+          even looked at. Every funnel stage is shown for transparency;
+          the found -> enriched gap gets the loud warning treatment
+          specifically, since it's the one genuinely avoidable, silent loss
+          (the later stages legitimately shrink in normal operation — not
+          every business has a website to fetch or a real weakness to find). */}
+      {batch.status === 'succeeded' && (() => {
+        const rawFound = batch.raw_found_count || 0
+        const enrichedN = batch.enriched_count || 0
+        const homepageAttempted = batch.homepage_attempted_count || 0
+        const homepageOk = batch.homepage_ok_count || 0
+        const weaknessesDetected = batch.weaknesses_detected_count || 0
+        const scoredN = batch.scored_count || 0
+        const bucketedN = hotP.length + warmP.length + coldP.length
+        const cappedGap = rawFound - enrichedN
+        const isCapped = cappedGap > 0
+
+        const stages = [
+          { label: 'Found', value: rawFound },
+          { label: 'Enriched', value: enrichedN },
+          { label: 'Homepage Fetched', value: homepageOk, sub: homepageAttempted ? `of ${homepageAttempted} attempted` : null },
+          { label: 'Weaknesses Detected', value: weaknessesDetected },
+          { label: 'Scored', value: scoredN },
+          { label: 'Bucketed', value: bucketedN },
+        ]
+
+        return (
+          <Card style={{ padding: '14px 18px', marginBottom: '18px' }}>
+            {isCapped && (
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', background: WARNING_MUTED, border: '1px solid rgba(251,191,36,0.32)', borderRadius: radius.md, padding: '10px 12px', marginBottom: '12px' }}>
+                <AlertTriangle size={16} color={WARNING} style={{ flexShrink: 0, marginTop: '1px' }} />
+                <p style={{ margin: 0, fontSize: '12.5px', color: WARNING, lineHeight: 1.5 }}>
+                  <b>{cappedGap} of {rawFound} businesses found were never processed</b> — this scan's size limit is {batch.max_prospects || 15}, so only the first {enrichedN} were enriched, weakness-detected, or scored. Run Find More to pick up more of the businesses Google found, or raise the scan size from the Goal page.
+                </p>
+              </div>
+            )}
+            <p style={{ margin: '0 0 10px', fontSize: '11px', fontWeight: 700, color: TEXT_TERTIARY, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Scan Funnel</p>
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
+              {stages.map((s, i) => (
+                <span key={s.label} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', padding: '6px 10px', borderRadius: radius.sm, background: BG_INSET }}>
+                    <span className="tabular-nums" style={{ fontSize: '14px', fontWeight: 700, color: TEXT_PRIMARY }}>{s.value}</span>
+                    <span style={{ fontSize: '10px', color: TEXT_TERTIARY, whiteSpace: 'nowrap' }}>{s.label}{s.sub ? ` (${s.sub})` : ''}</span>
+                  </span>
+                  {i < stages.length - 1 && <ChevronRight size={13} color={TEXT_TERTIARY} style={{ flexShrink: 0 }} />}
+                </span>
+              ))}
+            </div>
+          </Card>
+        )
+      })()}
 
       {batch.status === 'succeeded' && prospects.length === 0 && (() => {
         // Distinguish WHY nothing is showing rather than one generic
