@@ -498,9 +498,11 @@ export default function RevenueEnginePipeline() {
         const homepageOk = batch.homepage_ok_count || 0
         const weaknessesDetected = batch.weaknesses_detected_count || 0
         const scoredN = batch.scored_count || 0
+        const phonePopulated = batch.phone_populated_count || 0
         const bucketedN = hotP.length + warmP.length + coldP.length
         const cappedGap = rawFound - enrichedN
         const isCapped = cappedGap > 0
+        const pct = (n) => enrichedN ? Math.round((n / enrichedN) * 100) : 0
 
         const stages = [
           { label: 'Found', value: rawFound },
@@ -533,6 +535,13 @@ export default function RevenueEnginePipeline() {
                 </span>
               ))}
             </div>
+            {enrichedN > 0 && (
+              <p style={{ margin: '10px 0 0', fontSize: '11px', color: TEXT_TERTIARY }}>
+                Of {enrichedN} processed: <b style={{ color: TEXT_SECONDARY }}>{pct(homepageOk)}%</b> homepage fetched ·{' '}
+                <b style={{ color: TEXT_SECONDARY }}>{pct(phonePopulated)}%</b> had a phone number ·{' '}
+                <b style={{ color: TEXT_SECONDARY }}>{pct(weaknessesDetected)}%</b> had a detected weakness
+              </p>
+            )}
           </Card>
         )
       })()}
