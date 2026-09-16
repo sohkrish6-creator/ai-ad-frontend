@@ -60,6 +60,10 @@ const WEAKNESS_LABELS = {
   weak_seo_meta: 'Weak SEO Meta', weak_seo_title: 'Weak SEO Title', no_cta: 'No Clear CTA',
   site_unreachable: 'Site Unreachable',
   no_social_links_on_website: 'No Social Links On Site', weak_social_presence: 'Weak Social Presence',
+  // Google Business Profile signals — real for every business regardless
+  // of whether it has a website (see _detect_voice_weaknesses).
+  below_peer_rating: 'Below Local Avg Rating', below_peer_review_count: 'Below Local Avg Reviews',
+  few_photos: 'Few Photos', missing_hours: 'No Hours Listed', missing_description: 'No Description',
 }
 
 const WHATSAPP_INELIGIBLE_REASON_LABELS = {
@@ -150,6 +154,10 @@ export default function RevenueEnginePipeline() {
   // found, only the first 15 ever enriched/scored, the rest silently
   // dropped with just a banner explaining why after the fact.
   const [discMaxProspects, setDiscMaxProspects] = useState(15)
+  // Post-audit fix: the 7-day scan cache is a real win normally, but there
+  // was no way to bypass it for one run — real case (Healthcare & Clinics /
+  // Jaipur): 6 of 15 enriched businesses were silently served from cache.
+  const [discForceFresh, setDiscForceFresh] = useState(false)
   const [starting, setStarting] = useState(false)
   const [findMoreLoading, setFindMoreLoading] = useState(false)
 
@@ -262,7 +270,7 @@ export default function RevenueEnginePipeline() {
     }
   }
 
-  async function startScan(industry, city, excludePreviouslyDiscovered, maxProspects) {
+  async function startScan(industry, city, excludePreviouslyDiscovered, maxProspects, forceFresh) {
     if (!industry) { toast.error('Select an industry first.'); return }
     setStarting(true)
     try {
@@ -272,6 +280,7 @@ export default function RevenueEnginePipeline() {
           goal_type: 'segment', industry, city: city || '',
           exclude_previously_discovered: !!excludePreviouslyDiscovered,
           max_prospects: maxProspects || 15,
+          force_fresh: !!forceFresh,
         }),
       })
       const data = await res.json()
@@ -291,12 +300,12 @@ export default function RevenueEnginePipeline() {
     // this exact segment was scanned before — that de-dup is "Find More"'s
     // job specifically, not every scan's.
     const resolvedIndustry = discIndustry === 'Other' ? discIndustryOther : discIndustry
-    await startScan(resolvedIndustry, discCity, false, discMaxProspects)
+    await startScan(resolvedIndustry, discCity, false, discMaxProspects, discForceFresh)
   }
 
   async function handleFindMore() {
     setFindMoreLoading(true)
-    await startScan(batch.industry, batch.city, true, batch?.max_prospects || 15)
+    await startScan(batch.industry, batch.city, true, batch?.max_prospects || 15, false)
     setFindMoreLoading(false)
   }
 
@@ -338,6 +347,10 @@ export default function RevenueEnginePipeline() {
               Google often finds more than this — raise it to process more of what "Scanned" reports instead of only the first 15.
             </p>
           </div>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', cursor: 'pointer' }}>
+            <input type="checkbox" checked={discForceFresh} onChange={e => setDiscForceFresh(e.target.checked)} style={{ width: '15px', height: '15px', cursor: 'pointer' }} />
+            <span style={{ fontSize: '12.5px', color: TEXT_SECONDARY }}>Force fresh scan (ignore the 7-day cache, re-check every business)</span>
+          </label>
           <Button variant="primary" icon={Search} loading={starting} onClick={handleStartScan} style={{ width: '100%' }}>
             {starting ? 'Starting Quick Scan...' : 'Start Quick Scan'}
           </Button>
