@@ -145,6 +145,11 @@ export default function RevenueEnginePipeline() {
   const [discIndustry, setDiscIndustry] = useState('')
   const [discIndustryOther, setDiscIndustryOther] = useState('')
   const [discCity, setDiscCity] = useState(getLastCity)
+  // Post-audit fix: the default backend scan size is 15 with no way to
+  // raise it from this form — real case (Wedding & Events / Jaipur): 38
+  // found, only the first 15 ever enriched/scored, the rest silently
+  // dropped with just a banner explaining why after the fact.
+  const [discMaxProspects, setDiscMaxProspects] = useState(15)
   const [starting, setStarting] = useState(false)
   const [findMoreLoading, setFindMoreLoading] = useState(false)
 
@@ -257,7 +262,7 @@ export default function RevenueEnginePipeline() {
     }
   }
 
-  async function startScan(industry, city, excludePreviouslyDiscovered) {
+  async function startScan(industry, city, excludePreviouslyDiscovered, maxProspects) {
     if (!industry) { toast.error('Select an industry first.'); return }
     setStarting(true)
     try {
@@ -266,6 +271,7 @@ export default function RevenueEnginePipeline() {
         body: JSON.stringify({
           goal_type: 'segment', industry, city: city || '',
           exclude_previously_discovered: !!excludePreviouslyDiscovered,
+          max_prospects: maxProspects || 15,
         }),
       })
       const data = await res.json()
@@ -285,12 +291,12 @@ export default function RevenueEnginePipeline() {
     // this exact segment was scanned before — that de-dup is "Find More"'s
     // job specifically, not every scan's.
     const resolvedIndustry = discIndustry === 'Other' ? discIndustryOther : discIndustry
-    await startScan(resolvedIndustry, discCity, false)
+    await startScan(resolvedIndustry, discCity, false, discMaxProspects)
   }
 
   async function handleFindMore() {
     setFindMoreLoading(true)
-    await startScan(batch.industry, batch.city, true)
+    await startScan(batch.industry, batch.city, true, batch?.max_prospects || 15)
     setFindMoreLoading(false)
   }
 
@@ -318,6 +324,19 @@ export default function RevenueEnginePipeline() {
           <div style={{ marginBottom: '16px' }}>
             <label style={lbl}>City</label>
             <CityInput value={discCity} onChange={setDiscCity} style={inp} placeholder="e.g. Jaipur" />
+          </div>
+          <div style={{ marginBottom: '16px' }}>
+            <label style={lbl}>Prospects to scan</label>
+            <select
+              value={discMaxProspects}
+              onChange={e => setDiscMaxProspects(Number(e.target.value))}
+              style={{ ...inp, color: TEXT_PRIMARY }}
+            >
+              {[15, 25, 40, 50].map(n => <option key={n} value={n}>{n}</option>)}
+            </select>
+            <p style={{ margin: '6px 0 0', fontSize: '11px', color: TEXT_TERTIARY }}>
+              Google often finds more than this — raise it to process more of what "Scanned" reports instead of only the first 15.
+            </p>
           </div>
           <Button variant="primary" icon={Search} loading={starting} onClick={handleStartScan} style={{ width: '100%' }}>
             {starting ? 'Starting Quick Scan...' : 'Start Quick Scan'}
@@ -499,6 +518,15 @@ export default function RevenueEnginePipeline() {
         const weaknessesDetected = batch.weaknesses_detected_count || 0
         const scoredN = batch.scored_count || 0
         const phonePopulated = batch.phone_populated_count || 0
+        const cacheSkipped = batch.cache_skipped_count || 0
+        // Post-audit fix: homepage_ok_count/homepage_attempted_count alone
+        // can't tell "already scanned recently, cache reused, no fresh
+        // fetch attempted" apart from "attempted but none had a website" —
+        // both used to render as an unexplained flat 0. freshlyScanned is
+        // enriched businesses NOT served from cache; noWebsiteAmongFresh is
+        // how many of those had nothing to fetch at all.
+        const freshlyScanned = Math.max(0, enrichedN - cacheSkipped)
+        const noWebsiteAmongFresh = Math.max(0, freshlyScanned - homepageAttempted)
         const bucketedN = hotP.length + warmP.length + coldP.length
         const cappedGap = rawFound - enrichedN
         const isCapped = cappedGap > 0
@@ -540,6 +568,12 @@ export default function RevenueEnginePipeline() {
                 Of {enrichedN} processed: <b style={{ color: TEXT_SECONDARY }}>{pct(homepageOk)}%</b> homepage fetched ·{' '}
                 <b style={{ color: TEXT_SECONDARY }}>{pct(phonePopulated)}%</b> had a phone number ·{' '}
                 <b style={{ color: TEXT_SECONDARY }}>{pct(weaknessesDetected)}%</b> had a detected weakness
+              </p>
+            )}
+            {(cacheSkipped > 0 || noWebsiteAmongFresh > 0) && (
+              <p style={{ margin: '6px 0 0', fontSize: '11px', color: TEXT_TERTIARY }}>
+                {cacheSkipped > 0 && <>{cacheSkipped} of {enrichedN} were already scanned in the last 7 days, so no fresh homepage fetch ran for them (results reused). </>}
+                {noWebsiteAmongFresh > 0 && <>{noWebsiteAmongFresh} of the {freshlyScanned} freshly-scanned had no website listed on Google to fetch at all.</>}
               </p>
             )}
           </Card>
