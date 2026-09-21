@@ -138,7 +138,13 @@ export default function RevenueEnginePipeline() {
   const [selected, setSelected] = useState(() => new Set())
   const [generating, setGenerating] = useState(false)
   const [genProgress, setGenProgress] = useState({ done: 0, total: 0 })
+  // Post-audit fix: a toast alone is transient and can be missed — a
+  // persistent inline message next to the button makes a failure visible
+  // even if the user looked away mid-generation, matching "never an
+  // infinite spinner, always a readable error."
+  const [genError, setGenError] = useState('')
   const [activeSessionId, setActiveSessionId] = useState(null)
+  const [discardingSession, setDiscardingSession] = useState(false)
   const [activeClassTab, setActiveClassTab] = useState('hot')
   const toast = useToast()
 
@@ -226,38 +232,76 @@ export default function RevenueEnginePipeline() {
     setSelected(new Set(tabbedProspects.filter(p => p.whatsapp_eligible).map(p => p.id)))
   }
 
+  // Post-audit fix: real reported case — bulk "Generate WhatsApp Drafts"
+  // stuck at "Generating 0/1..." indefinitely on production. Traced to
+  // apiFetch having no timeout at all: when the per-prospect draft request
+  // never resolved (a hung GPT call, a slow backend, a dropped connection),
+  // the awaited promise inside runWithConcurrency's worker never settled,
+  // so `generating` never flipped back to false and the spinner ran
+  // forever with no error surfaced. GEN_TIMEOUT_MS is generous (the backend
+  // itself now bounds its own GPT call at 45s with one retry — see
+  // _call_gpt_json_with_retry's timeout param — so ~90s covers a full
+  // backend-side retry cycle finishing and returning a real error) but
+  // finite, so a hang now always resolves into a visible, specific error
+  // instead of an indefinite spinner.
+  const GEN_TIMEOUT_MS = 90000
+
   async function handleGenerateAndSend() {
     const ids = Array.from(selected)
     if (ids.length === 0) return
     setGenerating(true)
+    setGenError('')
     setGenProgress({ done: 0, total: ids.length })
     const succeeded = []
-    await runWithConcurrency(ids, 3, async (id) => {
-      try {
-        const res = await apiFetch(`${BACKEND}/revenue-engine/prospects/${id}/outreach-drafts`, { method: 'POST' })
-        const data = await res.json()
-        if (data.success) succeeded.push(id)
-      } catch { /* counted as a failure below — not added to succeeded */ }
-      setGenProgress(p => ({ ...p, done: p.done + 1 }))
-    })
-    setGenerating(false)
+    const failures = []
+    try {
+      await runWithConcurrency(ids, 3, async (id) => {
+        try {
+          const res = await apiFetch(`${BACKEND}/revenue-engine/prospects/${id}/outreach-drafts`, {
+            method: 'POST', timeoutMs: GEN_TIMEOUT_MS,
+          })
+          if (!res.ok) {
+            failures.push({ id, reason: `HTTP ${res.status}` })
+          } else {
+            const data = await res.json()
+            if (data.success) succeeded.push(id)
+            else failures.push({ id, reason: data.detail || data.message || 'generation failed' })
+          }
+        } catch (err) {
+          failures.push({ id, reason: err?.message || 'network error' })
+        }
+        setGenProgress(p => ({ ...p, done: p.done + 1 }))
+      })
+    } finally {
+      // Guaranteed regardless of what happened above — the spinner must
+      // never be able to outlive this function.
+      setGenerating(false)
+    }
 
     if (succeeded.length === 0) {
-      toast.error('Draft generation failed for every selected prospect.')
+      const sample = failures[0]?.reason ? ` (${failures[0].reason})` : ''
+      const msg = `Draft generation failed for every selected prospect${sample}.`
+      setGenError(msg)
+      toast.error(msg)
       return
     }
     if (succeeded.length < ids.length) {
-      toast.error(`${ids.length - succeeded.length} draft(s) failed to generate — continuing with the ${succeeded.length} that succeeded.`)
+      const msg = `${ids.length - succeeded.length} draft(s) failed to generate — continuing with the ${succeeded.length} that succeeded.`
+      setGenError(msg)
+      toast.error(msg)
     }
 
     try {
       const res = await apiFetch(`${BACKEND}/revenue-engine/whatsapp-outreach/sessions`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prospect_ids: succeeded, batch_id: batchId || '' }),
+        timeoutMs: GEN_TIMEOUT_MS,
       })
       const data = await res.json()
       if (!data.success) {
-        toast.error(data.detail || 'Could not start the WhatsApp send queue.')
+        const msg = data.detail || 'Could not start the WhatsApp send queue.'
+        setGenError(msg)
+        toast.error(msg)
         return
       }
       if (data.dropped?.length) {
@@ -265,9 +309,31 @@ export default function RevenueEnginePipeline() {
       }
       setSelected(new Set())
       navigate(`/revenue-engine/whatsapp-outreach/${data.session_id}`)
-    } catch {
-      toast.error('Backend se connect nahi ho paya.')
+    } catch (err) {
+      const msg = err?.message || 'Backend se connect nahi ho paya.'
+      setGenError(msg)
+      toast.error(msg)
     }
+  }
+
+  async function handleDiscardSession() {
+    if (!activeSessionId) return
+    setDiscardingSession(true)
+    try {
+      const res = await apiFetch(`${BACKEND}/revenue-engine/whatsapp-outreach/sessions/${activeSessionId}/discard`, {
+        method: 'POST', timeoutMs: 20000,
+      })
+      const data = await res.json()
+      if (data.success) {
+        setActiveSessionId(null)
+        toast.success('Discarded — that send queue will no longer show as in-progress.')
+      } else {
+        toast.error(data.detail || 'Could not discard this session.')
+      }
+    } catch (err) {
+      toast.error(err?.message || 'Backend se connect nahi ho paya.')
+    }
+    setDiscardingSession(false)
   }
 
   async function startScan(industry, city, excludePreviouslyDiscovered, maxProspects, forceFresh) {
@@ -487,9 +553,14 @@ export default function RevenueEnginePipeline() {
             <History size={16} color={WARNING} />
             <p style={{ margin: 0, fontSize: '13px', color: TEXT_PRIMARY }}>You have a WhatsApp send queue in progress.</p>
           </div>
-          <Button variant="primary" size="sm" onClick={() => navigate(`/revenue-engine/whatsapp-outreach/${activeSessionId}`)}>
-            Resume
-          </Button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Button variant="secondary" size="sm" loading={discardingSession} onClick={handleDiscardSession}>
+              Discard
+            </Button>
+            <Button variant="primary" size="sm" onClick={() => navigate(`/revenue-engine/whatsapp-outreach/${activeSessionId}`)}>
+              Resume
+            </Button>
+          </div>
         </Card>
       )}
 
@@ -663,6 +734,10 @@ export default function RevenueEnginePipeline() {
             {generating ? `Generating ${genProgress.done}/${genProgress.total}...` : `Generate WhatsApp Drafts (${selected.size})`}
           </Button>
         </Card>
+      )}
+
+      {genError && (
+        <div style={{ ...errBox, marginBottom: '10px' }}>{genError}</div>
       )}
 
       {prospects.length > 0 && tabbedProspects.length === 0 && (
