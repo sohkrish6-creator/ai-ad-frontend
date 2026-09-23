@@ -1,8 +1,9 @@
 import { BACKEND, apiFetch } from './lib/api'
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import {
   Wand2, Copy, Check, ChevronDown, ChevronUp, Sparkles, Layers, Type, LayoutGrid,
-  CalendarDays, MapPin, Trophy, Database, Info, RefreshCw, Hash, Lightbulb,
+  CalendarDays, MapPin, Trophy, Database, Info, RefreshCw, Hash, Lightbulb, Film, ChevronRight,
 } from 'lucide-react'
 import { useToast } from './ToastContext'
 import { useLoadingSteps } from './useLoadingSteps'
@@ -245,6 +246,16 @@ export default function CreativeStudio() {
   return (
     <PageShell maxWidth="900px">
       <PageHeader title="Creative Studio" sub="Complete creative strategy + production-ready image prompts, built from your real business & campaign intelligence." />
+      <Link
+        to="/creative-studio/reel-editor"
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', background: GOLD_DIM, border: `1px solid ${GOLD_BDR}`, borderRadius: '8px', padding: '11px 14px', marginBottom: '14px', textDecoration: 'none' }}
+      >
+        <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Film size={15} color={GOLD} />
+          <span style={{ fontSize: '13px', fontWeight: '600', color: BONE }}>New: AI Reel Auto-Editor — upload a raw video, get a captioned vertical Reel back</span>
+        </span>
+        <ChevronRight size={15} color={GOLD} />
+      </Link>
       <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '7px', padding: '9px 13px', marginBottom: '24px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
         <Info size={14} color="#1E40AF" style={{ flexShrink: 0, marginTop: '1px' }} />
         <p style={{ margin: 0, fontSize: '12px', color: '#1E40AF', lineHeight: 1.5 }}>

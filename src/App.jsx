@@ -36,6 +36,7 @@ import SmartAnalysis from './SmartAnalysis'
 import SocialIntelligence from './SocialIntelligence'
 import History from './History'
 import CreativeStudio from './CreativeStudio'
+import ReelAutoEditor from './ReelAutoEditor'
 import CommandCenter from './CommandCenter'
 import MarketingIntelligence from './MarketingIntelligence'
 import CreatorFinder from './CreatorFinder'
@@ -207,6 +208,7 @@ function Layout() {
           <Route path="/social-intelligence" element={<ProtectedRoute><SocialIntelligence /></ProtectedRoute>} />
           <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
           <Route path="/creative-studio" element={<ProtectedRoute><CreativeStudio /></ProtectedRoute>} />
+          <Route path="/creative-studio/reel-editor" element={<ProtectedRoute><ReelAutoEditor /></ProtectedRoute>} />
           <Route path="/command-center" element={<ProtectedRoute><CommandCenter /></ProtectedRoute>} />
           <Route path="/creator-finder" element={<ProtectedRoute><CreatorFinder /></ProtectedRoute>} />
           <Route path="/instagram-coach" element={<ProtectedRoute><InstagramCoach /></ProtectedRoute>} />

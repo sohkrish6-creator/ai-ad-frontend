@@ -1,5 +1,5 @@
 import {
-  Link2, Share2, Antenna, Image as ImageIcon, Wand2, Palette, Send, Gift, MessageSquare, Target,
+  Link2, Share2, Antenna, Image as ImageIcon, Wand2, Palette, Send, Gift, MessageSquare, Target, Film,
 } from 'lucide-react'
 import HubPage from './HubPage'
 
@@ -30,6 +30,7 @@ export default function MarketingHub() {
           label: 'Creative',
           links: [
             { label: 'Creative Studio', path: '/creative-studio', desc: 'AI ad creative generation.', Icon: Wand2 },
+            { label: 'AI Reel Auto-Editor', path: '/creative-studio/reel-editor', desc: 'Raw video in, captioned vertical Reel out.', Icon: Film },
             { label: 'Ad Creative', path: '/ad-creative', desc: 'Legacy creative tool.', Icon: Palette },
           ],
         },
