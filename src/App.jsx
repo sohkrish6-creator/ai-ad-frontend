@@ -30,6 +30,7 @@ import CricketAds from './CricketAds'
 import GoogleAdsConnect from './GoogleAdsConnect'
 import GoogleAdsDashboard from './GoogleAdsDashboard'
 import OrganicIntelligence from './OrganicIntelligence'
+import KeywordIntelligence from './KeywordIntelligence'
 import AccountAudit from './AccountAudit'
 import MetaAdsTest from './MetaAdsTest'
 import SmartAnalysis from './SmartAnalysis'
@@ -202,6 +203,7 @@ function Layout() {
           <Route path="/google-ads" element={<ProtectedRoute><GoogleAdsConnect /></ProtectedRoute>} />
           <Route path="/google-ads/dashboard" element={<ProtectedRoute><GoogleAdsDashboard /></ProtectedRoute>} />
           <Route path="/organic-intelligence" element={<ProtectedRoute><OrganicIntelligence /></ProtectedRoute>} />
+          <Route path="/keyword-intelligence" element={<ProtectedRoute><KeywordIntelligence /></ProtectedRoute>} />
           <Route path="/account-audit" element={<ProtectedRoute><AccountAudit /></ProtectedRoute>} />
           <Route path="/meta-test" element={<ProtectedRoute><MetaAdsTest /></ProtectedRoute>} />
           <Route path="/smart-analysis" element={<ProtectedRoute><SmartAnalysis /></ProtectedRoute>} />

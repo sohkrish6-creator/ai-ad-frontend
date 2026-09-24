@@ -1,6 +1,6 @@
 import {
   Monitor, Eye, BarChart2, Globe, Dna, Brain, Search, Radio, PlaySquare,
-  TrendingUp, Compass, Radar, BookOpen, Sparkles,
+  TrendingUp, Compass, Radar, BookOpen, Sparkles, KeyRound,
 } from 'lucide-react'
 import HubPage from './HubPage'
 
@@ -27,6 +27,7 @@ export default function IntelligenceHub() {
             { label: 'Marketing Brain', path: '/brain', desc: 'Full report: business, market, competitor, offer.', Icon: Brain },
             { label: 'Smart Analysis', path: '/smart-analysis', desc: '7-module parallel deep-dive.', Icon: Sparkles },
             { label: 'Marketing Intelligence', path: '/marketing-intelligence', desc: 'Cross-channel marketing insight.', Icon: BookOpen },
+            { label: 'Keyword Intelligence', path: '/keyword-intelligence', desc: 'Real search volume, seasonality, and what to bid on.', Icon: KeyRound },
           ],
         },
         {

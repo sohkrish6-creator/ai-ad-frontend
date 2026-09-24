@@ -55,6 +55,7 @@ export const COMMAND_PALETTE_PAGES = [
   { label: 'Opportunity Engine',     path: '/opportunity' },
   { label: 'YouTube Intel',          path: '/youtube' },
   { label: 'Organic Intelligence',   path: '/organic-intelligence' },
+  { label: 'Keyword Intelligence',   path: '/keyword-intelligence' },
   { label: 'Social Intelligence',    path: '/social-intelligence' },
   // Analytics
   { label: 'Performance Intelligence', path: '/performance' },

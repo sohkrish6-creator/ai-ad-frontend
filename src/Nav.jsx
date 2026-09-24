@@ -28,7 +28,7 @@ export const links = [
   { path: '/dashboard', label: 'Home',         Icon: LayoutDashboard, match: ['/dashboard'] },
   { path: '/sales',     label: 'Sales',        Icon: Rocket,          match: ['/sales', '/revenue-engine', '/voice-outreach', '/prospects', '/leads', '/outreach'] },
   { path: '/marketing', label: 'Marketing',    Icon: Wand2,           match: ['/marketing', '/google-ads/dashboard', '/cricket-ads', '/audience', '/offer', '/command-center', '/instagram-coach', '/creative-studio', '/creative-director', '/ad-creative', '/ad-to-creative', '/creator-finder'] },
-  { path: '/intel',     label: 'Intelligence', Icon: Dna,             match: ['/intel', '/website-audit', '/account-audit', '/visibility', '/analyze', '/intelligence', '/brain', '/smart-analysis', '/marketing-intelligence', '/competitor', '/ad-intel', '/opportunity', '/youtube', '/organic-intelligence', '/social-intelligence'] },
+  { path: '/intel',     label: 'Intelligence', Icon: Dna,             match: ['/intel', '/website-audit', '/account-audit', '/visibility', '/analyze', '/intelligence', '/brain', '/smart-analysis', '/marketing-intelligence', '/competitor', '/ad-intel', '/opportunity', '/youtube', '/organic-intelligence', '/social-intelligence', '/keyword-intelligence'] },
   { path: '/analytics', label: 'Analytics',    Icon: BarChart2,       match: ['/analytics', '/performance', '/kpi-engine', '/ai-optimizer', '/result-center', '/history'] },
 ]
 
