@@ -1,5 +1,5 @@
 import { BACKEND, apiFetch } from './lib/api'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, Fragment } from 'react'
 import {
   Users, Bot, CheckCircle, MessageCircle,
   TrendingUp, Activity, Eye, MousePointerClick, IndianRupee, Percent, Zap, RefreshCw,
@@ -57,9 +57,16 @@ function AnimatedNumber({ value, gold, size }) {
 }
 
 // ── Animated decimal number (mono font) ───────────────────────────────────
-function AnimatedDecimal({ value, prefix = '', suffix = '', decimals = 2, size = '28px', gold = false }) {
+// Post-audit fix: Conversions showed "0.0" (and any whole count, e.g. "3.0")
+// because toFixed(decimals) applied unconditionally — Conversions can be a
+// genuine fraction (cross-device attribution) so the decimal formatter is
+// still correct in general, it just needs a whole-number case. Opt-in via
+// dropDecimalIfWhole so Cost/CTR/Avg CPC (which read naturally with a fixed
+// decimal count even at a whole value, e.g. "₹5.00") are unaffected.
+function AnimatedDecimal({ value, prefix = '', suffix = '', decimals = 2, size = '28px', gold = false, dropDecimalIfWhole = false }) {
   const int = useCountUp(Math.round(value * 100), 900, true)
-  const display = (int / 100).toFixed(decimals)
+  const rounded = int / 100
+  const display = (dropDecimalIfWhole && Number.isInteger(rounded)) ? String(rounded) : rounded.toFixed(decimals)
   return (
     <p style={{
       fontSize: size, fontWeight: '600', margin: '0 0 5px 0',
@@ -104,6 +111,67 @@ function BarChart({ sources, maxSource, visible }) {
   ))
 }
 
+// ── "Why isn't this campaign delivering?" panel ────────────────────────────
+// Real reported case: a live Search campaign running 3 days at 78
+// impressions/5 clicks/₹4.39 spend/0 conversions, and the dashboard could
+// show the numbers but never say why. Renders GET /google-ads/campaign-
+// diagnostics/{id}'s structured issues (severity + plain-English fix,
+// grounded in Google's own campaign.primary_status_reasons and impression-
+// share-lost metrics) — never a guess generated in this component.
+const SEVERITY_META = {
+  high:   { color: RED,   label: 'High' },
+  medium: { color: GOLD,  label: 'Medium' },
+  low:    { color: MUTED, label: 'Low' },
+}
+
+function CampaignDiagnosticsPanel({ loading, error, data }) {
+  const boxStyle = {
+    background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '6px',
+    padding: '14px 16px', fontFamily: FONT_BODY,
+  }
+  if (loading) {
+    return <div style={boxStyle}><p style={{ margin: 0, fontSize: '12px', color: MUTED }}>Checking campaign status, bidding, keywords, ads, and conversion tracking...</p></div>
+  }
+  if (error) {
+    return <div style={boxStyle}><p style={{ margin: 0, fontSize: '12px', color: RED }}>{error}</p></div>
+  }
+  if (!data) return null
+
+  const { campaign, budget, bidding_strategy, metrics, issues } = data
+  return (
+    <div style={boxStyle}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginBottom: '12px', fontSize: '11px', color: MUTED, fontFamily: FONT_MONO }}>
+        <span>Status: <b style={{ color: BONE }}>{campaign.status}</b></span>
+        <span>Serving: <b style={{ color: BONE }}>{campaign.serving_status}</b></span>
+        <span>Primary: <b style={{ color: BONE }}>{campaign.primary_status}</b></span>
+        <span>Bidding: <b style={{ color: BONE }}>{bidding_strategy.type}</b></span>
+        {budget.amount_inr != null && <span>Daily budget: <b style={{ color: BONE }}>₹{budget.amount_inr}</b></span>}
+        {metrics.search_impression_share_pct != null && <span>Impr. share: <b style={{ color: BONE }}>{metrics.search_impression_share_pct}%</b></span>}
+        {metrics.search_rank_lost_impression_share_pct != null && <span>Lost to rank: <b style={{ color: BONE }}>{metrics.search_rank_lost_impression_share_pct}%</b></span>}
+        {metrics.search_budget_lost_impression_share_pct != null && <span>Lost to budget: <b style={{ color: BONE }}>{metrics.search_budget_lost_impression_share_pct}%</b></span>}
+      </div>
+
+      {issues.length === 0 ? (
+        <p style={{ margin: 0, fontSize: '12px', color: GREEN }}>No configuration issues found — status is eligible/serving with real keywords, ads, and conversion tracking in place.</p>
+      ) : (
+        issues.map((issue, i) => {
+          const meta = SEVERITY_META[issue.severity] || SEVERITY_META.medium
+          return (
+            <div key={i} style={{ padding: '9px 0', borderTop: i > 0 ? `1px solid ${SLATE_L}` : 'none' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
+                <span style={{ fontSize: '9px', fontWeight: '700', color: meta.color, border: `1px solid ${meta.color}`, borderRadius: '10px', padding: '1px 7px', textTransform: 'uppercase', letterSpacing: '0.03em' }}>{meta.label}</span>
+                <span style={{ fontSize: '12.5px', fontWeight: '600', color: BONE }}>{issue.title}</span>
+              </div>
+              <p style={{ margin: '0 0 3px', fontSize: '12px', color: MUTED, lineHeight: 1.45 }}>{issue.detail}</p>
+              <p style={{ margin: 0, fontSize: '12px', color: BONE }}><b style={{ color: GOLD }}>Fix: </b>{issue.fix}</p>
+            </div>
+          )
+        })
+      )}
+    </div>
+  )
+}
+
 // ── Main component ─────────────────────────────────────────────────────────
 function Dashboard() {
   
@@ -125,6 +193,14 @@ function Dashboard() {
   const [gAdsWaking, setGAdsWaking]   = useState(false)
   const [gAdsRefreshing, setGAdsRefreshing] = useState(false)
   const [gAdsTick, setGAdsTick]             = useState(0)
+  // "Why isn't this campaign delivering?" panel — real reported case: a
+  // live Search campaign running 3 days at 78 impressions/5 clicks/₹4.39
+  // spend with no way for the dashboard to say why. Keyed by campaign_id
+  // so multiple campaigns can be inspected independently without refetching.
+  const [openDiagnosticsId, setOpenDiagnosticsId] = useState(null)
+  const [diagnosticsById, setDiagnosticsById] = useState({})
+  const [diagnosticsLoadingId, setDiagnosticsLoadingId] = useState(null)
+  const [diagnosticsErrorById, setDiagnosticsErrorById] = useState({})
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768)
@@ -133,7 +209,7 @@ function Dashboard() {
   }, [])
 
   useEffect(() => {
-    const EMPTY = { total: 0, whatsapp: 0, website: 0, form: 0, new: 0, converted: 0 }
+    const EMPTY = { total: 0, whatsapp: 0, website: 0, form: 0, unknown: 0, new: 0, converted: 0 }
 
     async function fetchWithTimeout(url, ms = 12000) {
       const ctrl = new AbortController()
@@ -201,6 +277,26 @@ function Dashboard() {
     return () => ctrl.abort()
   }, [gAdsDays, gAdsTick])
 
+  async function toggleDiagnostics(campaignId) {
+    if (openDiagnosticsId === campaignId) { setOpenDiagnosticsId(null); return }
+    setOpenDiagnosticsId(campaignId)
+    if (diagnosticsById[campaignId]) return  // already fetched — expand only
+    setDiagnosticsLoadingId(campaignId)
+    setDiagnosticsErrorById(prev => ({ ...prev, [campaignId]: '' }))
+    try {
+      const res = await apiFetch(`${BACKEND}/google-ads/campaign-diagnostics/${campaignId}?days=${gAdsDays}`, { timeoutMs: 30000 })
+      const data = await res.json()
+      if (data.success) {
+        setDiagnosticsById(prev => ({ ...prev, [campaignId]: data }))
+      } else {
+        setDiagnosticsErrorById(prev => ({ ...prev, [campaignId]: data.error || data.detail || 'Could not diagnose this campaign.' }))
+      }
+    } catch (err) {
+      setDiagnosticsErrorById(prev => ({ ...prev, [campaignId]: err?.message || 'Backend se connect nahi ho paya.' }))
+    }
+    setDiagnosticsLoadingId(null)
+  }
+
   useEffect(() => {
     if (!loading) {
       requestAnimationFrame(() => {
@@ -219,10 +315,19 @@ function Dashboard() {
     { label: 'Via WhatsApp', value: stats.whatsapp,  sub: 'chat-sourced leads',        Icon: MessageCircle, gold: false },
   ] : []
 
+  // Post-audit fix: real reported case — Total Leads: 4, Lead Sources
+  // (WhatsApp/Website/Form) all 0. Leads created automatically by Voice
+  // Outreach/Revenue Engine carry a source string this chart's three fixed
+  // buckets never recognized — /leads/stats now reports them under
+  // `unknown` instead of silently dropping them, and showing that bucket
+  // here (only when it's non-zero, so the normal all-manual-leads case
+  // looks exactly as before) is what makes the total actually reconcile
+  // with what's on screen instead of three bars that don't add up to it.
   const sources = stats ? [
     { name: 'WhatsApp', count: stats.whatsapp },
     { name: 'Website',  count: stats.website  },
     { name: 'Form',     count: stats.form      },
+    ...(stats.unknown > 0 ? [{ name: 'Unknown', count: stats.unknown }] : []),
   ] : []
   const maxSource = Math.max(...sources.map(s => s.count), 1)
 
@@ -553,8 +658,8 @@ function Dashboard() {
                       { label: 'Cost (₹)',    val: gAds.cost_inr,     Icon: IndianRupee,        type: 'decimal', prefix: '₹'         },
                       { label: 'CTR',         val: gAds.ctr_pct,      Icon: Percent,            type: 'decimal', suffix: '%'         },
                       { label: 'Avg CPC (₹)', val: gAds.avg_cpc_inr, Icon: Zap,                type: 'decimal', prefix: '₹'         },
-                      { label: 'Conversions', val: gAds.conversions,  Icon: CheckCircle,        type: 'decimal', decimals: 1         },
-                    ].map(({ label, val, Icon, type, prefix, suffix, decimals }) => (
+                      { label: 'Conversions', val: gAds.conversions,  Icon: CheckCircle,        type: 'decimal', decimals: 1, dropDecimalIfWhole: true },
+                    ].map(({ label, val, Icon, type, prefix, suffix, decimals, dropDecimalIfWhole }) => (
                       <div key={label} style={{ background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '6px', padding: '14px 12px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                           <p style={{ fontSize: '10px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.06em', color: MUTED, margin: 0, fontFamily: FONT_BODY }}>{label}</p>
@@ -562,7 +667,7 @@ function Dashboard() {
                         </div>
                         {type === 'int'
                           ? <AnimatedNumber value={val} size="22px" />
-                          : <AnimatedDecimal value={val} prefix={prefix} suffix={suffix} decimals={decimals ?? 2} size="22px" />
+                          : <AnimatedDecimal value={val} prefix={prefix} suffix={suffix} decimals={decimals ?? 2} size="22px" dropDecimalIfWhole={dropDecimalIfWhole} />
                         }
                       </div>
                     ))}
@@ -628,29 +733,55 @@ function Dashboard() {
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', fontFamily: FONT_BODY }}>
                           <thead>
                             <tr style={{ borderBottom: `1px solid ${SLATE_L}` }}>
-                              {['Campaign', 'Status', 'Impr.', 'Clicks', 'Cost', 'CTR', 'CPC'].map(h => (
+                              {['Campaign', 'Status', 'Impr.', 'Clicks', 'Cost', 'CTR', 'CPC', ''].map(h => (
                                 <th key={h} style={{ textAlign: h === 'Campaign' ? 'left' : 'right', padding: '6px 8px', fontSize: '10px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: MUTED, whiteSpace: 'nowrap' }}>{h}</th>
                               ))}
                             </tr>
                           </thead>
                           <tbody>
                             {gAdsCampaigns.map((c, i) => (
-                              <tr key={c.campaign_id} className="campaign-row" style={{ borderBottom: i < gAdsCampaigns.length - 1 ? `1px solid ${SLATE_L}` : 'none' }}>
-                                <td style={{ padding: '8px 8px', color: BONE, fontWeight: '500', maxWidth: isMobile ? '100px' : '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</td>
-                                <td style={{ padding: '8px 8px', textAlign: 'right' }}>
-                                  <span style={{
-                                    padding: '2px 7px', borderRadius: '20px', fontSize: '10px', fontWeight: '600',
-                                    fontFamily: FONT_MONO,
-                                    background: c.status === 'ENABLED' ? 'rgba(63,166,107,0.12)' : `rgba(138,138,146,0.12)`,
-                                    color:      c.status === 'ENABLED' ? GREEN : MUTED,
-                                  }}>{c.status === 'ENABLED' ? 'Active' : 'Paused'}</span>
-                                </td>
-                                <td style={{ padding: '8px 8px', textAlign: 'right', color: MUTED, fontFamily: FONT_MONO }}>{c.impressions.toLocaleString()}</td>
-                                <td style={{ padding: '8px 8px', textAlign: 'right', color: MUTED, fontFamily: FONT_MONO }}>{c.clicks.toLocaleString()}</td>
-                                <td style={{ padding: '8px 8px', textAlign: 'right', color: BONE, fontWeight: '500', fontFamily: FONT_MONO }}>₹{c.cost_inr}</td>
-                                <td style={{ padding: '8px 8px', textAlign: 'right', color: MUTED, fontFamily: FONT_MONO }}>{c.ctr_pct}%</td>
-                                <td style={{ padding: '8px 8px', textAlign: 'right', color: MUTED, fontFamily: FONT_MONO }}>₹{c.avg_cpc_inr}</td>
-                              </tr>
+                              <Fragment key={c.campaign_id}>
+                                <tr className="campaign-row" style={{ borderBottom: openDiagnosticsId === c.campaign_id ? 'none' : (i < gAdsCampaigns.length - 1 ? `1px solid ${SLATE_L}` : 'none') }}>
+                                  <td style={{ padding: '8px 8px', color: BONE, fontWeight: '500', maxWidth: isMobile ? '100px' : '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</td>
+                                  <td style={{ padding: '8px 8px', textAlign: 'right' }}>
+                                    <span style={{
+                                      padding: '2px 7px', borderRadius: '20px', fontSize: '10px', fontWeight: '600',
+                                      fontFamily: FONT_MONO,
+                                      background: c.status === 'ENABLED' ? 'rgba(63,166,107,0.12)' : `rgba(138,138,146,0.12)`,
+                                      color:      c.status === 'ENABLED' ? GREEN : MUTED,
+                                    }}>{c.status === 'ENABLED' ? 'Active' : 'Paused'}</span>
+                                  </td>
+                                  <td style={{ padding: '8px 8px', textAlign: 'right', color: MUTED, fontFamily: FONT_MONO }}>{c.impressions.toLocaleString()}</td>
+                                  <td style={{ padding: '8px 8px', textAlign: 'right', color: MUTED, fontFamily: FONT_MONO }}>{c.clicks.toLocaleString()}</td>
+                                  <td style={{ padding: '8px 8px', textAlign: 'right', color: BONE, fontWeight: '500', fontFamily: FONT_MONO }}>₹{c.cost_inr}</td>
+                                  <td style={{ padding: '8px 8px', textAlign: 'right', color: MUTED, fontFamily: FONT_MONO }}>{c.ctr_pct}%</td>
+                                  <td style={{ padding: '8px 8px', textAlign: 'right', color: MUTED, fontFamily: FONT_MONO }}>₹{c.avg_cpc_inr}</td>
+                                  <td style={{ padding: '8px 8px', textAlign: 'right' }}>
+                                    <button
+                                      onClick={() => toggleDiagnostics(c.campaign_id)}
+                                      style={{
+                                        background: openDiagnosticsId === c.campaign_id ? GOLD : 'transparent',
+                                        color: openDiagnosticsId === c.campaign_id ? INK : GOLD,
+                                        border: `1px solid ${GOLD}`, borderRadius: '20px', padding: '3px 9px',
+                                        fontSize: '10px', fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: FONT_BODY,
+                                      }}
+                                    >
+                                      {openDiagnosticsId === c.campaign_id ? 'Hide' : 'Why?'}
+                                    </button>
+                                  </td>
+                                </tr>
+                                {openDiagnosticsId === c.campaign_id && (
+                                  <tr style={{ borderBottom: i < gAdsCampaigns.length - 1 ? `1px solid ${SLATE_L}` : 'none' }}>
+                                    <td colSpan={8} style={{ padding: '0 8px 14px' }}>
+                                      <CampaignDiagnosticsPanel
+                                        loading={diagnosticsLoadingId === c.campaign_id}
+                                        error={diagnosticsErrorById[c.campaign_id]}
+                                        data={diagnosticsById[c.campaign_id]}
+                                      />
+                                    </td>
+                                  </tr>
+                                )}
+                              </Fragment>
                             ))}
                           </tbody>
                         </table>
