@@ -1,12 +1,14 @@
 import { BACKEND, apiFetch } from './lib/api'
-import { useState, useEffect, useRef, Fragment } from 'react'
+import { useState, useEffect, useRef, useCallback, Fragment } from 'react'
 import {
   Users, Bot, CheckCircle, MessageCircle,
   TrendingUp, Activity, Eye, MousePointerClick, IndianRupee, Percent, Zap, RefreshCw,
+  Check, X, RotateCcw, Sliders, ChevronDown, ChevronUp, TrendingDown, AlertTriangle,
 } from 'lucide-react'
 import {
   AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from 'recharts'
+import { useToast } from './ToastContext'
 
 const INK      = '#0B0B0D'
 const BONE     = '#EDEAE3'
@@ -172,9 +174,199 @@ function CampaignDiagnosticsPanel({ loading, error, data }) {
   )
 }
 
+// ── Google Ads Optimizer: Recommendations section (Phase 1, approval-only) ──
+// Nothing here ever changes a live campaign without an explicit click on
+// "Approve" — the backend re-checks guardrails again at that exact moment
+// (see /google-ads/recommendations/{id}/approve), this UI just surfaces
+// what the daily job found and lets a human decide.
+const REC_TYPE_LABELS = {
+  raise_cpc: 'Raise max CPC', raise_budget: 'Raise daily budget', add_phrase_match: 'Add phrase-match variant',
+  add_negative_keyword: 'Add negative keyword', fix_disapproved_ad: 'Disapproved ad(s)',
+  fix_conversion_tracking: 'Missing conversion tracking', under_delivery_alert: 'Under-delivery',
+}
+const REC_SEVERITY_META = { high: { color: RED, label: 'High' }, medium: { color: GOLD, label: 'Medium' }, low: { color: MUTED, label: 'Low' } }
+const REC_STATUS_META = {
+  pending: { color: MUTED, label: 'Pending' }, approved: { color: GOLD, label: 'Approving...' },
+  applied: { color: GREEN, label: 'Applied' }, rejected: { color: MUTED, label: 'Rejected' },
+  reverted: { color: MUTED, label: 'Reverted' }, failed: { color: RED, label: 'Failed' },
+}
+const _GADS_ALERT_ONLY_TYPES = new Set(['fix_disapproved_ad', 'fix_conversion_tracking', 'under_delivery_alert'])
+
+function fmtInr(micros) {
+  if (micros === null || micros === undefined) return '—'
+  return `₹${(micros / 1_000_000).toFixed(2)}`
+}
+
+function RecommendationCard({ rec, busy, onApprove, onReject, onRevert }) {
+  const severity = REC_SEVERITY_META[rec.severity] || REC_SEVERITY_META.medium
+  const status = REC_STATUS_META[rec.status] || REC_STATUS_META.pending
+  const isAlertOnly = _GADS_ALERT_ONLY_TYPES.has(rec.type)
+  return (
+    <div style={{ background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '6px', padding: '13px 15px', marginBottom: '8px', fontFamily: FONT_BODY }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+        <div style={{ minWidth: 0, flex: '1 1 260px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '9px', fontWeight: '700', color: severity.color, border: `1px solid ${severity.color}`, borderRadius: '10px', padding: '1px 7px', textTransform: 'uppercase' }}>{severity.label}</span>
+            <span style={{ fontSize: '12.5px', fontWeight: '600', color: BONE }}>{REC_TYPE_LABELS[rec.type] || rec.type}</span>
+            <span style={{ fontSize: '10.5px', color: MUTED }}>· {rec.campaign_name}</span>
+            <span style={{ fontSize: '10px', fontWeight: '600', color: status.color }}>{status.label}</span>
+          </div>
+          <p style={{ margin: '0 0 4px', fontSize: '12px', color: MUTED, lineHeight: 1.45 }}>{rec.reason}</p>
+          {!isAlertOnly && (rec.type === 'raise_cpc' || rec.type === 'raise_budget') && (
+            <p style={{ margin: 0, fontSize: '11.5px', color: BONE, fontFamily: FONT_MONO }}>
+              {fmtInr(Number(rec.current_value))} → {fmtInr(Number(rec.proposed_value))}
+            </p>
+          )}
+          {rec.type === 'add_negative_keyword' && (
+            <p style={{ margin: 0, fontSize: '11.5px', color: BONE, fontFamily: FONT_MONO }}>"{rec.proposed_value}"</p>
+          )}
+        </div>
+        <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+          {rec.status === 'pending' && (
+            <>
+              <button disabled={busy} onClick={() => onApprove(rec.id)} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: GREEN, color: '#0B0B0D', border: 'none', borderRadius: '5px', padding: '5px 10px', fontSize: '11px', fontWeight: '700', cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1 }}>
+                <Check size={11} /> Approve
+              </button>
+              <button disabled={busy} onClick={() => onReject(rec.id)} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'transparent', color: MUTED, border: `1px solid ${SLATE_L}`, borderRadius: '5px', padding: '5px 10px', fontSize: '11px', fontWeight: '600', cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1 }}>
+                <X size={11} /> Reject
+              </button>
+            </>
+          )}
+          {rec.status === 'applied' && !isAlertOnly && (
+            <button disabled={busy} onClick={() => onRevert(rec.id)} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'transparent', color: RED, border: `1px solid ${RED}`, borderRadius: '5px', padding: '5px 10px', fontSize: '11px', fontWeight: '600', cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1 }}>
+              <RotateCcw size={11} /> Revert
+            </button>
+          )}
+        </div>
+      </div>
+      {rec.outcome && (
+        <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: `1px solid ${SLATE_L}`, display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+          {rec.outcome.worsened && (
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '10.5px', fontWeight: '700', color: RED }}>
+              <AlertTriangle size={11} /> Results worsened
+            </span>
+          )}
+          <span style={{ fontSize: '10.5px', color: MUTED, fontFamily: FONT_MONO }}>
+            Clicks {rec.outcome.clicks_change_pct != null ? `${rec.outcome.clicks_change_pct > 0 ? '+' : ''}${rec.outcome.clicks_change_pct}%` : 'n/a'}
+          </span>
+          <span style={{ fontSize: '10.5px', color: MUTED, fontFamily: FONT_MONO }}>
+            CPC {fmtInr(rec.outcome.cpc_before_inr * 1_000_000)} → {fmtInr(rec.outcome.cpc_after_inr * 1_000_000)}
+          </span>
+          <span style={{ fontSize: '10.5px', color: MUTED, fontFamily: FONT_MONO }}>
+            Conversions {rec.outcome.conversions_change > 0 ? '+' : ''}{rec.outcome.conversions_change}
+          </span>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function AutomationGuardrails({ settings, onSave, saving }) {
+  const [open, setOpen] = useState(false)
+  const [cpcCap, setCpcCap] = useState('')
+  const [budgetCap, setBudgetCap] = useState('')
+  const [stepPct, setStepPct] = useState('')
+  useEffect(() => {
+    if (settings) {
+      setCpcCap(String(settings.max_cpc_cap_micros / 1_000_000))
+      setBudgetCap(String(settings.max_daily_budget_cap_micros / 1_000_000))
+      setStepPct(String(settings.max_bid_change_pct))
+    }
+  }, [settings])
+  if (!settings) return null
+  return (
+    <div style={{ marginBottom: '10px' }}>
+      <button onClick={() => setOpen(o => !o)} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', color: MUTED, fontSize: '11.5px', fontWeight: '600', cursor: 'pointer', padding: '4px 0', fontFamily: FONT_BODY }}>
+        <Sliders size={12} /> Guardrails {open ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+      </button>
+      {open && (
+        <div style={{ background: SLATE_M, border: `1px solid ${SLATE_L}`, borderRadius: '6px', padding: '14px', marginTop: '6px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px', marginBottom: '10px' }}>
+            <div>
+              <label style={{ fontSize: '10px', color: MUTED, display: 'block', marginBottom: '3px' }}>Max CPC cap (₹)</label>
+              <input type="number" value={cpcCap} onChange={e => setCpcCap(e.target.value)} style={{ width: '100%', background: SLATE, border: `1px solid ${SLATE_L}`, borderRadius: '4px', padding: '6px 8px', color: BONE, fontSize: '12px', fontFamily: FONT_MONO, boxSizing: 'border-box' }} />
+            </div>
+            <div>
+              <label style={{ fontSize: '10px', color: MUTED, display: 'block', marginBottom: '3px' }}>Max daily budget cap (₹)</label>
+              <input type="number" value={budgetCap} onChange={e => setBudgetCap(e.target.value)} style={{ width: '100%', background: SLATE, border: `1px solid ${SLATE_L}`, borderRadius: '4px', padding: '6px 8px', color: BONE, fontSize: '12px', fontFamily: FONT_MONO, boxSizing: 'border-box' }} />
+            </div>
+            <div>
+              <label style={{ fontSize: '10px', color: MUTED, display: 'block', marginBottom: '3px' }}>Max change per step (%)</label>
+              <input type="number" value={stepPct} onChange={e => setStepPct(e.target.value)} style={{ width: '100%', background: SLATE, border: `1px solid ${SLATE_L}`, borderRadius: '4px', padding: '6px 8px', color: BONE, fontSize: '12px', fontFamily: FONT_MONO, boxSizing: 'border-box' }} />
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '7px', cursor: 'pointer' }}>
+              <input
+                type="checkbox" checked={!!settings.automation_paused}
+                onChange={e => onSave({ automation_paused: e.target.checked })}
+                style={{ width: '14px', height: '14px', cursor: 'pointer' }}
+              />
+              <span style={{ fontSize: '11.5px', color: settings.automation_paused ? RED : MUTED, fontWeight: settings.automation_paused ? '700' : '500' }}>
+                Pause all automation (no new recommendations, approvals blocked)
+              </span>
+            </label>
+            <button
+              disabled={saving}
+              onClick={() => onSave({ max_cpc_cap_inr: Number(cpcCap), max_daily_budget_cap_inr: Number(budgetCap), max_bid_change_pct: Number(stepPct) })}
+              style={{ background: GOLD, color: '#0B0D12', border: 'none', borderRadius: '5px', padding: '6px 14px', fontSize: '11.5px', fontWeight: '700', cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.6 : 1 }}
+            >
+              {saving ? 'Saving...' : 'Save'}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function RecommendationsSection({ recommendations, loading, error, settings, busyId, onApprove, onReject, onRevert, onSaveSettings, savingSettings }) {
+  if (loading && recommendations.length === 0) {
+    return <p style={{ fontSize: '12.5px', color: MUTED, fontFamily: FONT_BODY }}>Loading recommendations...</p>
+  }
+  if (error) {
+    return <p style={{ fontSize: '12.5px', color: RED, fontFamily: FONT_BODY }}>{error}</p>
+  }
+  const pending = recommendations.filter(r => r.status === 'pending')
+  const others = recommendations.filter(r => r.status !== 'pending')
+  return (
+    <div>
+      <AutomationGuardrails settings={settings} onSave={onSaveSettings} saving={savingSettings} />
+      {recommendations.length === 0 ? (
+        <p style={{ fontSize: '12.5px', color: MUTED, fontFamily: FONT_BODY }}>
+          No recommendations yet — the daily optimizer job hasn't run, or found nothing to flag.
+        </p>
+      ) : (
+        <>
+          {pending.length > 0 && (
+            <>
+              <p style={{ fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em', color: MUTED, margin: '0 0 8px', fontFamily: FONT_BODY }}>
+                Pending ({pending.length})
+              </p>
+              {pending.map(rec => (
+                <RecommendationCard key={rec.id} rec={rec} busy={busyId === rec.id} onApprove={onApprove} onReject={onReject} onRevert={onRevert} />
+              ))}
+            </>
+          )}
+          {others.length > 0 && (
+            <>
+              <p style={{ fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em', color: MUTED, margin: '14px 0 8px', fontFamily: FONT_BODY }}>
+                History
+              </p>
+              {others.map(rec => (
+                <RecommendationCard key={rec.id} rec={rec} busy={busyId === rec.id} onApprove={onApprove} onReject={onReject} onRevert={onRevert} />
+              ))}
+            </>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
 // ── Main component ─────────────────────────────────────────────────────────
 function Dashboard() {
-  
+  const toast = useToast()
 
   const [isMobile, setIsMobile]   = useState(window.innerWidth < 768)
   const [stats, setStats]         = useState(null)
@@ -201,6 +393,14 @@ function Dashboard() {
   const [diagnosticsById, setDiagnosticsById] = useState({})
   const [diagnosticsLoadingId, setDiagnosticsLoadingId] = useState(null)
   const [diagnosticsErrorById, setDiagnosticsErrorById] = useState({})
+
+  // Google Ads Optimizer: Recommendations — Phase 1, approval-only.
+  const [gadsRecs, setGadsRecs] = useState([])
+  const [gadsRecsLoading, setGadsRecsLoading] = useState(true)
+  const [gadsRecsError, setGadsRecsError] = useState('')
+  const [gadsSettings, setGadsSettings] = useState(null)
+  const [gadsSettingsSaving, setGadsSettingsSaving] = useState(false)
+  const [gadsRecBusyId, setGadsRecBusyId] = useState(null)
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768)
@@ -295,6 +495,81 @@ function Dashboard() {
       setDiagnosticsErrorById(prev => ({ ...prev, [campaignId]: err?.message || 'Backend se connect nahi ho paya.' }))
     }
     setDiagnosticsLoadingId(null)
+  }
+
+  const loadGadsRecs = useCallback(async () => {
+    try {
+      const [recRes, settingsRes] = await Promise.all([
+        apiFetch(`${BACKEND}/google-ads/recommendations`, { timeoutMs: 20000 }),
+        apiFetch(`${BACKEND}/google-ads/automation-settings`, { timeoutMs: 20000 }),
+      ])
+      const [recData, settingsData] = await Promise.all([recRes.json(), settingsRes.json()])
+      if (recData.success) setGadsRecs(recData.recommendations)
+      else setGadsRecsError(recData.error || recData.detail || 'Could not load recommendations.')
+      if (settingsData.success) setGadsSettings(settingsData.settings)
+    } catch (err) {
+      setGadsRecsError(err?.message || 'Backend se connect nahi ho paya.')
+    }
+    setGadsRecsLoading(false)
+  }, [])
+
+  useEffect(() => { loadGadsRecs() }, [loadGadsRecs])
+
+  async function handleApproveRec(recId) {
+    setGadsRecBusyId(recId)
+    try {
+      const res = await apiFetch(`${BACKEND}/google-ads/recommendations/${recId}/approve`, { method: 'POST', timeoutMs: 30000 })
+      const data = await res.json()
+      if (!data.success) toast.error(data.error || data.detail || 'Could not apply this change.')
+      else toast.success('Applied.')
+    } catch (err) {
+      toast.error(err?.message || 'Backend se connect nahi ho paya.')
+    }
+    await loadGadsRecs()
+    setGadsRecBusyId(null)
+  }
+
+  async function handleRejectRec(recId) {
+    setGadsRecBusyId(recId)
+    try {
+      const res = await apiFetch(`${BACKEND}/google-ads/recommendations/${recId}/reject`, { method: 'POST', timeoutMs: 20000 })
+      const data = await res.json()
+      if (!data.success) toast.error(data.detail || 'Could not reject this recommendation.')
+    } catch (err) {
+      toast.error(err?.message || 'Backend se connect nahi ho paya.')
+    }
+    await loadGadsRecs()
+    setGadsRecBusyId(null)
+  }
+
+  async function handleRevertRec(recId) {
+    setGadsRecBusyId(recId)
+    try {
+      const res = await apiFetch(`${BACKEND}/google-ads/recommendations/${recId}/revert`, { method: 'POST', timeoutMs: 30000 })
+      const data = await res.json()
+      if (!data.success) toast.error(data.error || data.detail || 'Could not revert this change.')
+      else toast.success('Reverted.')
+    } catch (err) {
+      toast.error(err?.message || 'Backend se connect nahi ho paya.')
+    }
+    await loadGadsRecs()
+    setGadsRecBusyId(null)
+  }
+
+  async function handleSaveGadsSettings(patch) {
+    setGadsSettingsSaving(true)
+    try {
+      const res = await apiFetch(`${BACKEND}/google-ads/automation-settings`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, timeoutMs: 20000,
+        body: JSON.stringify(patch),
+      })
+      const data = await res.json()
+      if (data.success) setGadsSettings(data.settings)
+      else toast.error(data.detail || 'Could not save guardrails.')
+    } catch (err) {
+      toast.error(err?.message || 'Backend se connect nahi ho paya.')
+    }
+    setGadsSettingsSaving(false)
   }
 
   useEffect(() => {
@@ -797,6 +1072,30 @@ function Dashboard() {
             </div>
           </>
         )}
+      </div>
+
+      {/* Google Ads Optimizer: Recommendations — Phase 1, approval-only.
+          Shown regardless of whether the performance-metrics fetch above
+          succeeded, since recommendations are fetched independently. */}
+      <div
+        className="section-card"
+        style={{
+          ...card, padding: isMobile ? '18px 16px' : '22px 20px', marginTop: '20px',
+          opacity: cardsIn ? 1 : 0, animation: cardsIn ? 'fadeSlideUp 0.4s ease both' : 'none', animationDelay: '480ms',
+        }}
+      >
+        <p style={{
+          fontSize: '10px', fontWeight: '500', textTransform: 'uppercase',
+          letterSpacing: '0.08em', color: MUTED, margin: '0 0 14px 0', fontFamily: FONT_BODY,
+        }}>
+          Recommendations
+        </p>
+        <RecommendationsSection
+          recommendations={gadsRecs} loading={gadsRecsLoading} error={gadsRecsError}
+          settings={gadsSettings} busyId={gadsRecBusyId}
+          onApprove={handleApproveRec} onReject={handleRejectRec} onRevert={handleRevertRec}
+          onSaveSettings={handleSaveGadsSettings} savingSettings={gadsSettingsSaving}
+        />
       </div>
     </>
   )
