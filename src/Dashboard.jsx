@@ -183,6 +183,7 @@ const REC_TYPE_LABELS = {
   raise_cpc: 'Raise max CPC', raise_budget: 'Raise daily budget', add_phrase_match: 'Add phrase-match variant',
   add_negative_keyword: 'Add negative keyword', fix_disapproved_ad: 'Disapproved ad(s)',
   fix_conversion_tracking: 'Missing conversion tracking', under_delivery_alert: 'Under-delivery',
+  reconnect_google_ads: 'Reconnect Google Ads',
 }
 const REC_SEVERITY_META = { high: { color: RED, label: 'High' }, medium: { color: GOLD, label: 'Medium' }, low: { color: MUTED, label: 'Low' } }
 const REC_STATUS_META = {
@@ -190,7 +191,7 @@ const REC_STATUS_META = {
   applied: { color: GREEN, label: 'Applied' }, rejected: { color: MUTED, label: 'Rejected' },
   reverted: { color: MUTED, label: 'Reverted' }, failed: { color: RED, label: 'Failed' },
 }
-const _GADS_ALERT_ONLY_TYPES = new Set(['fix_disapproved_ad', 'fix_conversion_tracking', 'under_delivery_alert'])
+const _GADS_ALERT_ONLY_TYPES = new Set(['fix_disapproved_ad', 'fix_conversion_tracking', 'under_delivery_alert', 'reconnect_google_ads'])
 
 function fmtInr(micros) {
   if (micros === null || micros === undefined) return '—'
